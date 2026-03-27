@@ -1,9 +1,13 @@
 const express = require('express');
 const router = express.Router();
+const { addOrderItems, getOrderById, updateOrderStatus } = require('../controllers/orderController');
+const { protect, admin } = require('../middleware/authMiddleware');
 
-// Placeholder for Order Management (SRS 3.9)
-router.get('/', (req, res) => {
-    res.json({ message: "Order route is active" });
-});
+// User routes
+router.post('/', protect, addOrderItems);
+router.get('/:id', protect, getOrderById);
 
-module.exports = router; // This MUST be here
+// Admin routes
+router.put('/:id/status', protect, admin, updateOrderStatus);
+
+module.exports = router;
