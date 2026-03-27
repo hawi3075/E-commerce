@@ -3,31 +3,28 @@ const dotenv = require('dotenv');
 const cors = require('cors');
 const connectDB = require('./config/db');
 
-// Load env vars
+// 1. Initialize Env
 dotenv.config();
 
-// Connect to MongoDB Atlas
+// 2. Connect Database
 connectDB();
 
 const app = express();
 
-// Body parser
+// 3. Middleware
 app.use(express.json());
 app.use(cors());
 
-// Routes
+// 4. Routes
+// Ensure these paths match your folders exactly
 app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/products', require('./routes/productRoutes'));
 app.use('/api/orders', require('./routes/orderRoutes'));
 
-// Error Handling Middleware
-app.use((err, req, res, next) => {
-    const statusCode = res.statusCode === 200 ? 500 : res.statusCode;
-    res.status(statusCode).json({
-        message: err.message,
-        stack: process.env.NODE_ENV === 'production' ? null : err.stack,
-    });
+// 5. Basic Test Route
+app.get('/', (req, res) => {
+    res.send('Safety Equipment API is running...');
 });
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
