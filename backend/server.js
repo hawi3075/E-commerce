@@ -1,37 +1,33 @@
-const express = require("express");
-const mongoose = require("mongoose");
-const cors = require("cors");
-require("dotenv").config();
+const express = require('express');
+const dotenv = require('dotenv');
+const cors = require('cors');
+const connectDB = require('./config/db');
 
-// import routes
-const authRoutes = require("./routes/auth");
-const productRoutes = require("./routes/product");
-const cartRoutes = require("./routes/cart");
+// Load env vars
+dotenv.config();
+
+// Connect to MongoDB Atlas
+connectDB();
 
 const app = express();
 
-// middleware
-app.use(cors());
+// Body parser
 app.use(express.json());
+app.use(cors());
 
-// connect MongoDB Atlas
-mongoose
-  .connect(process.env.MONGO_URI)
-  .then(() => console.log("MongoDB Atlas Connected"))
-  .catch((err) => console.log(err));
+// Routes
+app.use('/api/auth', require('./routes/authRoutes'));
+app.use('/api/products', require('./routes/productRoutes'));
+app.use('/api/orders', require('./routes/orderRoutes'));
 
-// routes
-app.use("/api/auth", authRoutes);
-app.use("/api/products", productRoutes);
-app.use("/api/cart", cartRoutes);
-
-// test route
-app.get("/", (req, res) => {
-  res.send("API is running...");
+// Error Handling Middleware
+app.use((err, req, res, next) => {
+    const statusCode = res.statusCode === 200 ? 500 : res.statusCode;
+    res.status(statusCode).json({
+        message: err.message,
+        stack: process.env.NODE_ENV === 'production' ? null : err.stack,
+    });
 });
 
-// server start
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
