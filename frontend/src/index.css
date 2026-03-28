@@ -2,8 +2,23 @@
 @tailwind components;
 @tailwind utilities;
 
-body {
-  margin: 0;
-  background-color: #f8fafc;
-  font-family: 'Inter', sans-serif;
+@layer base {
+  body {
+    @apply antialiased text-slate-900;
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+}
+
+/* Hide scrollbar but allow scrolling for category bar */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Smooth layout transitions */
+main {
+  min-height: calc(100vh - 130px);
 }

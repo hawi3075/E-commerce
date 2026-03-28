@@ -1,4 +1,4 @@
-import { Home, LayoutGrid, ShoppingBag, User, ShieldCheck } from 'lucide-react';
+import { Home, LayoutGrid, ShoppingBag, ShieldCheck } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const Navbar = () => {

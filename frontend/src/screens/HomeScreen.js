@@ -1,93 +1,120 @@
 import React from 'react';
-// Changed Mask to VenetianMask
-import { 
-  ShieldCheck, 
-  Zap, 
-  Eye, 
-  Trash2, 
-  HardHat, 
-  Shirt, 
-  VenetianMask, 
-  PencilRuler, 
-  Footprints 
-} from 'lucide-react';
+import { ArrowRight, ShoppingCart, Heart, ShieldCheck, Zap } from 'lucide-react';
 
 const HomeScreen = () => {
-  return (
-    <div className="pb-24 bg-slate-50">
-      
-      {/* 1. HERO SECTION */}
-      <div className="relative h-[600px] bg-slate-900 flex items-center px-8 overflow-hidden">
-        <div className="absolute inset-0 z-0">
-          <img 
-            src="https://images.unsplash.com/photo-1504307651254-35680f356dfd?auto=format&fit=crop&w=1200&q=80" 
-            className="w-full h-full object-cover opacity-40" 
-            alt="Industrial Background" 
-          />
-          <div className="absolute inset-0 bg-gradient-to-r from-slate-900 via-slate-900/60 to-transparent"></div>
-        </div>
+  const categories = [
+    { id: 1, name: 'Head & Face Protection', sub: 'Safety Helmets', img: 'https://images.pexels.com/photos/6474471/pexels-photo-6474471.jpeg', color: 'bg-zinc-900', textColor: 'text-white' },
+    { id: 2, name: 'High-Visibility Apparel', sub: 'Reflective Gear', img: 'https://images.pexels.com/photos/8961555/pexels-photo-8961555.jpeg', color: 'bg-white', textColor: 'text-slate-900', border: 'border border-slate-100' },
+    { id: 3, name: 'Hand & Arm Protection', sub: 'Industrial Gloves', img: 'https://images.pexels.com/photos/5582869/pexels-photo-5582869.jpeg', color: 'bg-white', textColor: 'text-slate-900', border: 'border border-slate-100' },
+    { id: 4, name: 'Work Boots & Footwear', sub: 'Steel Toe', img: 'https://images.pexels.com/photos/298863/pexels-photo-298863.jpeg', color: 'bg-yellow-400', textColor: 'text-slate-900' },
+  ];
 
-        <div className="relative z-10 max-w-xl">
-          <span className="bg-yellow-400 text-slate-900 px-4 py-1.5 text-[10px] font-black uppercase tracking-[0.2em] rounded-sm">
-            Professional Grade PPE
-          </span>
-          <h1 className="text-white text-7xl font-black uppercase mt-6 leading-[0.9] tracking-tighter">
-            Safety <br /> <span className="text-white/40 italic">First</span>
+  const products = [
+    { id: 1, name: 'Industrial Heavy Duty Safety Helmet', price: 45.00, img: 'https://images.pexels.com/photos/6474487/pexels-photo-6474487.jpeg', tag: 'Top Rated' },
+    { id: 2, name: 'Class 3 High-Visibility Reflective Vest', price: 25.50, img: 'https://images.pexels.com/photos/1216589/pexels-photo-1216589.jpeg', tag: 'Essential' },
+    { id: 3, name: 'Cut-Resistant Nitrile Coated Gloves', price: 12.99, img: 'https://images.pexels.com/photos/5582869/pexels-photo-5582869.jpeg', tag: 'Best Seller' },
+    { id: 4, name: 'Waterproof Steel Toe Construction Boots', price: 129.00, img: 'https://images.pexels.com/photos/298863/pexels-photo-298863.jpeg', tag: 'New Arrival' },
+  ];
+
+  return (
+    <div className="max-w-7xl mx-auto px-6 md:px-16 pt-8 space-y-20 pb-20">
+      
+      {/* --- HERO BANNER (Drs Safety Cloth Theme) --- */}
+      <div className="bg-[#f3f4f6] rounded-[40px] p-8 md:p-20 flex flex-col md:flex-row items-center gap-10 relative overflow-hidden">
+        <div className="flex-1 space-y-8 z-10">
+          <div className="flex items-center gap-2 text-blue-600 font-bold text-sm tracking-widest uppercase">
+            <ShieldCheck size={20} /> Professional PPE Provider
+          </div>
+          <h1 className="text-5xl md:text-7xl font-black leading-[1.1] text-slate-900 tracking-tight">
+            Premium <span className="text-blue-600">Safety Gear</span> for Every Professional!
           </h1>
-          <p className="text-slate-300 mt-6 text-lg font-medium leading-relaxed">
-            Use Your PPE. Engineered for the world’s <br /> most demanding environments.
+          <p className="text-slate-500 text-lg max-w-sm font-medium">
+            Certified industrial clothing and equipment. Safety first, style always.
           </p>
-          <div className="flex gap-4 mt-10">
-            <button className="bg-yellow-400 hover:bg-yellow-500 text-slate-900 px-10 py-4 font-black uppercase text-sm transition-all transform hover:scale-105 shadow-xl shadow-yellow-400/20">
-              Shop Now
-            </button>
+          
+          <div className="flex gap-4">
+             <div className="bg-yellow-400 p-6 rounded-3xl w-44 h-52 relative shadow-xl shadow-yellow-100 group cursor-pointer hover:-translate-y-1 transition-transform">
+               <p className="font-extrabold text-blue-900 leading-tight text-xl">Site Safety <br/> Bundle</p>
+               <button className="absolute bottom-5 left-5 bg-blue-600 text-[10px] font-bold text-white px-4 py-1.5 rounded-full uppercase tracking-wider">Order Now</button>
+             </div>
+             <div className="bg-white p-6 rounded-3xl w-44 h-52 relative border border-slate-100 shadow-xl shadow-slate-100 group cursor-pointer hover:-translate-y-1 transition-transform">
+               <p className="font-bold text-slate-300 text-[10px] uppercase mb-1">BULK OFFER</p>
+               <p className="font-extrabold text-blue-600 leading-tight text-xl">15% OFF for Companies</p>
+               <button className="absolute bottom-5 left-5 bg-blue-400 text-[10px] font-bold text-white px-4 py-1.5 rounded-full uppercase tracking-wider">Get Quote</button>
+             </div>
           </div>
         </div>
-      </div>
-
-      {/* 2. THE SENTINEL PROTOCOL */}
-      <div className="px-6 py-16">
-        <h2 className="text-4xl font-black uppercase tracking-tighter mb-2 text-slate-900">The Sentinel <br /> Protocol</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-8">
-          {[
-            { title: 'Proper Gear', icon: <ShieldCheck className="text-yellow-400" />, desc: 'Wear proper protective gear at all times.' },
-            { title: 'Mindful Work', icon: <Zap className="text-yellow-400" />, desc: 'Practice safe and mindful work habits.' },
-            { title: 'Stay Alert', icon: <Eye className="text-yellow-400" />, desc: 'Stay alert and aware of your surroundings.' },
-            { title: 'Clean Workspace', icon: <Trash2 className="text-yellow-400" />, desc: 'Maintain strict order and sanitation.' }
-          ].map((item, idx) => (
-            <div key={idx} className="bg-white p-8 rounded-[2rem] shadow-sm border border-slate-100 flex flex-col items-start group hover:bg-slate-900 transition-all duration-300">
-              <div className="w-14 h-14 bg-slate-50 rounded-2xl flex items-center justify-center mb-6 group-hover:bg-slate-800">
-                {item.icon}
-              </div>
-              <h3 className="font-black uppercase text-xl mb-3 group-hover:text-white">{item.title}</h3>
-              <p className="text-slate-500 text-sm group-hover:text-slate-400">{item.desc}</p>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* 3. EQUIPMENT ARCHIVE */}
-      <div className="bg-white py-20 px-6 text-center">
-        <h2 className="text-3xl font-black uppercase tracking-tighter mb-1">Equipment Archive</h2>
-        <div className="w-16 h-1 bg-yellow-400 mx-auto mb-12"></div>
         
-        <div className="flex justify-center items-start overflow-x-auto gap-8 no-scrollbar">
-          {[
-            { name: 'Helmet', icon: <HardHat size={32} /> },
-            { name: 'Jacket', icon: <Shirt size={32} /> },
-            { name: 'Mask', icon: <VenetianMask size={32} /> }, // Updated Icon usage here
-            { name: 'Gloves', icon: <PencilRuler size={32} /> },
-            { name: 'Boots', icon: <Footprints size={32} /> }
-          ].map((cat, idx) => (
-            <div key={idx} className="flex flex-col items-center min-w-[80px]">
-              <div className="w-20 h-20 rounded-full border border-slate-100 shadow-lg flex items-center justify-center mb-4 hover:border-yellow-400 transition-colors cursor-pointer text-slate-600">
-                {cat.icon}
+        <div className="flex-1 relative h-[550px] w-full hidden md:block">
+           <img 
+             src="https://images.pexels.com/photos/1216589/pexels-photo-1216589.jpeg" 
+             alt="Safety Specialist" 
+             className="h-full w-full object-cover rounded-[40px] shadow-2xl"
+           />
+           <div className="absolute bottom-10 -left-10 bg-white p-4 rounded-2xl shadow-xl flex items-center gap-4 border border-slate-50">
+              <div className="bg-green-100 p-2 rounded-full text-green-600"><Zap size={24}/></div>
+              <div>
+                <p className="text-xs text-slate-400 font-bold">Fast Delivery</p>
+                <p className="text-sm font-black text-slate-800">24h Express Shipping</p>
               </div>
-              <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">{cat.name}</span>
+           </div>
+        </div>
+      </div>
+
+      {/* --- TRENDING CATEGORIES --- */}
+      <section className="space-y-8">
+        <div className="flex justify-between items-end">
+          <h2 className="text-3xl font-black tracking-tight text-slate-900">Browse Safety Categories</h2>
+          <button className="text-blue-500 font-bold text-sm flex items-center gap-2 hover:underline">
+            View all categories <ArrowRight size={16} />
+          </button>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+          {categories.map((cat) => (
+            <div key={cat.id} className={`${cat.color} ${cat.textColor} ${cat.border || ''} rounded-[32px] p-8 h-80 flex flex-col justify-between relative overflow-hidden group cursor-pointer shadow-sm hover:shadow-2xl transition-all`}>
+              <div className="z-10">
+                {cat.sub && <span className="bg-blue-600/10 text-blue-600 px-3 py-1 rounded-full text-[10px] font-bold uppercase mb-2 inline-block">{cat.sub}</span>}
+                <h3 className="text-xl font-extrabold leading-tight max-w-[160px]">{cat.name}</h3>
+              </div>
+              <img src={cat.img} alt={cat.name} className="absolute -bottom-4 -right-4 w-3/4 h-3/5 object-cover rounded-tl-[40px] group-hover:scale-110 transition-transform" />
+              <button className="z-10 w-fit mt-4 bg-blue-600 text-white p-2 rounded-full flex items-center gap-2 text-[10px] font-bold px-4 hover:bg-blue-700">
+                View Products <ArrowRight size={12} />
+              </button>
             </div>
           ))}
         </div>
-      </div>
+      </section>
+
+      {/* --- BEST SELLERS --- */}
+      <section className="space-y-8">
+        <div className="flex justify-between items-end">
+          <h2 className="text-3xl font-black tracking-tight text-slate-900">Industrial Best Sellers</h2>
+          <button className="text-blue-500 font-bold text-sm flex items-center gap-2 hover:underline">
+            See all products <ArrowRight size={16} />
+          </button>
+        </div>
+
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+          {products.map((prod) => (
+            <div key={prod.id} className="group cursor-pointer space-y-4">
+              <div className="bg-slate-50 rounded-[32px] p-6 relative aspect-square overflow-hidden border border-transparent hover:border-blue-100 transition-colors">
+                <span className="absolute top-4 left-4 bg-blue-600 text-white text-[10px] font-black px-3 py-1 rounded-full z-10">{prod.tag}</span>
+                <div className="absolute top-4 right-4 space-y-2 translate-x-12 group-hover:translate-x-0 transition-transform z-10">
+                  <button className="bg-white p-2 rounded-full shadow-md block hover:text-red-500 transition-colors"><Heart size={16}/></button>
+                  <button className="bg-white p-2 rounded-full shadow-md block hover:text-blue-500 transition-colors"><ShoppingCart size={16}/></button>
+                </div>
+                <img src={prod.img} alt={prod.name} className="w-full h-full object-cover rounded-2xl group-hover:scale-105 transition-all duration-500" />
+              </div>
+              <div className="px-2">
+                <p className="text-blue-600 font-black text-xl">${prod.price.toFixed(2)}</p>
+                <h4 className="text-slate-600 text-sm font-bold group-hover:text-blue-600 transition-colors">{prod.name}</h4>
+                <button className="w-full mt-4 bg-slate-900 text-white font-bold py-3 rounded-2xl opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 transition-all duration-300">Add to Cart</button>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
 
     </div>
   );
