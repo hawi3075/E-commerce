@@ -36,3 +36,4 @@ const AdminScreen = () => {
     </div>
   );
 };
+export default AdminScreen;

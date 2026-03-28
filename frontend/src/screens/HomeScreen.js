@@ -1,35 +1,96 @@
+import React from 'react';
+// Changed Mask to VenetianMask
+import { 
+  ShieldCheck, 
+  Zap, 
+  Eye, 
+  Trash2, 
+  HardHat, 
+  Shirt, 
+  VenetianMask, 
+  PencilRuler, 
+  Footprints 
+} from 'lucide-react';
+
 const HomeScreen = () => {
   return (
-    <div className="pb-20 bg-gray-50">
-      {/* Hero Section */}
-      <div className="relative h-[500px] bg-slate-900 flex items-center px-8 overflow-hidden">
-        <div className="z-10 max-w-md">
-          <span className="bg-yellow-400 text-slate-900 px-3 py-1 text-xs font-black uppercase tracking-widest">
+    <div className="pb-24 bg-slate-50">
+      
+      {/* 1. HERO SECTION */}
+      <div className="relative h-[600px] bg-slate-900 flex items-center px-8 overflow-hidden">
+        <div className="absolute inset-0 z-0">
+          <img 
+            src="https://images.unsplash.com/photo-1504307651254-35680f356dfd?auto=format&fit=crop&w=1200&q=80" 
+            className="w-full h-full object-cover opacity-40" 
+            alt="Industrial Background" 
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-slate-900 via-slate-900/60 to-transparent"></div>
+        </div>
+
+        <div className="relative z-10 max-w-xl">
+          <span className="bg-yellow-400 text-slate-900 px-4 py-1.5 text-[10px] font-black uppercase tracking-[0.2em] rounded-sm">
             Professional Grade PPE
           </span>
-          <h1 className="text-white text-6xl font-black uppercase mt-4 leading-tight">
-            Safety <br /> <span className="text-white/80">First</span>
+          <h1 className="text-white text-7xl font-black uppercase mt-6 leading-[0.9] tracking-tighter">
+            Safety <br /> <span className="text-white/40 italic">First</span>
           </h1>
-          <p className="text-gray-400 mt-4 text-sm">Use your PPE. Engineered for the world's most demanding environments.</p>
-          <div className="flex gap-4 mt-8">
-            <button className="bg-yellow-400 px-8 py-3 font-bold uppercase text-sm">Shop Now</button>
-            <button className="border border-white/30 text-white px-8 py-3 font-bold uppercase text-sm">View Standards</button>
+          <p className="text-slate-300 mt-6 text-lg font-medium leading-relaxed">
+            Use Your PPE. Engineered for the world’s <br /> most demanding environments.
+          </p>
+          <div className="flex gap-4 mt-10">
+            <button className="bg-yellow-400 hover:bg-yellow-500 text-slate-900 px-10 py-4 font-black uppercase text-sm transition-all transform hover:scale-105 shadow-xl shadow-yellow-400/20">
+              Shop Now
+            </button>
           </div>
         </div>
-        <img src="/hero-bg.jpg" className="absolute right-0 opacity-50 h-full object-cover" alt="Workers" />
       </div>
 
-      {/* Protocol Section */}
-      <div className="p-8 grid grid-cols-1 gap-4">
-        <h2 className="text-2xl font-black uppercase">The Sentinel Protocol</h2>
-        {['Proper Gear', 'Mindful Work', 'Stay Alert'].map((item) => (
-          <div key={item} className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-            <div className="w-10 h-10 bg-slate-900 rounded-lg mb-4"></div>
-            <h3 className="font-bold uppercase">{item}</h3>
-            <p className="text-gray-500 text-sm mt-2">Efficiency is built on reliability. Ensure safety at all times.</p>
-          </div>
-        ))}
+      {/* 2. THE SENTINEL PROTOCOL */}
+      <div className="px-6 py-16">
+        <h2 className="text-4xl font-black uppercase tracking-tighter mb-2 text-slate-900">The Sentinel <br /> Protocol</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-8">
+          {[
+            { title: 'Proper Gear', icon: <ShieldCheck className="text-yellow-400" />, desc: 'Wear proper protective gear at all times.' },
+            { title: 'Mindful Work', icon: <Zap className="text-yellow-400" />, desc: 'Practice safe and mindful work habits.' },
+            { title: 'Stay Alert', icon: <Eye className="text-yellow-400" />, desc: 'Stay alert and aware of your surroundings.' },
+            { title: 'Clean Workspace', icon: <Trash2 className="text-yellow-400" />, desc: 'Maintain strict order and sanitation.' }
+          ].map((item, idx) => (
+            <div key={idx} className="bg-white p-8 rounded-[2rem] shadow-sm border border-slate-100 flex flex-col items-start group hover:bg-slate-900 transition-all duration-300">
+              <div className="w-14 h-14 bg-slate-50 rounded-2xl flex items-center justify-center mb-6 group-hover:bg-slate-800">
+                {item.icon}
+              </div>
+              <h3 className="font-black uppercase text-xl mb-3 group-hover:text-white">{item.title}</h3>
+              <p className="text-slate-500 text-sm group-hover:text-slate-400">{item.desc}</p>
+            </div>
+          ))}
+        </div>
       </div>
+
+      {/* 3. EQUIPMENT ARCHIVE */}
+      <div className="bg-white py-20 px-6 text-center">
+        <h2 className="text-3xl font-black uppercase tracking-tighter mb-1">Equipment Archive</h2>
+        <div className="w-16 h-1 bg-yellow-400 mx-auto mb-12"></div>
+        
+        <div className="flex justify-center items-start overflow-x-auto gap-8 no-scrollbar">
+          {[
+            { name: 'Helmet', icon: <HardHat size={32} /> },
+            { name: 'Jacket', icon: <Shirt size={32} /> },
+            { name: 'Mask', icon: <VenetianMask size={32} /> }, // Updated Icon usage here
+            { name: 'Gloves', icon: <PencilRuler size={32} /> },
+            { name: 'Boots', icon: <Footprints size={32} /> }
+          ].map((cat, idx) => (
+            <div key={idx} className="flex flex-col items-center min-w-[80px]">
+              <div className="w-20 h-20 rounded-full border border-slate-100 shadow-lg flex items-center justify-center mb-4 hover:border-yellow-400 transition-colors cursor-pointer text-slate-600">
+                {cat.icon}
+              </div>
+              <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">{cat.name}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
     </div>
   );
 };
+
+export default HomeScreen;

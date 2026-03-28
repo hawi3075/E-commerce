@@ -44,3 +44,4 @@ const ShopScreen = () => {
     </div>
   );
 };
+export default ShopScreen;
