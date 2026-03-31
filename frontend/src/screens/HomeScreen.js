@@ -1,20 +1,51 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { ShieldCheck, ShoppingCart, Award, CheckCircle, ArrowRight, Truck, Clock } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import { 
+  ShoppingCart, Award, CheckCircle, 
+  ArrowRight, Truck, Clock, Loader2 
+} from 'lucide-react';
 
 const HomeScreen = () => {
-  const products = [
-    { id: 1, name: "Alpha Safety Helmet", price: "$45.00", cat: "Headwear", img: "https://images.pexels.com/photos/6492100/pexels-photo-6492100.jpeg" },
-    { id: 2, name: "High-Visibility Jacket", price: "$120.00", cat: "Workwear", img: "https://images.pexels.com/photos/7667442/pexels-photo-7667442.jpeg" },
-    { id: 3, name: "Industrial Coverall", price: "$180.00", cat: "Body Protection", img: "https://images.pexels.com/photos/8961555/pexels-photo-8961555.jpeg" },
-    { id: 4, name: "Reinforced Steel Boots", price: "$95.00", cat: "Footwear", img: "https://images.pexels.com/photos/5214413/pexels-photo-5214413.jpeg" }
-  ];
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const { data } = await axios.get('/api/products'); 
+        setProducts(data);
+        setLoading(false);
+      } catch (error) {
+        // Fallback mock data
+        setProducts([
+          { _id: '1', name: "Alpha Safety Helmet", price: 45.00, category: "Headwear", image: "https://images.pexels.com/photos/6492100/pexels-photo-6492100.jpeg" },
+          { _id: '2', name: "High-Visibility Jacket", price: 120.00, category: "Workwear", image: "https://images.pexels.com/photos/7667442/pexels-photo-7667442.jpeg" },
+          { _id: '3', name: "Industrial Coverall", price: 180.00, category: "Body Protection", image: "https://images.pexels.com/photos/8961555/pexels-photo-8961555.jpeg" },
+          { _id: '4', name: "Reinforced Steel Boots", price: 95.00, category: "Footwear", image: "https://images.pexels.com/photos/5214413/pexels-photo-5214413.jpeg" }
+        ]);
+        setLoading(false);
+      }
+    };
+    fetchProducts();
+  }, []);
+
+  const handleAddToCart = (productId) => {
+    const userInfo = localStorage.getItem('userInfo'); 
+    if (!userInfo) {
+      alert("Guest users can view details but cannot buy. Please Login.");
+      navigate('/login');
+    } else {
+      navigate(`/cart/${productId}`);
+    }
+  };
 
   return (
     <div className="bg-white text-gray-800 font-sans overflow-x-hidden">
       
-      {/* 1. HERO SECTION - Full Display fixed */}
-      <section className="relative w-full h-[90vh] min-h-[600px] flex items-center pt-16">
+      {/* 1. HERO SECTION (Search & Badge Removed) */}
+      <section className="relative w-full h-[80vh] flex items-center pt-16">
         <div className="absolute inset-0 z-0">
           <img 
             src="https://images.pexels.com/photos/1216589/pexels-photo-1216589.jpeg" 
@@ -23,154 +54,113 @@ const HomeScreen = () => {
           />
         </div>
 
-        <div className="relative z-10 px-6 md:px-16 max-w-3xl">
-          <div className="inline-block bg-blue-600/20 backdrop-blur-md border border-blue-500/30 px-3 py-1 rounded-full mb-6">
-            <p className="text-blue-400 text-[10px] font-bold uppercase tracking-widest">Premium Safety Gear</p>
-          </div>
-          <h1 className="text-4xl md:text-6xl font-bold text-white leading-tight mb-6">
+        <div className="relative z-10 px-6 md:px-16 max-w-4xl">
+          <h1 className="text-5xl md:text-7xl font-black text-white leading-tight mb-8 tracking-tighter uppercase">
             Protection Engineered <br /> for <span className="text-blue-500">Industry Leaders.</span>
           </h1>
-          <p className="text-gray-300 text-sm md:text-base mb-10 max-w-lg leading-relaxed">
-            Drs Safety Cloth provides durable, certified personal protective equipment. We ensure your team is equipped for the toughest conditions on site.
-          </p>
+          
           <div className="flex flex-wrap gap-4">
-            <button className="bg-blue-600 text-white px-10 py-4 rounded-xl text-sm font-bold hover:bg-blue-700 transition-all shadow-lg shadow-blue-900/20">
+            <button 
+              onClick={() => window.scrollTo({top: 900, behavior: 'smooth'})}
+              className="bg-blue-600 text-white px-12 py-5 rounded-xl text-xs font-black uppercase tracking-[0.2em] hover:bg-blue-700 transition-all shadow-2xl shadow-blue-900/40"
+            >
               Browse Inventory
             </button>
-            <button className="bg-white/5 border border-white/20 text-white px-10 py-4 rounded-xl text-sm font-bold hover:bg-white/10 transition-all flex items-center gap-2">
+            <button className="bg-white/5 border border-white/20 text-white px-10 py-5 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-white/10 transition-all flex items-center gap-2">
               Our Standards <ArrowRight size={16} />
             </button>
           </div>
         </div>
       </section>
 
-      {/* 2. TRUST FEATURES SECTION */}
-      <section className="py-12 bg-gray-50 px-6 md:px-16 border-b border-gray-100">
-        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-12">
-          <div className="flex items-center gap-4">
-            <Truck className="text-blue-600" size={30} />
+      {/* 2. MAXIMIZED TRUST FEATURES SECTION */}
+      <section className="py-24 bg-slate-900 text-white px-6 md:px-16 relative overflow-hidden">
+        <div className="absolute top-0 left-0 w-full h-1 bg-blue-600"></div>
+        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-16">
+          
+          <div className="flex flex-col items-start gap-6 group">
+            <div className="w-16 h-16 bg-blue-600/10 border border-blue-600/30 rounded-2xl flex items-center justify-center group-hover:bg-blue-600 transition-all duration-500">
+              <Truck className="text-blue-500 group-hover:text-white" size={32} />
+            </div>
             <div>
-              <h4 className="font-bold text-sm uppercase">Quick Delivery</h4>
-              <p className="text-xs text-gray-500 font-medium">Fast shipping to your worksite.</p>
+              <h4 className="text-xl font-black uppercase tracking-tighter mb-2">Quick Delivery</h4>
+              <p className="text-sm text-slate-400 font-bold uppercase tracking-widest leading-relaxed">Worksite Shipping</p>
+              <div className="w-8 h-1 bg-blue-600 mt-4"></div>
             </div>
           </div>
-          <div className="flex items-center gap-4 border-x border-gray-200 px-0 md:px-12">
-            <Award className="text-blue-600" size={30} />
+
+          <div className="flex flex-col items-start gap-6 group border-t md:border-t-0 md:border-x border-slate-800 pt-12 md:pt-0 md:px-12">
+            <div className="w-16 h-16 bg-blue-600/10 border border-blue-600/30 rounded-2xl flex items-center justify-center group-hover:bg-blue-600 transition-all duration-500">
+              <Award className="text-blue-500 group-hover:text-white" size={32} />
+            </div>
             <div>
-              <h4 className="font-bold text-sm uppercase">Certified PPE</h4>
-              <p className="text-xs text-gray-500 font-medium">Meets ISO global standards.</p>
+              <h4 className="text-xl font-black uppercase tracking-tighter mb-2">Certified PPE</h4>
+              <p className="text-sm text-slate-400 font-bold uppercase tracking-widest leading-relaxed">ISO Global Standards</p>
+              <div className="w-8 h-1 bg-blue-600 mt-4"></div>
             </div>
           </div>
-          <div className="flex items-center gap-4">
-            <Clock className="text-blue-600" size={30} />
+
+          <div className="flex flex-col items-start gap-6 group border-t md:border-t-0 pt-12 md:pt-0">
+            <div className="w-16 h-16 bg-blue-600/10 border border-blue-600/30 rounded-2xl flex items-center justify-center group-hover:bg-blue-600 transition-all duration-500">
+              <Clock className="text-blue-500 group-hover:text-white" size={32} />
+            </div>
             <div>
-              <h4 className="font-bold text-sm uppercase">24/7 Support</h4>
-              <p className="text-xs text-gray-500 font-medium">Technical help when you need it.</p>
+              <h4 className="text-xl font-black uppercase tracking-tighter mb-2">24/7 Support</h4>
+              <p className="text-sm text-slate-400 font-bold uppercase tracking-widest leading-relaxed">Technical Assistance</p>
+              <div className="w-8 h-1 bg-blue-600 mt-4"></div>
             </div>
           </div>
+
         </div>
       </section>
 
-      {/* 3. EXPLANATION SECTION - Side by Side (Safety Focused) */}
-      <section className="py-24 px-6 md:px-16 max-w-7xl mx-auto grid md:grid-cols-2 gap-16 items-center">
-        <div className="relative group">
-          <div className="absolute -top-4 -left-4 w-24 h-24 border-t-4 border-l-4 border-blue-600"></div>
-          <img 
-            src="https://images.pexels.com/photos/3806749/pexels-photo-3806749.jpeg" 
-            alt="Safety Clothing" 
-            className="rounded-2xl shadow-xl w-full h-[450px] object-cover" 
-          />
-        </div>
-        <div className="space-y-6">
-          <h2 className="text-blue-600 text-[10px] font-bold uppercase tracking-[0.4em]">Our Mission</h2>
-          <h3 className="text-3xl md:text-4xl font-bold text-gray-900 leading-tight">
-            Quality Protection <br /> for Every Professional.
-          </h3>
-          <p className="text-gray-600 text-sm leading-loose font-medium">
-            At Drs Safety Cloth, we understand that safety isn't just a requirement—it's a priority. We specialize in safety clothing and accessories that balance maximum protection with the comfort needed for a full day's work.
-          </p>
-          <div className="space-y-4">
-            {["High-Visibiltiy Standards", "Flame & Heat Resistance", "Reinforced Durability"].map((item, i) => (
-              <div key={i} className="flex items-center gap-3 text-sm font-bold text-gray-700">
-                <CheckCircle size={18} className="text-blue-600" /> {item}
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* 4. PRODUCT LIST SECTION - Ready for Sale */}
-      <section className="bg-gray-50 py-24 px-6 md:px-16">
+      {/* 3. PRODUCT LIST SECTION */}
+      <section className="bg-white py-24 px-6 md:px-16" id="inventory">
         <div className="max-w-7xl mx-auto">
-          <div className="flex justify-between items-end mb-12">
+          <div className="flex justify-between items-end mb-16">
             <div>
-              <h2 className="text-3xl font-bold text-gray-900 tracking-tight">Ready for Dispatch</h2>
-              <p className="text-gray-500 text-xs mt-2 font-bold uppercase tracking-widest">In-Stock Equipment</p>
+              <h2 className="text-4xl font-black text-gray-900 uppercase tracking-tighter leading-none">Ready for Dispatch</h2>
+              <p className="text-blue-600 text-[10px] mt-4 font-black uppercase tracking-[0.4em]">In-Stock Equipment</p>
             </div>
-            <Link to="/shop" className="text-blue-600 font-bold text-sm hover:text-blue-800 transition-colors">See Full Catalog</Link>
+            <Link to="/shop" className="text-gray-400 font-black text-xs uppercase tracking-widest hover:text-blue-600 transition-colors pb-1 border-b-2 border-transparent hover:border-blue-600">See Full Catalog</Link>
           </div>
           
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-            {products.map((p) => (
-              <div key={p.id} className="bg-white border border-gray-100 rounded-xl overflow-hidden hover:shadow-xl transition-all group">
-                <div className="h-64 overflow-hidden relative bg-gray-100">
-                  <img src={p.img} alt={p.name} className="w-full h-full object-cover group-hover:scale-105 transition-all duration-700" />
-                  <div className="absolute top-3 left-3 bg-white/90 backdrop-blur px-2 py-1 rounded text-[8px] font-bold uppercase text-blue-600">
-                    {p.cat}
+          {loading ? (
+            <div className="flex justify-center py-20"><Loader2 className="animate-spin text-blue-600" size={40} /></div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+              {products.map((p) => (
+                <div key={p._id} className="bg-white border border-gray-100 rounded-3xl overflow-hidden hover:shadow-[0_20px_50px_rgba(8,_112,_184,_0.1)] transition-all group">
+                  <div className="h-80 overflow-hidden relative bg-gray-50">
+                    <img src={p.image} alt={p.name} className="w-full h-full object-cover group-hover:scale-110 transition-all duration-1000" />
+                    <div className="absolute top-6 left-6 bg-white px-4 py-1.5 rounded-full text-[9px] font-black uppercase text-blue-600 tracking-widest shadow-sm">
+                      {p.category}
+                    </div>
+                  </div>
+                  <div className="p-8">
+                    <h4 className="font-black text-gray-900 text-base mb-1 uppercase tracking-tight">{p.name}</h4>
+                    <p className="text-gray-400 text-[10px] font-black uppercase mb-6 tracking-widest text-blue-500/60">Drs Safety Cloth</p>
+                    <div className="flex justify-between items-center pt-6 border-t border-gray-50">
+                      <span className="text-2xl font-black text-gray-900">${p.price.toFixed(2)}</span>
+                      <button 
+                        onClick={() => handleAddToCart(p._id)}
+                        className="bg-gray-900 text-white p-4 rounded-2xl hover:bg-blue-600 transition-all shadow-xl hover:shadow-blue-500/40 group-hover:-translate-y-1"
+                      >
+                        <ShoppingCart size={20} />
+                      </button>
+                    </div>
                   </div>
                 </div>
-                <div className="p-6">
-                  <h4 className="font-bold text-gray-900 text-sm mb-1">{p.name}</h4>
-                  <p className="text-gray-400 text-[10px] font-bold uppercase mb-4 tracking-widest">Professional Grade</p>
-                  <div className="flex justify-between items-center pt-4 border-t border-gray-50">
-                    <span className="text-lg font-bold text-gray-900">{p.price}</span>
-                    <button className="bg-gray-900 text-white p-2.5 rounded-lg hover:bg-blue-600 transition-colors">
-                      <ShoppingCart size={16} />
-                    </button>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 
-      {/* 5. FOOTER */}
-      <footer className="bg-white border-t border-gray-100 pt-20 pb-10 px-6 md:px-16">
-        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-16 mb-16">
-          <div className="space-y-6">
-            <h2 className="text-xl font-bold text-gray-900 tracking-tight">Drs<span className="text-blue-600">SafetyCloth</span></h2>
-            <p className="text-gray-500 text-xs leading-relaxed font-medium">
-              We provide the tools to keep you safe in high-risk environments. Your protection is our primary business.
-            </p>
-          </div>
-          <div>
-            <h4 className="font-bold text-xs uppercase tracking-widest mb-6 text-gray-400">Navigation</h4>
-            <div className="flex flex-col gap-3 text-xs font-bold text-gray-600">
-              <Link to="/" className="hover:text-blue-600">Home</Link>
-              <Link to="/about" className="hover:text-blue-600">Our Story</Link>
-              <Link to="/shop" className="hover:text-blue-600">Shop PPE</Link>
-            </div>
-          </div>
-          <div>
-            <h4 className="font-bold text-xs uppercase tracking-widest mb-6 text-gray-400">Support</h4>
-            <div className="flex flex-col gap-3 text-xs font-bold text-gray-600">
-              <span>Shipping Policy</span>
-              <span>Bulk Orders</span>
-              <span>Contact Us</span>
-            </div>
-          </div>
-          <div>
-            <h4 className="font-bold text-xs uppercase tracking-widest mb-6 text-gray-400">Stay Informed</h4>
-            <div className="flex bg-gray-50 rounded-lg p-1 border border-gray-200">
-              <input type="text" placeholder="Email Updates" className="bg-transparent border-none text-xs w-full focus:ring-0 px-3" />
-              <button className="bg-blue-600 text-white px-4 py-2 rounded-md text-[10px] font-bold">Join</button>
-            </div>
-          </div>
-        </div>
-        <div className="text-center pt-8 border-t border-gray-50">
-          <p className="text-[10px] text-gray-300 font-bold uppercase tracking-[0.3em] italic">© 2026 Drs Safety Cloth. All Rights Reserved.</p>
-        </div>
+      {/* FOOTER */}
+      <footer className="bg-slate-950 text-white py-20 px-6 md:px-16 text-center">
+         <h2 className="text-3xl font-black tracking-tighter mb-4 uppercase">DRS<span className="text-blue-500">SAFETY</span>CLOTH</h2>
+         <p className="text-[10px] text-slate-600 font-black uppercase tracking-[0.5em]">© 2026 Protection for the Brave</p>
       </footer>
     </div>
   );

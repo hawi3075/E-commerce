@@ -15,7 +15,7 @@ import PaymentScreen from './screens/PaymentScreen';
 
 // Admin Screen Imports
 import UploadProduct from './screens/admin/UploadProduct';
-import PaymentSettings from './screens/admin/PaymentSettings';
+
 import ManageUsers from './screens/admin/ManageUsers'; // We will create this next
 
 // A quick Dashboard component so the /admin page isn't empty
@@ -68,9 +68,10 @@ function App() {
           {/* Admin Section - Notice the "flex" wrapper for the sidebar */}
           <Route path="/admin" element={<div className="flex"><AdminSidebar /><Dashboard /></div>} />
           <Route path="/admin/upload" element={<div className="flex"><AdminSidebar /><UploadProduct /></div>} />
-          <Route path="/admin/payments" element={<div className="flex"><AdminSidebar /><PaymentSettings /></div>} />
+
           <Route path="/admin/users" element={<div className="flex"><AdminSidebar /><ManageUsers /></div>} />
           <Route path="/admin/codes" element={<div className="flex"><AdminSidebar /><div className="p-8">Codes Page Coming Soon...</div></div>} />
+
         </Routes>
       </LayoutWrapper>
     </Router>
