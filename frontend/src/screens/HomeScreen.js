@@ -1,166 +1,175 @@
 import React from 'react';
-import { motion } from 'framer-motion';
-import { 
-  ChevronRight, 
-  ShieldCheck, 
-  Zap, 
-  Globe, 
-  Mail, 
-  Phone, 
-  MapPin, 
-  Facebook, 
-  Instagram, 
-  Twitter,
-  ShoppingCart,
-  Star
-} from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { ShieldCheck, ShoppingCart, Award, CheckCircle, ArrowRight, Truck, Clock } from 'lucide-react';
 
 const HomeScreen = () => {
-  const currentYear = new Date().getFullYear();
-
-  // Updated List of Products Ready for Sale
   const products = [
-    { id: 1, name: "Vanguard Alpha Helmet", price: "$45.00", category: "Helmet", img: "https://images.pexels.com/photos/6492100/pexels-photo-6492100.jpeg" },
-    { id: 2, name: "Titanium Weave Jacket", price: "$120.00", category: "Jacket", img: "https://images.pexels.com/photos/7667442/pexels-photo-7667442.jpeg" },
-    { id: 3, name: "Storm-Guard Full Cover", price: "$180.00", category: "Full Cover", img: "https://images.pexels.com/photos/8961555/pexels-photo-8961555.jpeg" },
-    { id: 4, name: "Impact-Pro Steel Boots", price: "$95.00", category: "Boots", img: "https://images.pexels.com/photos/5214413/pexels-photo-5214413.jpeg" },
-    { id: 5, name: "Thermal-Grip Gloves", price: "$25.00", category: "Gloves", img: "https://images.pexels.com/photos/5582869/pexels-photo-5582869.jpeg" },
-    { id: 6, name: "Respirator X-9 Mask", price: "$35.00", category: "Mask", img: "https://images.pexels.com/photos/3951628/pexels-photo-3951628.jpeg" },
+    { id: 1, name: "Alpha Safety Helmet", price: "$45.00", cat: "Headwear", img: "https://images.pexels.com/photos/6492100/pexels-photo-6492100.jpeg" },
+    { id: 2, name: "High-Visibility Jacket", price: "$120.00", cat: "Workwear", img: "https://images.pexels.com/photos/7667442/pexels-photo-7667442.jpeg" },
+    { id: 3, name: "Industrial Coverall", price: "$180.00", cat: "Body Protection", img: "https://images.pexels.com/photos/8961555/pexels-photo-8961555.jpeg" },
+    { id: 4, name: "Reinforced Steel Boots", price: "$95.00", cat: "Footwear", img: "https://images.pexels.com/photos/5214413/pexels-photo-5214413.jpeg" }
   ];
 
   return (
-    <div className="bg-white font-sans">
+    <div className="bg-white text-gray-800 font-sans overflow-x-hidden">
       
-      {/* --- SECTION 1: HERO --- */}
-      <section className="relative min-h-screen w-full overflow-hidden">
+      {/* 1. HERO SECTION - Full Display fixed */}
+      <section className="relative w-full h-[90vh] min-h-[600px] flex items-center pt-16">
         <div className="absolute inset-0 z-0">
           <img 
             src="https://images.pexels.com/photos/1216589/pexels-photo-1216589.jpeg" 
-            alt="Safety Gear Background" 
-            className="h-full w-full object-cover brightness-[0.85]" 
+            alt="PPE Equipment" 
+            className="w-full h-full object-cover brightness-[0.4]" 
           />
-          <div className="absolute inset-0 bg-black/20"></div>
         </div>
-        <div className="relative z-10 min-h-screen flex flex-col justify-center px-6 md:px-16 pt-48">
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="max-w-4xl space-y-6">
-            <h1 className="text-4xl md:text-6xl font-black text-white drop-shadow-2xl uppercase tracking-tighter">
-              ARMOUR FOR <br /> <span className="text-blue-500">INDUSTRY.</span>
-            </h1>
-            <p className="text-white/90 text-sm max-w-sm font-semibold tracking-wider">
-              Premium protective equipment for the world's toughest environments. 
-            </p>
-            <button className="bg-blue-600 text-white font-black text-[9px] uppercase tracking-widest px-10 py-4 transition-all hover:bg-blue-700 shadow-xl">
-              EXPLORE COLLECTION
+
+        <div className="relative z-10 px-6 md:px-16 max-w-3xl">
+          <div className="inline-block bg-blue-600/20 backdrop-blur-md border border-blue-500/30 px-3 py-1 rounded-full mb-6">
+            <p className="text-blue-400 text-[10px] font-bold uppercase tracking-widest">Premium Safety Gear</p>
+          </div>
+          <h1 className="text-4xl md:text-6xl font-bold text-white leading-tight mb-6">
+            Protection Engineered <br /> for <span className="text-blue-500">Industry Leaders.</span>
+          </h1>
+          <p className="text-gray-300 text-sm md:text-base mb-10 max-w-lg leading-relaxed">
+            Drs Safety Cloth provides durable, certified personal protective equipment. We ensure your team is equipped for the toughest conditions on site.
+          </p>
+          <div className="flex flex-wrap gap-4">
+            <button className="bg-blue-600 text-white px-10 py-4 rounded-xl text-sm font-bold hover:bg-blue-700 transition-all shadow-lg shadow-blue-900/20">
+              Browse Inventory
             </button>
-          </motion.div>
+            <button className="bg-white/5 border border-white/20 text-white px-10 py-4 rounded-xl text-sm font-bold hover:bg-white/10 transition-all flex items-center gap-2">
+              Our Standards <ArrowRight size={16} />
+            </button>
+          </div>
         </div>
       </section>
 
-      {/* --- SECTION 2: PRODUCT GRID (READY FOR SALE) --- */}
-      <section className="py-24 px-6 md:px-16 bg-white">
-        <div className="max-w-7xl mx-auto">
-          <div className="flex justify-between items-end mb-12 border-l-4 border-blue-600 pl-6">
+      {/* 2. TRUST FEATURES SECTION */}
+      <section className="py-12 bg-gray-50 px-6 md:px-16 border-b border-gray-100">
+        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-12">
+          <div className="flex items-center gap-4">
+            <Truck className="text-blue-600" size={30} />
             <div>
-              <h2 className="text-[10px] font-black text-blue-600 tracking-[0.4em] uppercase">Inventory</h2>
-              <h3 className="text-3xl font-black text-slate-900 tracking-tighter">READY FOR DISPATCH</h3>
+              <h4 className="font-bold text-sm uppercase">Quick Delivery</h4>
+              <p className="text-xs text-gray-500 font-medium">Fast shipping to your worksite.</p>
             </div>
-            <p className="hidden md:block text-slate-500 text-[10px] font-bold uppercase tracking-widest">Showing 6 high-demand items</p>
           </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
-            {products.map((product) => (
-              <motion.div 
-                key={product.id}
-                whileHover={{ y: -10 }}
-                className="group relative bg-slate-50 border border-slate-100 p-4 rounded-sm transition-all hover:shadow-2xl hover:bg-white"
-              >
-                {/* Product Image */}
-                <div className="relative h-72 w-full overflow-hidden mb-6 bg-slate-200">
-                  <img 
-                    src={product.img} 
-                    alt={product.name} 
-                    className="h-full w-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500"
-                  />
-                  <div className="absolute top-4 left-4 bg-blue-600 text-white text-[8px] font-black px-3 py-1 uppercase tracking-widest">
-                    In Stock
-                  </div>
-                </div>
-
-                {/* Product Info */}
-                <div className="flex justify-between items-start mb-2">
-                  <div>
-                    <p className="text-[10px] font-black text-blue-500 uppercase tracking-widest mb-1">{product.category}</p>
-                    <h4 className="text-sm font-black text-slate-900 uppercase tracking-tight">{product.name}</h4>
-                  </div>
-                  <span className="text-sm font-black text-slate-900">{product.price}</span>
-                </div>
-
-                <div className="flex items-center gap-1 mb-6">
-                  {[...Array(5)].map((_, i) => <Star key={i} size={10} className="fill-blue-600 text-blue-600" />)}
-                  <span className="text-[8px] font-bold text-slate-400 ml-2">(4.8)</span>
-                </div>
-
-                {/* Add to Cart Button */}
-                <button className="w-full flex items-center justify-center gap-3 bg-slate-900 text-white text-[10px] font-black uppercase tracking-[0.2em] py-4 hover:bg-blue-600 transition-colors">
-                  <ShoppingCart size={14} /> Add to Cart
-                </button>
-              </motion.div>
-            ))}
+          <div className="flex items-center gap-4 border-x border-gray-200 px-0 md:px-12">
+            <Award className="text-blue-600" size={30} />
+            <div>
+              <h4 className="font-bold text-sm uppercase">Certified PPE</h4>
+              <p className="text-xs text-gray-500 font-medium">Meets ISO global standards.</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-4">
+            <Clock className="text-blue-600" size={30} />
+            <div>
+              <h4 className="font-bold text-sm uppercase">24/7 Support</h4>
+              <p className="text-xs text-gray-500 font-medium">Technical help when you need it.</p>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* --- SECTION 3: TECHNICAL MATERIALS --- */}
-      <section className="bg-slate-900 py-24 px-6 md:px-16 text-white">
-        <div className="max-w-7xl mx-auto grid md:grid-cols-4 gap-8">
-           {[
-              { name: "Ripstop Nylon", use: "Jackets & Covers", icon: <Zap /> },
-              { name: "Kevlar Weave", use: "Gloves & Armor", icon: <ShieldCheck /> },
-              { name: "Heat-Seal PVC", use: "Waterproof Gear", icon: <Globe /> },
-              { name: "Steel-Composite", use: "Industrial Boots", icon: <ShieldCheck /> }
-            ].map((mat, i) => (
-              <div key={i} className="border border-white/10 p-8 hover:bg-blue-600/10 transition-all">
-                <div className="text-blue-500 mb-4">{mat.icon}</div>
-                <h3 className="text-xs font-black uppercase tracking-widest">{mat.name}</h3>
-                <p className="text-[9px] text-slate-400 mt-1 uppercase font-bold">{mat.use}</p>
+      {/* 3. EXPLANATION SECTION - Side by Side (Safety Focused) */}
+      <section className="py-24 px-6 md:px-16 max-w-7xl mx-auto grid md:grid-cols-2 gap-16 items-center">
+        <div className="relative group">
+          <div className="absolute -top-4 -left-4 w-24 h-24 border-t-4 border-l-4 border-blue-600"></div>
+          <img 
+            src="https://images.pexels.com/photos/3806749/pexels-photo-3806749.jpeg" 
+            alt="Safety Clothing" 
+            className="rounded-2xl shadow-xl w-full h-[450px] object-cover" 
+          />
+        </div>
+        <div className="space-y-6">
+          <h2 className="text-blue-600 text-[10px] font-bold uppercase tracking-[0.4em]">Our Mission</h2>
+          <h3 className="text-3xl md:text-4xl font-bold text-gray-900 leading-tight">
+            Quality Protection <br /> for Every Professional.
+          </h3>
+          <p className="text-gray-600 text-sm leading-loose font-medium">
+            At Drs Safety Cloth, we understand that safety isn't just a requirement—it's a priority. We specialize in safety clothing and accessories that balance maximum protection with the comfort needed for a full day's work.
+          </p>
+          <div className="space-y-4">
+            {["High-Visibiltiy Standards", "Flame & Heat Resistance", "Reinforced Durability"].map((item, i) => (
+              <div key={i} className="flex items-center gap-3 text-sm font-bold text-gray-700">
+                <CheckCircle size={18} className="text-blue-600" /> {item}
               </div>
             ))}
+          </div>
         </div>
       </section>
 
-      {/* --- SECTION 4: CONTACT & FOOTER --- */}
-      <footer className="bg-slate-950 text-white pt-24 pb-12 border-t border-white/5">
-        <div className="max-w-7xl mx-auto px-6 md:px-16 grid md:grid-cols-4 gap-16 pb-16">
-          <div className="space-y-6">
-            <h2 className="text-2xl font-black tracking-tighter uppercase">LUU<span className="text-blue-500">SAFETY</span></h2>
-            <p className="text-slate-400 text-[10px] leading-relaxed uppercase font-bold tracking-widest">Professional Grade PPE.</p>
-            <div className="flex gap-4">
-              <Facebook size={18} className="text-slate-500 hover:text-white" />
-              <Instagram size={18} className="text-slate-500 hover:text-white" />
+      {/* 4. PRODUCT LIST SECTION - Ready for Sale */}
+      <section className="bg-gray-50 py-24 px-6 md:px-16">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex justify-between items-end mb-12">
+            <div>
+              <h2 className="text-3xl font-bold text-gray-900 tracking-tight">Ready for Dispatch</h2>
+              <p className="text-gray-500 text-xs mt-2 font-bold uppercase tracking-widest">In-Stock Equipment</p>
             </div>
+            <Link to="/shop" className="text-blue-600 font-bold text-sm hover:text-blue-800 transition-colors">See Full Catalog</Link>
           </div>
-          <div className="space-y-6">
-            <h3 className="text-[10px] font-black uppercase tracking-widest text-blue-500">Links</h3>
-            <ul className="space-y-3 text-[10px] text-slate-400 font-black uppercase tracking-widest">
-              <li className="hover:text-white cursor-pointer">Technical SRS</li>
-              <li className="hover:text-white cursor-pointer">Certifications</li>
-              <li className="hover:text-white cursor-pointer">Bulk Sales</li>
-            </ul>
-          </div>
-          <div className="space-y-6">
-            <h3 className="text-[10px] font-black uppercase tracking-widest text-blue-500">Contact</h3>
-            <div className="text-[10px] text-slate-400 space-y-4 font-black uppercase tracking-widest">
-              <p className="flex items-center gap-2"><Mail size={14} className="text-blue-500"/> SALES@LUUSAFETY.COM</p>
-              <p className="flex items-center gap-2"><Phone size={14} className="text-blue-500"/> +1 800-LUU-SAFE</p>
-            </div>
-          </div>
-          <div className="space-y-6">
-             <h3 className="text-[10px] font-black uppercase tracking-widest text-blue-500">Update</h3>
-             <input type="text" placeholder="EMAIL" className="bg-transparent border border-white/20 w-full p-3 text-[10px] focus:border-blue-500 outline-none" />
+          
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+            {products.map((p) => (
+              <div key={p.id} className="bg-white border border-gray-100 rounded-xl overflow-hidden hover:shadow-xl transition-all group">
+                <div className="h-64 overflow-hidden relative bg-gray-100">
+                  <img src={p.img} alt={p.name} className="w-full h-full object-cover group-hover:scale-105 transition-all duration-700" />
+                  <div className="absolute top-3 left-3 bg-white/90 backdrop-blur px-2 py-1 rounded text-[8px] font-bold uppercase text-blue-600">
+                    {p.cat}
+                  </div>
+                </div>
+                <div className="p-6">
+                  <h4 className="font-bold text-gray-900 text-sm mb-1">{p.name}</h4>
+                  <p className="text-gray-400 text-[10px] font-bold uppercase mb-4 tracking-widest">Professional Grade</p>
+                  <div className="flex justify-between items-center pt-4 border-t border-gray-50">
+                    <span className="text-lg font-bold text-gray-900">{p.price}</span>
+                    <button className="bg-gray-900 text-white p-2.5 rounded-lg hover:bg-blue-600 transition-colors">
+                      <ShoppingCart size={16} />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
-        <div className="max-w-7xl mx-auto px-6 md:px-16 pt-12 flex justify-between items-center border-t border-white/5">
-          <p className="text-[9px] font-black text-slate-600 uppercase tracking-[0.3em]">© {currentYear} LUU SAFETY. PROPERTY RIGHTS PROTECTED.</p>
+      </section>
+
+      {/* 5. FOOTER */}
+      <footer className="bg-white border-t border-gray-100 pt-20 pb-10 px-6 md:px-16">
+        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-16 mb-16">
+          <div className="space-y-6">
+            <h2 className="text-xl font-bold text-gray-900 tracking-tight">Drs<span className="text-blue-600">SafetyCloth</span></h2>
+            <p className="text-gray-500 text-xs leading-relaxed font-medium">
+              We provide the tools to keep you safe in high-risk environments. Your protection is our primary business.
+            </p>
+          </div>
+          <div>
+            <h4 className="font-bold text-xs uppercase tracking-widest mb-6 text-gray-400">Navigation</h4>
+            <div className="flex flex-col gap-3 text-xs font-bold text-gray-600">
+              <Link to="/" className="hover:text-blue-600">Home</Link>
+              <Link to="/about" className="hover:text-blue-600">Our Story</Link>
+              <Link to="/shop" className="hover:text-blue-600">Shop PPE</Link>
+            </div>
+          </div>
+          <div>
+            <h4 className="font-bold text-xs uppercase tracking-widest mb-6 text-gray-400">Support</h4>
+            <div className="flex flex-col gap-3 text-xs font-bold text-gray-600">
+              <span>Shipping Policy</span>
+              <span>Bulk Orders</span>
+              <span>Contact Us</span>
+            </div>
+          </div>
+          <div>
+            <h4 className="font-bold text-xs uppercase tracking-widest mb-6 text-gray-400">Stay Informed</h4>
+            <div className="flex bg-gray-50 rounded-lg p-1 border border-gray-200">
+              <input type="text" placeholder="Email Updates" className="bg-transparent border-none text-xs w-full focus:ring-0 px-3" />
+              <button className="bg-blue-600 text-white px-4 py-2 rounded-md text-[10px] font-bold">Join</button>
+            </div>
+          </div>
+        </div>
+        <div className="text-center pt-8 border-t border-gray-50">
+          <p className="text-[10px] text-gray-300 font-bold uppercase tracking-[0.3em] italic">© 2026 Drs Safety Cloth. All Rights Reserved.</p>
         </div>
       </footer>
     </div>
