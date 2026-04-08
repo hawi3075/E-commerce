@@ -1,16 +1,13 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
-import { Search, LogIn, ChevronDown, ShoppingBag, Package } from 'lucide-react';
+import { Search, LogIn, ShoppingBag, Package } from 'lucide-react';
 
 const Navbar = () => {
-  const [isCatOpen, setIsCatOpen] = useState(false);
-  const categories = ["Helmets", "Jackets", "Industrial Masks", "Safety Gloves", "Steel Boots", "Full Cover Cloths"];
-
   return (
     <header className="fixed top-0 left-0 right-0 z-50 font-sans shadow-sm">
       <div className="w-full bg-white border-b border-slate-200 px-6 md:px-16 py-4 flex justify-between items-center">
         
-        {/* BRAND */}
+        {/* BRAND / LOGO */}
         <Link to="/" className="text-2xl font-black text-slate-900 tracking-tighter">
           LUU<span className="text-blue-600">SAFETY</span>
         </Link>
@@ -18,7 +15,7 @@ const Navbar = () => {
         {/* RIGHT SIDE ACTIONS */}
         <div className="flex items-center gap-4 lg:gap-8">
           
-          {/* NAVIGATION LINKS */}
+          {/* NAVIGATION LINKS - Wired to App.js Routes */}
           <nav className="hidden lg:flex gap-8 text-[10px] font-bold uppercase tracking-widest text-slate-500">
             <Link to="/" className="hover:text-blue-600 transition-colors">Home</Link>
             <Link to="/about" className="hover:text-blue-600 transition-colors">About</Link>
@@ -35,31 +32,6 @@ const Navbar = () => {
             <Search size={14} className="absolute right-4 top-2.5 text-slate-400" />
           </div>
 
-          {/* CATEGORY DROPDOWN */}
-          <div className="relative border-l border-slate-200 pl-4 lg:pl-8">
-            <button 
-              onClick={() => setIsCatOpen(!isCatOpen)}
-              className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-900 hover:text-blue-600 transition-all"
-            >
-              Categories <ChevronDown size={14} className={`transition-transform ${isCatOpen ? 'rotate-180' : ''}`} />
-            </button>
-
-            {isCatOpen && (
-              <div className="absolute top-full right-0 mt-4 w-64 bg-white border border-slate-100 shadow-2xl py-4 z-50 rounded-b-xl">
-                {categories.map((cat) => (
-                  <Link 
-                    key={cat} 
-                    to={`/shop/${cat.toLowerCase().replace(/ /g, '-')}`}
-                    className="block px-6 py-3 text-[10px] font-bold text-slate-600 hover:bg-slate-50 hover:text-blue-600 uppercase tracking-widest"
-                    onClick={() => setIsCatOpen(false)}
-                  >
-                    {cat}
-                  </Link>
-                ))}
-              </div>
-            )}
-          </div>
-
           {/* USER ACTIONS (Orders, Cart, Login) */}
           <div className="flex gap-4 lg:gap-6 items-center border-l border-slate-200 pl-4 lg:pl-8">
              
@@ -69,7 +41,7 @@ const Navbar = () => {
              </Link>
 
              {/* SHOPPING CART ICON */}
-             <Link to="/cart" className="relative text-slate-600 hover:text-blue-600 transition-colors">
+             <Link to="/checkout" className="relative text-slate-600 hover:text-blue-600 transition-colors">
                 <ShoppingBag size={20} />
                 <span className="absolute -top-1 -right-1 bg-blue-600 text-white text-[8px] font-bold px-1 rounded-full">0</span>
              </Link>

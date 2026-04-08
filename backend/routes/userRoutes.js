@@ -1,23 +1,20 @@
 const express = require('express');
 const router = express.Router();
-const User = require('../models/userModel');
+const { 
+  registerUser, 
+  authUser, 
+  getUsers, 
+  deleteUser 
+} = require('../controllers/userController');
 const { protect, admin } = require('../middleware/authMiddleware');
 
-// @desc Get all users (Admin only)
-router.get('/', protect, admin, async (req, res) => {
-    const users = await User.find({});
-    res.json(users);
-});
+// Public routes
+router.post('/', registerUser);
+router.post('/login', authUser);
 
-// @desc Delete user (Admin only)
-router.delete('/:id', protect, admin, async (req, res) => {
-    const user = await User.findById(req.params.id);
-    if (user) {
-        await user.deleteOne();
-        res.json({ message: 'User removed' });
-    } else {
-        res.status(404).json({ message: 'User not found' });
-    }
-});
+// Admin routes
+// If any of these variables (getUsers, deleteUser) are undefined, the app crashes
+router.get('/', protect, admin, getUsers);
+router.delete('/:id', protect, admin, deleteUser);
 
 module.exports = router;

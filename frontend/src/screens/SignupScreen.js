@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { User, Mail, Lock, ArrowRight, AlertCircle, Eye, EyeOff, CheckCircle2 } from 'lucide-react';
+import { User, Mail, Lock, ArrowRight, AlertCircle, Eye, EyeOff, CheckCircle2, Loader2 } from 'lucide-react';
 import axios from 'axios';
 
 const SignupScreen = () => {
@@ -19,18 +19,17 @@ const SignupScreen = () => {
     setLoading(true);
 
     try {
-      // Connects to your backend on port 5000
+      // Endpoint for registration
       const { data } = await axios.post('http://localhost:5000/api/users', { name, email, password });
       
       localStorage.setItem('userInfo', JSON.stringify(data));
       setIsSuccess(true);
       
-      // Automatic redirect after 2 seconds
+      // Automatic redirect after 2 seconds to shop
       setTimeout(() => navigate('/shop'), 2000);
-
     } catch (err) {
-      // This catches the MongoDB crash error
-      setError(err.response?.data?.message || 'Database Error: Check your MongoDB Whitelist.');
+      setError(err.response?.data?.message || 'Registration failed. Check your connection.');
+    } finally {
       setLoading(false);
     }
   };
@@ -39,7 +38,6 @@ const SignupScreen = () => {
     backgroundColor: 'transparent',
     WebkitBoxShadow: '0 0 0px 1000px transparent inset',
     WebkitTextFillColor: 'white',
-    transition: 'background-color 5000s ease-in-out 0s',
   };
 
   return (
@@ -76,7 +74,7 @@ const SignupScreen = () => {
                   <label className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Full Name</label>
                   <div className="relative border-b border-white/10">
                     <User className="absolute left-0 top-2 text-slate-500" size={14} />
-                    <input required type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="hawi"
+                    <input required type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="Full Name"
                       className="w-full py-2 pl-7 text-[13px] bg-transparent text-white outline-none focus:border-blue-600 transition-all"
                       style={neutralInputStyle} />
                   </div>
@@ -86,7 +84,7 @@ const SignupScreen = () => {
                   <label className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Email Address</label>
                   <div className="relative border-b border-white/10">
                     <Mail className="absolute left-0 top-2 text-slate-500" size={14} />
-                    <input required type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="hs11@gmail.com"
+                    <input required type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="email@example.com"
                       className="w-full py-2 pl-7 text-[13px] bg-transparent text-white outline-none focus:border-blue-600 transition-all"
                       style={neutralInputStyle} />
                   </div>
@@ -106,7 +104,7 @@ const SignupScreen = () => {
                 </div>
 
                 <button type="submit" disabled={loading} className="w-full bg-blue-600 text-white py-4 font-black text-[10px] uppercase tracking-[0.3em] mt-4 flex items-center justify-center gap-2 hover:bg-blue-700 transition-all active:scale-[0.98]">
-                  {loading ? 'Registering...' : 'Confirm'} <ArrowRight size={16} />
+                  {loading ? <Loader2 className="animate-spin" size={16} /> : 'Confirm'} <ArrowRight size={16} />
                 </button>
               </form>
 
@@ -116,14 +114,6 @@ const SignupScreen = () => {
                     Login Now
                 </Link>
               </div>
-
-              {/* BYPASS BUTTON - For testing the product page redirect now */}
-              <button 
-                onClick={() => { setIsSuccess(true); setTimeout(() => navigate('/shop'), 1500); }}
-                className="w-full mt-6 text-[8px] text-slate-600 uppercase font-black hover:text-slate-400 transition-colors"
-              >
-                Skip to Products (Debug Mode)
-              </button>
             </>
           )}
         </div>
