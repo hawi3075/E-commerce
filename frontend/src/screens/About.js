@@ -1,89 +1,60 @@
 import React from 'react';
-import { motion } from 'framer-motion';
-import { ShieldCheck, Zap, Globe, HardHat, Award } from 'lucide-react';
 
 const About = () => {
-  const stats = [
-    { icon: <ShieldCheck className="text-blue-600" />, title: "Certified Gear", desc: "All our PPE meets international safety standards." },
-    { icon: <Zap className="text-blue-600" />, title: "Fast Sync", desc: "Real-time inventory management via the AuraSync protocol." },
-    { icon: <Globe className="text-blue-600" />, title: "ASTU Roots", desc: "Proudly developed by engineers from Adama Science & Technology University." },
-  ];
-
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 pt-24 pb-20 px-8">
+    <div className="min-h-screen bg-white pt-32 pb-20 px-6">
       <div className="max-w-6xl mx-auto">
         
-        {/* HERO SECTION */}
-        <div className="text-center mb-20">
-          <motion.h1 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="text-5xl md:text-7xl font-black tracking-tight mb-6"
-          >
+        {/* Main Branding Section */}
+        <div className="text-center mb-16">
+          <h1 className="text-7xl font-black text-slate-900 tracking-tighter mb-4">
             LUU<span className="text-blue-600">SAFETY</span>
-          </motion.h1>
-          <motion.p 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.2 }}
-            className="text-xl text-slate-500 font-medium max-w-2xl mx-auto"
-          >
-            Engineering safety for the modern workforce. We provide high-fidelity protection 
-            integrated with the AuraSync administrative terminal.
-          </motion.p>
+          </h1>
+          <div className="h-1 w-24 bg-blue-600 mx-auto rounded-full"></div>
         </div>
 
-        {/* MISSION CARD (Glassmorphism) */}
-        <motion.div 
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.3 }}
-          className="bg-white/60 backdrop-blur-2xl border border-white/20 p-12 rounded-[3rem] shadow-xl shadow-blue-100/50 mb-16 flex flex-col md:flex-row items-center gap-12"
-        >
-          <div className="flex-1">
-            <h2 className="text-3xl font-black mb-6 uppercase tracking-tight">The AuraSync Protocol</h2>
-            <p className="text-slate-600 leading-relaxed mb-6 font-medium">
-              LUU SAFETY isn't just a store; it's a technical ecosystem. Our platform is 
-              built to ensure that civil engineers, construction workers, and resort staff 
-              have instant access to the gear they need, with 100% data transparency.
-            </p>
-            <div className="flex gap-4">
-               <div className="bg-blue-600 text-white px-6 py-2 rounded-full text-xs font-bold uppercase tracking-widest">Innovation</div>
-               <div className="bg-slate-900 text-white px-6 py-2 rounded-full text-xs font-bold uppercase tracking-widest">Reliability</div>
-            </div>
-          </div>
-          <div className="w-full md:w-1/3 aspect-square bg-blue-50 rounded-[2.5rem] flex items-center justify-center">
-            <HardHat size={120} className="text-blue-600 opacity-20" />
-          </div>
-        </motion.div>
-
-        {/* FEATURE GRID */}
-        <div className="grid md:grid-cols-3 gap-8">
-          {stats.map((stat, i) => (
-            <motion.div
-              key={i}
-              whileHover={{ y: -10 }}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.1 + 0.5 }}
-              className="bg-white p-10 rounded-[2.5rem] shadow-sm border border-slate-100 group transition-all hover:border-blue-200"
-            >
-              <div className="bg-blue-50 w-14 h-14 rounded-2xl flex items-center justify-center mb-6 group-hover:bg-blue-600 group-hover:text-white transition-colors">
-                {stat.icon}
+        {/* Info Card - Glassmorphism Style using only Tailwind */}
+        <div className="bg-slate-50 border border-slate-200 rounded-[3rem] p-12 shadow-2xl">
+          <div className="flex flex-col md:flex-row gap-12 items-center">
+            
+            <div className="flex-1">
+              <span className="text-blue-600 font-bold text-xs uppercase tracking-[0.3em] mb-4 block">
+                The AuraSync Protocol
+              </span>
+              <h2 className="text-4xl font-black text-slate-900 mb-6 uppercase">
+                Premium Safety <br/> Engineering
+              </h2>
+              <p className="text-slate-500 text-lg leading-relaxed mb-8 font-medium">
+                Developed as part of the QuickBuy ecosystem, LUU SAFETY provides high-fidelity 
+                protection gear. Our platform was built by developers from <strong>ASTU</strong> 
+                to ensure real-time synchronization between our global warehouse and your safety needs.
+              </p>
+              
+              <div className="grid grid-cols-2 gap-6">
+                <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                  <p className="text-blue-600 font-black text-2xl">100%</p>
+                  <p className="text-slate-400 text-xs font-bold uppercase tracking-widest mt-1">Verified Gear</p>
+                </div>
+                <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                  <p className="text-blue-600 font-black text-2xl">ASTU</p>
+                  <p className="text-slate-400 text-xs font-bold uppercase tracking-widest mt-1">Engineered</p>
+                </div>
               </div>
-              <h3 className="font-bold text-lg mb-2">{stat.title}</h3>
-              <p className="text-slate-500 text-sm font-medium leading-relaxed">{stat.desc}</p>
-            </motion.div>
-          ))}
+            </div>
+
+            {/* Visual Decorative Box */}
+            <div className="w-full md:w-80 h-80 bg-slate-900 rounded-[2.5rem] flex items-center justify-center border-8 border-white shadow-xl relative overflow-hidden">
+               <div className="absolute inset-0 bg-gradient-to-br from-blue-600/20 to-transparent"></div>
+               <span className="text-blue-500 font-black text-6xl relative z-10">AS</span>
+            </div>
+
+          </div>
         </div>
 
-        {/* FOOTER NOD */}
-        <div className="text-center mt-24">
-          <p className="text-[10px] font-black text-slate-300 uppercase tracking-[0.5em]">
-            Developed at Adama Science & Technology University © 2026
-          </p>
-        </div>
-
+        {/* Footer Reference */}
+        <p className="text-center mt-16 text-slate-300 font-black text-[10px] uppercase tracking-[0.5em]">
+          Adama Science & Technology University © 2026
+        </p>
       </div>
     </div>
   );
