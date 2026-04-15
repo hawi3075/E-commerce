@@ -2,59 +2,26 @@ import React from 'react';
 
 const About = () => {
   return (
-    <div className="min-h-screen bg-white pt-32 pb-20 px-6">
-      <div className="max-w-6xl mx-auto">
-        
-        {/* Main Branding Section */}
-        <div className="text-center mb-16">
-          <h1 className="text-7xl font-black text-slate-900 tracking-tighter mb-4">
-            LUU<span className="text-blue-600">SAFETY</span>
-          </h1>
-          <div className="h-1 w-24 bg-blue-600 mx-auto rounded-full"></div>
-        </div>
-
-        {/* Info Card - Glassmorphism Style using only Tailwind */}
-        <div className="bg-slate-50 border border-slate-200 rounded-[3rem] p-12 shadow-2xl">
-          <div className="flex flex-col md:flex-row gap-12 items-center">
-            
-            <div className="flex-1">
-              <span className="text-blue-600 font-bold text-xs uppercase tracking-[0.3em] mb-4 block">
-                The AuraSync Protocol
-              </span>
-              <h2 className="text-4xl font-black text-slate-900 mb-6 uppercase">
-                Premium Safety <br/> Engineering
-              </h2>
-              <p className="text-slate-500 text-lg leading-relaxed mb-8 font-medium">
-                Developed as part of the QuickBuy ecosystem, LUU SAFETY provides high-fidelity 
-                protection gear. Our platform was built by developers from <strong>ASTU</strong> 
-                to ensure real-time synchronization between our global warehouse and your safety needs.
-              </p>
-              
-              <div className="grid grid-cols-2 gap-6">
-                <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-                  <p className="text-blue-600 font-black text-2xl">100%</p>
-                  <p className="text-slate-400 text-xs font-bold uppercase tracking-widest mt-1">Verified Gear</p>
-                </div>
-                <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-                  <p className="text-blue-600 font-black text-2xl">ASTU</p>
-                  <p className="text-slate-400 text-xs font-bold uppercase tracking-widest mt-1">Engineered</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Visual Decorative Box */}
-            <div className="w-full md:w-80 h-80 bg-slate-900 rounded-[2.5rem] flex items-center justify-center border-8 border-white shadow-xl relative overflow-hidden">
-               <div className="absolute inset-0 bg-gradient-to-br from-blue-600/20 to-transparent"></div>
-               <span className="text-blue-500 font-black text-6xl relative z-10">AS</span>
-            </div>
-
+    <div style={{ minHeight: '100vh', backgroundColor: '#f8fafc', paddingTop: '100px', paddingBottom: '50px', paddingLeft: '20px', paddingRight: '20px', fontFamily: 'sans-serif' }}>
+      <div style={{ maxWidth: '1000px', margin: '0 auto', backgroundColor: 'white', borderRadius: '40px', padding: '50px', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.1)' }}>
+        <h1 style={{ fontSize: '4rem', fontWeight: '900', color: '#0f172a', margin: '0 0 20px 0' }}>
+          LUU<span style={{ color: '#2563eb' }}>SAFETY</span>
+        </h1>
+        <p style={{ fontSize: '1.25rem', color: '#64748b', lineHeight: '1.6', marginBottom: '30px' }}>
+          Welcome to the <strong>AuraSync</strong> terminal. Developed at <strong>ASTU</strong>, we provide high-end 
+          safety equipment for the modern industrial workforce. Our platform ensures that gear synchronization 
+          is seamless and secure.
+        </p>
+        <div style={{ display: 'flex', gap: '20px' }}>
+          <div style={{ flex: 1, backgroundColor: '#eff6ff', padding: '20px', borderRadius: '20px' }}>
+            <h3 style={{ margin: '0', color: '#1e40af' }}>Our Roots</h3>
+            <p style={{ fontSize: '0.9rem', color: '#1e3a8a' }}>Adama Science & Technology University</p>
+          </div>
+          <div style={{ flex: 1, backgroundColor: '#f1f5f9', padding: '20px', borderRadius: '20px' }}>
+            <h3 style={{ margin: '0', color: '#334155' }}>Version</h3>
+            <p style={{ fontSize: '0.9rem', color: '#475569' }}>AuraSync V2.0 - E-Shop</p>
           </div>
         </div>
-
-        {/* Footer Reference */}
-        <p className="text-center mt-16 text-slate-300 font-black text-[10px] uppercase tracking-[0.5em]">
-          Adama Science & Technology University © 2026
-        </p>
       </div>
     </div>
   );
