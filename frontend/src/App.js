@@ -12,10 +12,14 @@ import ProductScreen from './screens/ProductScreen';
 import SignupScreen from './screens/SignupScreen';
 import OrderScreen from './screens/OrderScreen';
 import PaymentScreen from './screens/PaymentScreen';
-import ShopScreen from './screens/ShopScreen'; // Added your new Shop Screen
+import ShopScreen from './screens/ShopScreen'; 
+
+// --- ADDED THESE IMPORTS SO THE PAGES ARE NOT EMPTY ---
+import AboutScreen from './screens/AboutScreen'; 
+import ContactScreen from './screens/ContactScreen';
 
 // Admin Screen Imports
-import Dashboard from './screens/admin/Dashboard'; // Now imported as a separate file
+import Dashboard from './screens/admin/Dashboard'; 
 import UploadProduct from './screens/admin/UploadProduct';
 import ManageUsers from './screens/admin/ManageUsers';
 
@@ -54,8 +58,9 @@ function App() {
           <Route path="/login" element={<LoginScreen />} />
           <Route path="/signup" element={<SignupScreen />} />
           
-          <Route path="/about" element={<div className="p-20 text-center font-black uppercase text-slate-400">About AuraSync Page</div>} />
-          <Route path="/contact" element={<div className="p-20 text-center font-black uppercase text-slate-400">Contact Support Page</div>} />
+          {/* --- UPDATED THESE ROUTES TO USE YOUR ACTUAL SCREENS --- */}
+          <Route path="/about" element={<AboutScreen />} />
+          <Route path="/contact" element={<ContactScreen />} />
           <Route path="/search" element={<div className="p-20 text-center font-black uppercase text-slate-400">Search PPE Inventory</div>} />
 
           {/* --- PROTECTED CLIENT PAGES --- */}
@@ -65,7 +70,6 @@ function App() {
           <Route path="/checkout" element={<ProtectedRoute><PaymentScreen /></ProtectedRoute>} />
 
           {/* --- ADMIN SECTION --- */}
-          {/* Dashboard is now a clean standalone component */}
           <Route path="/admin" element={<div className="flex"><AdminSidebar /><Dashboard /></div>} />
           <Route path="/admin/upload" element={<div className="flex"><AdminSidebar /><UploadProduct /></div>} />
           <Route path="/admin/users" element={<div className="flex"><AdminSidebar /><ManageUsers /></div>} />
