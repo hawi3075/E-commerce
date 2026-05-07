@@ -1,6 +1,7 @@
 import React from 'react';
 
-const About = () => {
+// We name the component AboutScreen to match your App.js imports
+const AboutScreen = () => {
   return (
     <div style={{ minHeight: '100vh', backgroundColor: '#f8fafc', paddingTop: '100px', paddingBottom: '50px', paddingLeft: '20px', paddingRight: '20px', fontFamily: 'sans-serif' }}>
       <div style={{ maxWidth: '1000px', margin: '0 auto', backgroundColor: 'white', borderRadius: '40px', padding: '50px', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.1)' }}>
@@ -27,4 +28,4 @@ const About = () => {
   );
 };
 
-export default About;
+export default AboutScreen; // Exporting as AboutScreen to fix the App.js error

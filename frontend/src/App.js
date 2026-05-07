@@ -14,9 +14,9 @@ import OrderScreen from './screens/OrderScreen';
 import PaymentScreen from './screens/PaymentScreen';
 import ShopScreen from './screens/ShopScreen'; 
 
-// --- ADDED THESE IMPORTS SO THE PAGES ARE NOT EMPTY ---
-import AboutScreen from './screens/AboutScreen'; 
-import ContactScreen from './screens/ContactScreen';
+// --- FIXED IMPORTS: Matching your actual filenames ---
+import AboutScreen from './screens/About'; 
+import ContactScreen from './screens/Contact';
 
 // Admin Screen Imports
 import Dashboard from './screens/admin/Dashboard'; 
@@ -58,7 +58,7 @@ function App() {
           <Route path="/login" element={<LoginScreen />} />
           <Route path="/signup" element={<SignupScreen />} />
           
-          {/* --- UPDATED THESE ROUTES TO USE YOUR ACTUAL SCREENS --- */}
+          {/* --- PAGES ARE NOW PROPERLY CONNECTED --- */}
           <Route path="/about" element={<AboutScreen />} />
           <Route path="/contact" element={<ContactScreen />} />
           <Route path="/search" element={<div className="p-20 text-center font-black uppercase text-slate-400">Search PPE Inventory</div>} />
