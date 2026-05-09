@@ -1,57 +1,90 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Search, LogIn, ShoppingBag, Package } from 'lucide-react';
+import { Search, Bell, User, ShoppingCart, Moon, Store } from 'lucide-react';
 
 const Navbar = () => {
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 font-sans shadow-sm">
-      <div className="w-full bg-white border-b border-slate-200 px-6 md:px-16 py-4 flex justify-between items-center">
+    <header className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-slate-200 font-sans">
+      <div className="max-w-[1600px] mx-auto px-4 h-16 flex items-center justify-between gap-4">
         
-        {/* BRAND / LOGO */}
-        <Link to="/" className="text-2xl font-black text-slate-900 tracking-tighter">
-          LUU<span className="text-blue-600">SAFETY</span>
-        </Link>
+        {/* LOGO SECTION */}
+        <div className="flex items-center gap-2 min-w-max">
+          <div className="bg-emerald-100 p-1.5 rounded-lg">
+            <Store size={22} className="text-emerald-600" />
+          </div>
+          <Link to="/" className="text-xl font-bold text-slate-900 tracking-tight">
+            Efoy Gebeya
+          </Link>
+        </div>
 
-        {/* RIGHT SIDE ACTIONS */}
-        <div className="flex items-center gap-4 lg:gap-8">
-          
-          {/* NAVIGATION LINKS - Wired to App.js Routes */}
-          <nav className="hidden lg:flex gap-8 text-[10px] font-bold uppercase tracking-widest text-slate-500">
-            <Link to="/" className="hover:text-blue-600 transition-colors">Home</Link>
-            <Link to="/about" className="hover:text-blue-600 transition-colors">About</Link>
-            <Link to="/contact" className="hover:text-blue-600 transition-colors">Contact</Link>
-          </nav>
+        {/* MAIN NAVIGATION */}
+        <nav className="hidden lg:flex items-center gap-6 text-sm font-medium text-slate-600">
+          <Link to="/" className="text-emerald-600 font-semibold">Home</Link>
+          <Link to="/shop" className="hover:text-emerald-600 transition-colors">Shop</Link>
+          <Link to="/about" className="hover:text-emerald-600 transition-colors">About</Link>
+          <Link to="/contact" className="hover:text-emerald-600 transition-colors">Contact</Link>
+        </nav>
 
-          {/* SEARCH BAR */}
-          <div className="relative group hidden md:block">
+        {/* SEARCH BAR - SCREENSHOT STYLE */}
+        <div className="flex-1 max-w-md hidden md:flex items-center">
+          <div className="relative w-full flex items-center">
+            <Search size={16} className="absolute left-3 text-slate-400" />
             <input 
               type="text" 
-              placeholder="SEARCH PPE..." 
-              className="bg-slate-100 border-none rounded-full py-2 px-5 pr-10 text-[9px] font-bold tracking-widest focus:ring-2 focus:ring-blue-600 transition-all w-40 lg:w-56"
+              placeholder="Search products..." 
+              className="w-full bg-slate-50 border border-slate-200 rounded-l-md py-1.5 pl-10 pr-4 text-sm focus:outline-none focus:ring-1 focus:ring-emerald-500"
             />
-            <Search size={14} className="absolute right-4 top-2.5 text-slate-400" />
-          </div>
-
-          {/* USER ACTIONS (Orders, Cart, Login) */}
-          <div className="flex gap-4 lg:gap-6 items-center border-l border-slate-200 pl-4 lg:pl-8">
-             
-             {/* TRACK ORDERS ICON */}
-             <Link to="/orders" title="Track Orders" className="text-slate-600 hover:text-blue-600 transition-colors">
-                <Package size={20} />
-             </Link>
-
-             {/* SHOPPING CART ICON */}
-             <Link to="/checkout" className="relative text-slate-600 hover:text-blue-600 transition-colors">
-                <ShoppingBag size={20} />
-                <span className="absolute -top-1 -right-1 bg-blue-600 text-white text-[8px] font-bold px-1 rounded-full">0</span>
-             </Link>
-
-             {/* LOGIN BUTTON */}
-             <Link to="/login" className="bg-blue-600 text-white px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest flex items-center gap-2 hover:bg-blue-700 transition-all shadow-md shadow-blue-100">
-                <LogIn size={14} /> Login
-             </Link>
+            <button className="bg-emerald-700 text-white px-4 py-1.5 rounded-r-md text-sm font-medium hover:bg-emerald-800 transition-colors">
+              Search
+            </button>
           </div>
         </div>
+
+        {/* SETTINGS & ACTIONS */}
+        <div className="flex items-center gap-4">
+          
+          {/* LOCALE SELECTORS */}
+          <div className="hidden xl:flex items-center gap-3 border-r border-slate-200 pr-4">
+            <select className="text-xs font-semibold bg-transparent outline-none cursor-pointer">
+              <option>English</option>
+            </select>
+            <select className="text-xs font-semibold bg-transparent outline-none cursor-pointer">
+              <option>USD</option>
+            </select>
+            <button className="text-slate-500 hover:text-emerald-600">
+              <Moon size={18} />
+            </button>
+          </div>
+
+          {/* ADMIN TAG */}
+          <div className="hidden sm:block">
+            <span className="bg-indigo-100 text-indigo-600 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-tighter">
+              Super Admin
+            </span>
+          </div>
+
+          {/* ICON ACTIONS */}
+          <div className="flex items-center gap-5">
+            <button className="flex flex-col items-center gap-0.5 text-slate-600 hover:text-emerald-600 transition-colors">
+              <Bell size={20} />
+              <span className="text-[10px] font-bold uppercase">Alerts</span>
+            </button>
+            
+            <Link to="/login" className="flex flex-col items-center gap-0.5 text-slate-600 hover:text-emerald-600 transition-colors">
+              <User size={20} />
+              <span className="text-[10px] font-bold uppercase">Account</span>
+            </Link>
+
+            <Link to="/checkout" className="flex flex-col items-center gap-0.5 text-slate-600 hover:text-emerald-600 transition-colors relative">
+              <ShoppingCart size={20} />
+              <span className="text-[10px] font-bold uppercase">Cart</span>
+              <span className="absolute -top-1 right-0 bg-emerald-600 text-white text-[9px] w-4 h-4 flex items-center justify-center rounded-full border-2 border-white">
+                0
+              </span>
+            </Link>
+          </div>
+        </div>
+
       </div>
     </header>
   );
