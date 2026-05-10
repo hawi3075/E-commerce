@@ -1,158 +1,223 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
-import { ShoppingCart, Loader2, UserPlus, X } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { 
+  Shield, Truck, Headset, Zap, 
+  ArrowRight, Star, ShoppingCart, Search, 
+  User, Bell, Moon, Sun, Globe, ChevronDown
+} from 'lucide-react';
 
-const HomeScreen = () => {
-  const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [showToast, setShowToast] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState('All');
-  const navigate = useNavigate();
+const LuuSafetyHome = () => {
+  const [isScrolled, setIsScrolled] = useState(false);
 
-  // Category List
-  const categories = ['All', 'Headwear', 'Workwear', 'Body Protection', 'Footwear'];
-
-  const triggerAuthNotice = () => {
-    setShowToast(true);
-    setTimeout(() => setShowToast(false), 4000);
-  };
-
+  // Dynamic Header Scroll Logic
   useEffect(() => {
-    const fetchProducts = async () => {
-      setLoading(true);
-      try {
-        // Fetching live data from your MongoDB via Mongoose backend
-        const { data } = await axios.get('/api/products'); 
-        setProducts(data);
-      } catch (error) {
-        console.error("API Error:", error);
-        setProducts([]); // Strict: no mock data shown
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchProducts();
+    const handleScroll = () => setIsScrolled(window.scrollY > 20);
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Filter logic
-  const filteredProducts = selectedCategory === 'All' 
-    ? products 
-    : products.filter(p => p.category === selectedCategory);
+  const categories = [
+    { id: 1, name: 'Protective Clothing', image: 'https://images.unsplash.com/photo-1591193303642-1e969966113b', link: '/shop?cat=clothing' },
+    { id: 2, name: 'Safety Footwear', image: 'https://images.unsplash.com/photo-1560769629-975ec94e6a86', link: '/shop?cat=shoes' },
+    { id: 3, name: 'Head Protection', image: 'https://images.unsplash.com/photo-1513188732907-5f732b831ca8', link: '/shop?cat=head' },
+  ];
+
+  const products = [
+    { id: 101, name: 'Industrial Hard Hat', price: 25.00, rating: 5.0, sold: 124, stock: 18, image: 'https://images.unsplash.com/photo-1584285418504-0051b6d51f6e' },
+    { id: 102, name: 'High-Vis Safety Vest', price: 12.99, rating: 4.9, sold: 89, stock: 46, image: 'https://images.unsplash.com/photo-1622560480605-d83c853bc5c3' },
+    { id: 103, name: 'Steel Toe Work Boots', price: 85.00, rating: 4.8, sold: 45, stock: 12, image: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff' },
+    { id: 104, name: 'Anti-Fog Goggles', price: 15.00, rating: 4.7, sold: 210, stock: 51, image: 'https://images.unsplash.com/photo-1599493758264-36cc4247f820' },
+  ];
 
   return (
-    <div className="bg-white text-slate-800 font-sans relative">
+    <div className="bg-[#fcfcfc] min-h-screen font-sans antialiased text-slate-900">
       
-      {/* AUTH NOTIFICATION */}
-      <div className={`fixed top-24 right-10 z-[100] transform transition-all duration-500 ease-in-out ${showToast ? 'translate-x-0 opacity-100' : 'translate-x-[120%] opacity-0'}`}>
-        <div className="bg-slate-900 text-white p-5 shadow-2xl border-l-4 border-blue-500 flex items-center gap-4 min-w-[300px]">
-          <div className="flex-1">
-            <h5 className="text-[10px] font-black uppercase tracking-[0.2em] text-blue-500">Authentication Required</h5>
-            <p className="text-xs font-bold text-slate-300">Please sign up to purchase products.</p>
+      {/* --- DYNAMIC HEADER (Ref: image_733c25) --- */}
+      <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled ? 'bg-white shadow-md py-2' : 'bg-white/90 backdrop-blur-md py-4'}`}>
+        <div className="max-w-[1440px] mx-auto px-6 flex items-center justify-between gap-6">
+          <Link to="/" className="flex items-center gap-2">
+            <div className="bg-purple-600 p-1.5 rounded-lg text-white"><Shield size={20} /></div>
+            <span className="text-xl font-black italic tracking-tighter uppercase">Luu<span className="text-purple-600">Safety</span></span>
+          </Link>
+
+          <nav className="hidden lg:flex items-center gap-8 text-[13px] font-bold uppercase tracking-tight text-slate-600">
+            <Link to="/" className="text-purple-600 border-b-2 border-purple-600">Home</Link>
+            <Link to="/shop" className="hover:text-purple-600 transition-colors">Shop</Link>
+            <Link to="/about" className="hover:text-purple-600 transition-colors">About</Link>
+            <Link to="/contact" className="hover:text-purple-600 transition-colors">Contact</Link>
+          </nav>
+
+          <div className="flex-1 max-w-md hidden md:flex items-center relative">
+            <input type="text" placeholder="Search equipment..." className="w-full bg-slate-100 border-none rounded-full py-2.5 px-5 text-sm focus:ring-2 focus:ring-purple-600 transition-all" />
+            <button className="absolute right-1 p-2 bg-purple-600 rounded-full text-white hover:bg-purple-700 transition-colors"><Search size={16} /></button>
           </div>
-          <button onClick={() => setShowToast(false)} className="text-slate-500 hover:text-white">
-            <X size={16} />
-          </button>
-        </div>
-      </div>
 
-      {/* 1. HERO SECTION */}
-      <section className="relative w-full h-[85vh] flex items-center">
-        <div className="absolute inset-0 z-0">
-          <img 
-            src="https://images.pexels.com/photos/1216589/pexels-photo-1216589.jpeg" 
-            alt="PPE Equipment" 
-            className="w-full h-full object-cover brightness-[0.35]" 
-          />
+          <div className="flex items-center gap-4 text-slate-600">
+            <div className="hidden xl:flex items-center gap-4 border-x border-slate-200 px-4">
+              <button className="flex items-center gap-1 text-[11px] font-bold uppercase">English <ChevronDown size={14} /></button>
+              <button className="flex items-center gap-1 text-[11px] font-bold uppercase">EUR <ChevronDown size={14} /></button>
+              <button className="hover:text-purple-600 transition-colors"><Moon size={18} /></button>
+            </div>
+            <button className="relative hover:text-purple-600"><Bell size={20} /><span className="absolute -top-1 -right-1 bg-purple-600 text-[8px] text-white w-3.5 h-3.5 rounded-full flex items-center justify-center font-bold">3</span></button>
+            <button className="hover:text-purple-600"><User size={20} /></button>
+            <button className="relative hover:text-purple-600"><ShoppingCart size={20} /><span className="absolute -top-1 -right-1 bg-slate-900 text-[8px] text-white w-3.5 h-3.5 rounded-full flex items-center justify-center font-bold">0</span></button>
+          </div>
         </div>
+      </header>
 
-        <div className="relative z-10 px-8 md:px-24 max-w-4xl">
-          <div className="w-16 h-1 bg-blue-600 mb-8"></div>
-          <h1 className="text-4xl md:text-6xl font-black text-white leading-tight tracking-tighter uppercase mb-10">
-            High Performance <br /> 
-            <span className="text-blue-500">Safety Gear.</span>
+      {/* --- HERO SECTION --- */}
+      <section className="relative h-[600px] bg-slate-900 overflow-hidden pt-0 mt-0">
+        <div className="absolute inset-0 opacity-40">
+          <img src="https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1" alt="Hero" className="w-full h-full object-cover" />
+        </div>
+        <div className="relative max-w-[1400px] mx-auto px-6 h-full flex flex-col justify-center text-white">
+          <div className="flex items-center gap-2 mb-4 bg-white/10 w-max px-3 py-1 rounded-full backdrop-blur-md">
+            <Zap size={14} className="text-purple-400" />
+            <span className="text-[10px] font-black uppercase tracking-widest">Premium Safety Gear</span>
+          </div>
+          <h1 className="text-5xl md:text-8xl font-black mb-6 leading-[0.9] uppercase tracking-tighter">
+            Elevate <br /> <span className="text-purple-500 italic">Workplace.</span>
           </h1>
-          
-          <button 
-            onClick={() => navigate('/signup')} 
-            className="bg-blue-600 hover:bg-blue-700 text-white px-12 py-5 font-black text-xs uppercase tracking-[0.3em] transition-all flex items-center gap-4 shadow-2xl group"
-          >
-            <UserPlus size={18} /> Join AuraSync
-          </button>
+          <p className="max-w-xl text-slate-300 mb-10 text-lg font-medium leading-relaxed">
+            Industrial-grade personal protective equipment (PPE) engineered for maximum durability and safety in Ethiopia's hardest environments.
+          </p>
+          <Link to="/shop" className="bg-purple-600 hover:bg-purple-700 text-white px-10 py-4 rounded-full font-black uppercase text-xs tracking-widest w-max flex items-center gap-3 transition-all transform hover:-translate-y-1">
+            Explore Shop <ArrowRight size={18} />
+          </Link>
         </div>
       </section>
 
-      {/* 2. DYNAMIC CATEGORY FILTER */}
-      <div className="sticky top-[64px] z-[40] bg-white border-b border-slate-100 py-6 px-8 flex justify-center gap-2 md:gap-8 overflow-x-auto no-scrollbar">
-        {categories.map((cat) => (
-          <button
-            key={cat}
-            onClick={() => setSelectedCategory(cat)}
-            className={`px-6 py-2 text-[10px] font-black uppercase tracking-widest transition-all rounded-full
-              ${selectedCategory === cat 
-                ? 'bg-blue-600 text-white shadow-lg shadow-blue-200' 
-                : 'bg-slate-50 text-slate-400 hover:bg-slate-100 hover:text-slate-900'}`}
-          >
-            {cat}
-          </button>
-        ))}
-      </div>
+      {/* --- TRUST BADGES --- */}
+      <section className="bg-white border-b border-slate-100">
+        <div className="max-w-[1400px] mx-auto px-6 py-10 grid grid-cols-2 lg:grid-cols-4 gap-8">
+          {[
+            { icon: Shield, title: 'Secure Payments', desc: 'Protected by Luu' },
+            { icon: Truck, title: 'Free Shipping', desc: 'Across All Ethiopia' },
+            { icon: Headset, title: 'Expert Support', desc: 'Certified Assistance' },
+            { icon: Zap, title: 'Flash Deals', desc: 'Safety Discounts' },
+          ].map((item, i) => (
+            <div key={i} className="flex items-center gap-4 justify-center">
+              <div className="p-3 bg-purple-50 rounded-xl text-purple-600"><item.icon size={22} /></div>
+              <div>
+                <h4 className="font-black text-[11px] uppercase tracking-tight text-slate-800 leading-none mb-1">{item.title}</h4>
+                <p className="text-[10px] text-slate-400 font-bold uppercase">{item.desc}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
 
-      {/* 3. PRODUCT INVENTORY */}
-      <section className="bg-white py-20 px-6 md:px-16">
-        <div className="max-w-7xl mx-auto">
-          <div className="flex flex-col items-center mb-16 text-center">
-             <h2 className="text-3xl font-black text-slate-900 uppercase tracking-tighter">Available Safety Gear</h2>
-             <div className="w-12 h-1 bg-blue-600 mt-4"></div>
+      {/* --- SHOP BY CATEGORY (Ref: image_3abc51) --- */}
+      <section className="max-w-[1400px] mx-auto px-6 py-20">
+        <div className="flex justify-between items-end mb-12">
+          <div>
+            <span className="text-[10px] font-black uppercase tracking-[5px] text-purple-600">Inventory</span>
+            <h3 className="text-4xl font-black uppercase italic tracking-tighter mt-2 text-slate-900">Shop by Category</h3>
           </div>
-          
-          {loading ? (
-            <div className="flex justify-center py-20"><Loader2 className="animate-spin text-blue-600" size={40} /></div>
-          ) : filteredProducts.length === 0 ? (
-            <div className="text-center py-20 border-2 border-dashed border-slate-100 rounded-3xl">
-              <p className="text-slate-400 font-bold uppercase tracking-widest text-xs">No equipment found in this category</p>
+          <Link to="/shop" className="text-xs font-black uppercase text-slate-400 hover:text-purple-600 flex items-center gap-2 tracking-widest transition-colors">
+            View All <ArrowRight size={16} />
+          </Link>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {categories.map((cat) => (
+            <div key={cat.id} className="relative h-80 rounded-[2rem] overflow-hidden group border border-slate-100 shadow-sm hover:shadow-xl transition-all">
+              <img src={cat.image} alt={cat.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
+              <div className="absolute bottom-8 left-8">
+                <h4 className="text-2xl font-black text-white uppercase mb-4">{cat.name}</h4>
+                <Link to={cat.link} className="bg-purple-600 text-white px-6 py-2 rounded-full text-[10px] font-black uppercase tracking-widest hover:bg-white hover:text-purple-600 transition-all">Explore Items</Link>
+              </div>
             </div>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
-              {filteredProducts.map((p) => (
-                <div key={p._id} className="bg-white group cursor-pointer" onClick={() => navigate(`/product/${p._id}`)}>
-                  <div className="h-80 overflow-hidden bg-slate-50 relative rounded-2xl mb-6">
-                    <img 
-                      src={p.image} 
-                      alt={p.name} 
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" 
-                    />
-                  </div>
-                  <div className="px-2">
-                    <p className="text-blue-600 text-[9px] font-black uppercase tracking-widest mb-1">{p.category}</p>
-                    <h4 className="font-black text-slate-900 text-sm uppercase mb-4 truncate">{p.name}</h4>
-                    <div className="flex justify-between items-center">
-                      <span className="text-xl font-black text-slate-900">${p.price.toFixed(2)}</span>
-                      <button 
-                        onClick={(e) => {
-                          e.stopPropagation(); // Prevents navigating to product page
-                          triggerAuthNotice();
-                        }}
-                        className="bg-slate-900 text-white p-3 rounded-xl hover:bg-blue-600 transition-colors"
-                      >
-                        <ShoppingCart size={18} />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
+          ))}
         </div>
       </section>
 
-      {/* FOOTER */}
-      <footer className="bg-slate-950 text-white py-12 px-6 text-center border-t border-slate-900">
-         <h2 className="text-xl font-black uppercase mb-4 tracking-tighter">LUU<span className="text-blue-500">SAFETY</span></h2>
-         <p className="text-[10px] text-slate-700 font-bold uppercase tracking-[0.4em]">© 2026 AuraSync Industrial Solutions</p>
+      {/* --- NEW MATERIAL ARRIVED (Ref: image_08cf36) --- */}
+      <section className="max-w-[1400px] mx-auto px-6 py-10">
+        <h3 className="text-3xl font-black uppercase italic mb-10 tracking-tighter">New Material Arrived</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+          {[
+            { id: 1, name: 'Tactical Kevlar Gloves', price: 45, image: 'https://images.unsplash.com/photo-1590674839382-7460356fd0a1' },
+            { id: 2, name: 'Oxygen Respirator V2', price: 120, image: 'https://images.unsplash.com/photo-1582719471384-894fbb16e074' },
+          ].map((item) => (
+            <div key={item.id} className="bg-white border border-slate-100 rounded-[2rem] overflow-hidden flex shadow-sm hover:shadow-lg transition-all group">
+              <div className="w-1/2 bg-slate-50 relative overflow-hidden">
+                <img src={item.image} alt={item.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+              </div>
+              <div className="w-1/2 p-12 flex flex-col justify-center">
+                <span className="text-purple-600 font-black text-[10px] uppercase mb-4 tracking-widest">Featured Item</span>
+                <h4 className="text-2xl font-black uppercase mb-4 leading-tight">{item.name}</h4>
+                <p className="text-3xl font-black text-purple-700 mb-8">${item.price}</p>
+                <button className="bg-slate-900 text-white px-8 py-3.5 rounded-lg text-[10px] font-black uppercase hover:bg-purple-600 transition-colors w-max">Shop Now</button>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* --- BESTSELLERS / FOR YOU (Ref: image_08f13a & image_08f0f6) --- */}
+      <section className="py-24 bg-slate-50">
+        <div className="max-w-[1400px] mx-auto px-6">
+          <div className="flex items-center gap-4 mb-12">
+            <div className="w-12 h-12 bg-purple-600 rounded-2xl flex items-center justify-center text-white rotate-12 shadow-lg shadow-purple-200"><Star className="fill-white" size={24} /></div>
+            <h3 className="text-4xl font-black uppercase italic tracking-tighter">Bestsellers</h3>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+            {products.map((p) => (
+              <div key={p.id} className="bg-white rounded-3xl p-6 border border-slate-200 hover:shadow-2xl transition-all group relative">
+                <div className="relative h-64 bg-white rounded-2xl mb-6 overflow-hidden">
+                  <img src={p.image} alt={p.name} className="w-full h-full object-contain group-hover:scale-105 transition-transform" />
+                  <span className="absolute top-4 left-4 bg-green-100 text-green-700 text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest">{p.stock} in stock</span>
+                  <button className="absolute bottom-4 left-4 right-4 bg-purple-600 text-white py-3 rounded-xl text-[11px] font-black uppercase flex items-center justify-center gap-2 translate-y-20 group-hover:translate-y-0 transition-transform shadow-xl shadow-purple-200"><ShoppingCart size={16} /> Add to Cart</button>
+                </div>
+                <h4 className="font-black text-slate-800 text-sm uppercase mb-2 leading-tight tracking-tight">{p.name}</h4>
+                <div className="flex items-center gap-1.5 mb-4">
+                  <Star size={14} className="fill-orange-400 text-orange-400" />
+                  <span className="text-[10px] font-black text-slate-400">{p.rating} | {p.sold} SOLD</span>
+                </div>
+                <p className="text-purple-700 font-black text-2xl tracking-tighter">${p.price.toFixed(2)}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* --- FOOTER (Ref: image_08f0be) --- */}
+      <footer className="bg-black text-white pt-24 pb-12 rounded-t-[4rem]">
+        <div className="max-w-[1400px] mx-auto px-6 grid grid-cols-1 md:grid-cols-4 gap-20 mb-20">
+          <div className="col-span-1 md:col-span-1">
+            <h2 className="text-3xl font-black italic tracking-tighter mb-8 uppercase leading-none">Luu<span className="text-purple-600">Safety.</span></h2>
+            <p className="text-slate-400 text-sm font-medium leading-relaxed mb-6">Your trusted marketplace for industrial-grade protection. Built for reliability, fast delivery, and premium quality across Ethiopia.</p>
+          </div>
+          <div>
+            <h4 className="font-black uppercase text-[10px] text-slate-500 mb-8 tracking-[4px]">Quick Links</h4>
+            <ul className="space-y-4 text-[13px] font-bold text-slate-300">
+              <li><Link to="/" className="hover:text-purple-500 transition-colors">Home</Link></li>
+              <li><Link to="/shop" className="hover:text-purple-500 transition-colors">Shop</Link></li>
+              <li><Link to="/contact" className="hover:text-purple-500 transition-colors">Support</Link></li>
+            </ul>
+          </div>
+          <div>
+            <h4 className="font-black uppercase text-[10px] text-slate-500 mb-8 tracking-[4px]">Customer</h4>
+            <ul className="space-y-4 text-[13px] font-bold text-slate-300">
+              <li><Link to="/account" className="hover:text-purple-500 transition-colors">My Account</Link></li>
+              <li><Link to="/orders" className="hover:text-purple-500 transition-colors">Check Orders</Link></li>
+              <li><Link to="/privacy" className="hover:text-purple-500 transition-colors">Privacy Policy</Link></li>
+            </ul>
+          </div>
+          <div>
+            <h4 className="font-black uppercase text-[10px] text-slate-500 mb-8 tracking-[4px]">Headquarters</h4>
+            <p className="text-[13px] font-bold text-slate-300">Bole Road, Addis Ababa</p>
+            <p className="text-[13px] font-bold text-slate-300 mt-2">+251 911 223344</p>
+            <p className="text-[13px] font-bold text-purple-600 mt-2">hub@luusafety.com</p>
+          </div>
+        </div>
+        <div className="text-center pt-10 border-t border-slate-900 text-[10px] font-black text-slate-600 uppercase tracking-[10px]">
+          © 2026 LUU SAFETY MARKETPLACE • EFOY GEBEYA ENGINE
+        </div>
       </footer>
     </div>
   );
 };
 
-export default HomeScreen;
+export default LuuSafetyHome;
