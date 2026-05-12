@@ -109,25 +109,47 @@ const LuuSafetyHome = () => {
       </section>
 
       {/* --- PRODUCT SECTIONS --- */}
-      <div className="space-y-16 py-20">
+      <div className="space-y-24 py-20">
+        
+        {/* NEW MATERIAL SECTION */}
         <section className="max-w-[1400px] mx-auto px-6">
-          <div className="flex items-center gap-3 mb-10"><div className="w-1.5 h-8 bg-purple-600 rounded-full" /><h3 className="text-3xl font-black uppercase italic tracking-tighter">New Material Arrived</h3></div>
+          <div className="mb-10">
+            <div className="flex items-center gap-3 mb-2">
+              <div className="w-1.5 h-8 bg-purple-600 rounded-full" />
+              <h3 className="text-3xl font-black uppercase italic tracking-tighter">New Material Arrived</h3>
+            </div>
+            <p className="text-slate-500 text-xs font-bold uppercase tracking-widest ml-4">Be the first to equip yourself with our latest arrivals in industrial protection.</p>
+          </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
             {products.map(p => <ProductCard key={p.id} p={p} label="New" />)}
           </div>
         </section>
 
+        {/* BESTSELLERS SECTION */}
         <section className="max-w-[1400px] mx-auto px-6">
-          <div className="flex items-center gap-3 mb-10"><div className="w-1.5 h-8 bg-purple-600 rounded-full" /><h3 className="text-3xl font-black uppercase italic tracking-tighter">Bestsellers</h3></div>
+          <div className="mb-10">
+            <div className="flex items-center gap-3 mb-2">
+              <div className="w-1.5 h-8 bg-purple-600 rounded-full" />
+              <h3 className="text-3xl font-black uppercase italic tracking-tighter">Bestsellers</h3>
+            </div>
+            <p className="text-slate-500 text-xs font-bold uppercase tracking-widest ml-4">The most trusted and highly-rated safety gear chosen by professionals nationwide.</p>
+          </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
             {products.slice().reverse().map(p => <ProductCard key={p.id} p={p} label="Top Seller" />)}
           </div>
         </section>
 
+        {/* FOR YOU SECTION */}
         <section className="max-w-[1400px] mx-auto px-6">
           <div className="flex items-center justify-between mb-10">
-            <div className="flex items-center gap-3"><div className="w-1.5 h-8 bg-purple-600 rounded-full" /><h3 className="text-3xl font-black uppercase italic tracking-tighter">For You</h3></div>
-            <Sparkles className="text-purple-600 animate-pulse" />
+            <div>
+              <div className="flex items-center gap-3 mb-2">
+                <div className="w-1.5 h-8 bg-purple-600 rounded-full" />
+                <h3 className="text-3xl font-black uppercase italic tracking-tighter">For You</h3>
+              </div>
+              <p className="text-slate-500 text-xs font-bold uppercase tracking-widest ml-4">Tailored recommendations based on your professional requirements and style.</p>
+            </div>
+            <Sparkles className="text-purple-600 animate-pulse hidden md:block" />
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
             {products.map(p => <ProductCard key={p.id} p={p} label="Recommended" />)}
