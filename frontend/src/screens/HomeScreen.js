@@ -2,10 +2,10 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { 
   Shield, Zap, ArrowRight, Star, ShoppingCart, 
-  MapPin, Phone, Sparkles 
+  MapPin, Phone, Sparkles, TrendingUp
 } from 'lucide-react';
 
-// Use the shared component that is also used in the Shop
+// Shared Global Navbar
 import Navbar from '../components/Navbar';
 
 const HomeScreen = () => {
@@ -17,143 +17,132 @@ const HomeScreen = () => {
   ];
 
   const ProductCard = ({ p, label }) => (
-    <div className="bg-white rounded-3xl p-5 border border-slate-100 hover:shadow-2xl transition-all group relative">
-      <div className="relative h-64 bg-white rounded-2xl mb-5 overflow-hidden">
-        <img src={p.image} alt={p.name} className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500" />
+    <div className="bg-white rounded-[2rem] p-6 border border-slate-100 hover:border-purple-100 hover:shadow-[0_20px_50px_rgba(126,34,206,0.1)] transition-all duration-500 group relative">
+      <div className="relative h-64 bg-slate-50 rounded-2xl mb-6 overflow-hidden">
+        <img src={p.image} alt={p.name} className="w-full h-full object-contain mix-blend-multiply group-hover:scale-110 transition-transform duration-700" />
+        
         {label && (
-          <span className="absolute top-4 left-4 bg-purple-600 text-white text-[8px] font-black px-3 py-1 rounded-full uppercase tracking-widest shadow-lg">
+          <div className="absolute top-4 left-4 bg-purple-600 text-white text-[9px] font-black px-3 py-1 rounded-full uppercase tracking-widest shadow-lg">
             {label}
-          </span>
+          </div>
         )}
-        <span className="absolute top-4 right-4 bg-green-50 text-green-600 text-[9px] font-black px-2 py-1 rounded-full uppercase">
-          {p.stock} in stock
-        </span>
-        <button className="absolute bottom-4 left-4 right-4 bg-purple-700 text-white py-3 rounded-xl text-[10px] font-black uppercase flex items-center justify-center gap-2 translate-y-20 group-hover:translate-y-0 transition-transform shadow-xl">
+
+        <button className="absolute bottom-4 left-4 right-4 bg-purple-700 text-white py-4 rounded-xl text-[10px] font-black uppercase flex items-center justify-center gap-2 translate-y-[120%] group-hover:translate-y-0 transition-transform duration-500 shadow-xl shadow-purple-200">
           <ShoppingCart size={14} /> Add to Cart
         </button>
       </div>
-      <h4 className="font-black text-slate-800 text-[11px] uppercase mb-2 tracking-tight line-clamp-1">{p.name}</h4>
-      <div className="flex items-center gap-1.5 mb-4">
-        <Star size={10} className="fill-orange-400 text-orange-400" />
-        <span className="text-[9px] font-black text-slate-400">{p.rating} | {p.sold} SOLD</span>
-      </div>
-      <div className="flex items-center justify-between">
-        <p className="text-purple-700 font-black text-xl tracking-tighter">${p.price.toFixed(2)}</p>
-        <button className="text-[8px] font-black uppercase text-slate-400 hover:text-purple-600 transition-colors">Details ›</button>
+
+      <div className="space-y-1">
+        <div className="flex justify-between items-start">
+          <h4 className="font-black text-slate-800 text-[12px] uppercase tracking-tight line-clamp-1 flex-1">{p.name}</h4>
+          <span className="text-[9px] font-black text-green-600 bg-green-50 px-2 py-0.5 rounded ml-2">{p.stock} In Stock</span>
+        </div>
+        
+        <div className="flex items-center gap-1.5 pb-4">
+          <Star size={10} className="fill-orange-400 text-orange-400" />
+          <span className="text-[9px] font-black text-slate-400 uppercase tracking-tighter">{p.rating} • {p.sold} Units Sold</span>
+        </div>
+
+        <div className="flex items-center justify-between pt-2 border-t border-slate-50">
+          <p className="text-purple-700 font-black text-2xl tracking-tighter">${p.price.toFixed(2)}</p>
+          <Link to={`/product/${p.id}`} className="p-2 rounded-full hover:bg-purple-50 text-slate-300 hover:text-purple-600 transition-colors">
+            <ArrowRight size={16} />
+          </Link>
+        </div>
       </div>
     </div>
   );
 
   return (
-    <div className="bg-[#fcfcfc] min-h-screen font-sans antialiased text-slate-900">
-      
-      {/* SHARED NAVBAR COMPONENT */}
+    <div className="bg-white min-h-screen font-sans antialiased text-slate-900">
       <Navbar />
 
-      {/* HERO SECTION */}
-      <section className="relative h-[650px] bg-slate-900 overflow-hidden">
-        <div className="absolute inset-0 opacity-50">
-          <img src="https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1" alt="Hero" className="w-full h-full object-cover" />
+      {/* Hero Section - Refined with Glassmorphism */}
+      <section className="relative h-[700px] bg-slate-950 flex items-center overflow-hidden">
+        <div className="absolute inset-0 z-0">
+          <img src="https://images.unsplash.com/photo-1504307651254-35680f356dfd" alt="Industrial" className="w-full h-full object-cover opacity-30 grayscale" />
+          <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/60 to-transparent" />
         </div>
-        <div className="relative max-w-[1400px] mx-auto px-10 h-full flex flex-col justify-center text-white">
-          <div className="flex items-center gap-2 mb-4 bg-purple-600/20 w-max px-4 py-1.5 rounded-full border border-purple-500/30 backdrop-blur-sm">
-            <Zap size={12} className="text-purple-400" />
-            <span className="text-[9px] font-black uppercase tracking-[2px]">Certified Protection</span>
+
+        <div className="max-w-[1440px] mx-auto px-10 relative z-10 w-full">
+          <div className="max-w-3xl">
+            <div className="inline-flex items-center gap-2 mb-6 bg-white/5 backdrop-blur-xl border border-white/10 px-4 py-2 rounded-full">
+              <TrendingUp size={14} className="text-purple-400" />
+              <span className="text-[10px] font-black uppercase tracking-[3px] text-purple-200">2026 Collection Live</span>
+            </div>
+            
+            <h1 className="text-7xl md:text-[120px] font-black text-white uppercase tracking-tighter leading-[0.8] mb-8">
+              Armor <br /> <span className="text-purple-600 italic">Evolution.</span>
+            </h1>
+            
+            <p className="text-slate-400 text-lg font-medium mb-12 leading-relaxed max-w-lg">
+              The next generation of PPE is here. Engineered for ASTU professionals who demand maximum safety without compromise.
+            </p>
+
+            <div className="flex gap-4">
+              <Link to="/shop" className="bg-purple-600 hover:bg-purple-700 text-white px-10 py-5 rounded-2xl font-black uppercase text-xs tracking-[2px] flex items-center gap-3 transition-all shadow-2xl shadow-purple-600/40">
+                Shop Collection <ArrowRight size={18} />
+              </Link>
+            </div>
           </div>
-          <h1 className="text-6xl md:text-8xl font-black mb-6 leading-[0.85] uppercase tracking-tighter">
-            Secure <br /> <span className="text-purple-500 italic">Your Future.</span>
-          </h1>
-          <p className="max-w-md text-slate-300 mb-10 text-base font-medium leading-relaxed">
-            Industrial-grade safety materials and personal protective equipment for the modern Ethiopian workforce.
-          </p>
-          <Link to="/shop" className="bg-purple-600 hover:bg-purple-700 text-white px-10 py-4 rounded-2xl font-black uppercase text-[11px] tracking-widest flex items-center gap-3 transition-all shadow-2xl shadow-purple-600/20 w-max">
-            Explore Market <ArrowRight size={16} />
-          </Link>
         </div>
       </section>
 
-      {/* MAIN CONTENT AREA */}
-      <div className="space-y-24 py-20">
+      {/* Main Grid Section */}
+      <main className="max-w-[1440px] mx-auto px-10 py-24 space-y-32">
         
-        {/* NEW ARRIVALS */}
-        <section className="max-w-[1400px] mx-auto px-10">
-          <div className="mb-10 flex items-center justify-between border-b border-slate-100 pb-6">
-            <div>
-              <div className="flex items-center gap-3 mb-1">
-                <div className="w-1.5 h-8 bg-purple-600 rounded-full" />
-                <h3 className="text-3xl font-black uppercase italic tracking-tighter">New Arrivals</h3>
-              </div>
-              <p className="text-slate-500 text-[11px] font-bold uppercase tracking-widest ml-4">Latest industrial protection for ASTU engineers.</p>
+        {/* Featured Section */}
+        <section>
+          <div className="flex items-end justify-between mb-12 border-b border-slate-100 pb-8">
+            <div className="space-y-2">
+              <h2 className="text-5xl font-black uppercase tracking-tighter italic">Essential <span className="text-purple-600">Inventory</span></h2>
+              <p className="text-slate-400 text-xs font-bold uppercase tracking-[4px]">Verified Safety Standards Only</p>
             </div>
-            <Link to="/shop" className="text-[10px] font-black uppercase tracking-widest text-purple-600 hover:underline">View All</Link>
+            <Sparkles className="text-purple-600 animate-bounce" size={32} />
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-            {products.map(p => <ProductCard key={p.id} p={p} label="New" />)}
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            {products.map(p => <ProductCard key={p.id} p={p} label="Essential" />)}
           </div>
         </section>
 
-        {/* FOR YOU / RECOMMENDATIONS */}
-        <section className="max-w-[1400px] mx-auto px-10">
-          <div className="flex items-center justify-between mb-10 border-b border-slate-100 pb-6">
-            <div>
-              <div className="flex items-center gap-3 mb-1">
-                <div className="w-1.5 h-8 bg-purple-600 rounded-full" />
-                <h3 className="text-3xl font-black uppercase italic tracking-tighter">Tailored For You</h3>
-              </div>
-              <p className="text-slate-500 text-[11px] font-bold uppercase tracking-widest ml-4">Recommendations based on your professional requirements.</p>
-            </div>
-            <Sparkles className="text-purple-600 animate-pulse" size={24} />
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-            {products.slice().reverse().map(p => <ProductCard key={p.id} p={p} label="Recommended" />)}
-          </div>
-        </section>
-      </div>
+      </main>
 
-      {/* FOOTER SECTION */}
-      <footer className="px-6 pb-6">
-        <div className="bg-black text-white rounded-[3rem] pt-20 pb-10 px-12 max-w-[1440px] mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-12 border-b border-white/10 pb-16">
-            <div className="col-span-1">
-              <div className="flex items-center gap-2 mb-6">
-                <div className="bg-purple-600 p-1.5 rounded-lg text-white"><Shield size={18} /></div>
-                <h2 className="text-2xl font-black italic tracking-tighter uppercase">Luu<span className="text-purple-600">Safety.</span></h2>
+      {/* Modern Footer */}
+      <footer className="p-6">
+        <div className="bg-slate-950 text-white rounded-[3.5rem] p-16 max-w-[1440px] mx-auto">
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-16 border-b border-white/5 pb-20">
+            <div className="col-span-2">
+              <div className="flex items-center gap-3 mb-8">
+                <div className="bg-purple-600 p-2 rounded-xl"><Shield size={24} /></div>
+                <h2 className="text-3xl font-black italic tracking-tighter uppercase">Luu<span className="text-purple-600">Safety.</span></h2>
               </div>
-              <p className="text-slate-400 text-[10px] font-bold uppercase tracking-widest leading-relaxed max-w-[250px]">
-                Your trusted marketplace for safety products and fast delivery across Ethiopia.
+              <p className="text-slate-500 text-sm font-bold uppercase tracking-widest leading-loose max-w-md">
+                Premier PPE Solutions across Ethiopia. Built on the Efoy Gebeya marketplace framework for reliability and speed.
               </p>
             </div>
-            <div>
-              <h4 className="font-black uppercase text-[10px] text-white mb-8 tracking-[4px]">Navigation</h4>
-              <ul className="space-y-4 text-[11px] font-black uppercase tracking-[2px] text-slate-500">
-                <li><Link to="/" className="hover:text-purple-600 transition-colors">Home</Link></li>
-                <li><Link to="/shop" className="hover:text-purple-600 transition-colors">Marketplace</Link></li>
-                <li><Link to="/about" className="hover:text-purple-600 transition-colors">About Us</Link></li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-black uppercase text-[10px] text-white mb-8 tracking-[4px]">Customer</h4>
-              <ul className="space-y-4 text-[11px] font-black uppercase tracking-[2px] text-slate-500">
-                <li className="hover:text-purple-600 cursor-pointer">Support</li>
-                <li className="hover:text-purple-600 cursor-pointer">Check Orders</li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-black uppercase text-[10px] text-white mb-8 tracking-[4px]">Contact</h4>
-              <ul className="space-y-4 text-[11px] font-black uppercase tracking-[2px] text-slate-500">
-                <li className="flex items-center gap-3"><MapPin size={14} className="text-purple-600" /> Addis Ababa</li>
-                <li className="flex items-center gap-3"><Phone size={14} className="text-purple-600" /> +251 911 223344</li>
-              </ul>
+            
+            <div className="grid grid-cols-2 col-span-2 gap-8">
+              <div>
+                <h4 className="font-black uppercase text-[10px] text-purple-500 mb-8 tracking-[5px]">Portal</h4>
+                <ul className="space-y-4 text-[11px] font-black uppercase tracking-[2px] text-slate-400">
+                  <li><Link to="/shop" className="hover:text-white transition-colors">Marketplace</Link></li>
+                  <li><Link to="/admin" className="hover:text-white transition-colors">Admin Dashboard</Link></li>
+                </ul>
+              </div>
+              <div>
+                <h4 className="font-black uppercase text-[10px] text-purple-500 mb-8 tracking-[5px]">Contact</h4>
+                <div className="space-y-4 text-[11px] font-black uppercase tracking-[2px] text-slate-400">
+                  <p className="flex items-center gap-3"><MapPin size={14} /> Addis Ababa, ET</p>
+                  <p className="flex items-center gap-3"><Phone size={14} /> +251 900 000 000</p>
+                </div>
+              </div>
             </div>
           </div>
-          <div className="pt-10 flex justify-between items-center">
-            <p className="text-[9px] font-black text-slate-600 uppercase tracking-[5px]">
+          <div className="pt-12 text-center">
+            <p className="text-[10px] font-black text-slate-700 uppercase tracking-[8px]">
               © 2026 Luu Safety • Marketplace Engine
             </p>
-            <div className="flex gap-4 opacity-30">
-              <Zap size={16} />
-              <Shield size={16} />
-            </div>
           </div>
         </div>
       </footer>
