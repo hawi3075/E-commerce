@@ -1,162 +1,148 @@
 import React, { useState } from 'react';
-// Reusing your existing Navbar
-import Navbar from '../components/Navbar';
+import { Link, useNavigate } from 'react-router-dom';
 import { 
-  Shield, 
-  ShoppingCart, 
-  Star, 
-  Filter, 
-  ArrowUpDown 
+  User, Mail, Lock, ArrowRight, AlertCircle, 
+  Eye, EyeOff, CheckCircle2, Loader2, Shield 
 } from 'lucide-react';
+import axios from 'axios';
 
-const ProductScreen = () => {
-  const [activeCategory, setActiveCategory] = useState('All Gear');
+const SignupScreen = () => {
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState('');
+  const [isSuccess, setIsSuccess] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
-  // Static Mock Data
-  const categories = [
-    { name: 'All Gear' },
-    { name: 'Headwear' },
-    { name: 'Workwear' },
-    { name: 'Footwear' }
-  ];
+  const handleSignup = async (e) => {
+    e.preventDefault();
+    setError('');
+    setLoading(true);
 
-  const products = [
-    { 
-      id: 1, 
-      name: 'Tactical Kevlar Gloves', 
-      price: 45.00, 
-      rating: 5.0, 
-      image: 'https://images.unsplash.com/photo-1584285418504-0051b6d51f6e' 
-    },
-    { 
-      id: 2, 
-      name: 'Oxygen Respirator V2', 
-      price: 120.00, 
-      rating: 4.9, 
-      image: 'https://images.unsplash.com/photo-1599493758264-36cc4247f820' 
-    },
-    { 
-      id: 3, 
-      name: 'Industrial Hard Hat', 
-      price: 25.00, 
-      rating: 4.8, 
-      image: 'https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1' 
-    },
-    { 
-      id: 4, 
-      name: 'High-Vis Safety Vest', 
-      price: 15.99, 
-      rating: 4.7, 
-      image: 'https://images.unsplash.com/photo-1622560480605-d83c853bc5c3' 
-    },
-  ];
+    try {
+      const { data } = await axios.post('http://localhost:5000/api/users', { name, email, password });
+      
+      localStorage.setItem('userInfo', JSON.stringify(data));
+      setIsSuccess(true);
+      
+      setTimeout(() => navigate('/shop'), 2000);
+    } catch (err) {
+      setError(err.response?.data?.message || 'Registration failed. Check your connection.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
-    <div className="bg-[#fcfcfc] min-h-screen font-sans">
-      <Navbar />
+    <div className="min-h-screen w-full relative flex items-center justify-center py-12 bg-slate-950 font-sans overflow-hidden">
+      {/* Background Image Overlay */}
+      <div className="absolute inset-0 z-0">
+        <img 
+          src="https://images.unsplash.com/photo-1504307651254-35680f356dfd" 
+          className="w-full h-full object-cover brightness-[0.2] grayscale" 
+          alt="bg" 
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-purple-900/20 to-slate-950/80"></div>
+      </div>
 
-      {/* Header Section with Purple Accents */}
-      <section className="max-w-[1440px] mx-auto px-6 pt-12 pb-8">
-        <h1 className="text-4xl font-black mb-2 tracking-tighter uppercase">
-          Professional <span className="text-purple-600">Gear</span>
-        </h1>
-        <p className="text-slate-500 text-sm font-medium tracking-wide mb-8">
-          High-performance safety equipment for ASTU engineers.
-        </p>
-
-        {/* Category Filters */}
-        <div className="flex flex-wrap gap-3 mb-10">
-          {categories.map((cat) => (
-            <button
-              key={cat.name}
-              onClick={() => setActiveCategory(cat.name)}
-              className={`px-6 py-2.5 rounded-full text-[11px] font-black uppercase tracking-widest border transition-all ${
-                activeCategory === cat.name
-                  ? 'bg-purple-600 text-white border-purple-600 shadow-lg'
-                  : 'bg-white text-slate-600 border-slate-200 hover:border-purple-400'
-              }`}
-            >
-              {cat.name}
-            </button>
-          ))}
-        </div>
-      </section>
-
-      {/* Product Grid */}
-      <main className="max-w-[1440px] mx-auto px-6 pb-20">
-        <div className="flex items-center justify-between mb-8 border-b border-slate-100 pb-4">
-          <div className="flex items-center gap-2">
-            <Filter size={14} className="text-slate-400" />
-            <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">
-              Showing {products.length} products
-            </span>
+      <div className="relative z-10 w-full max-w-[420px] mx-6">
+        {/* Top Branding */}
+        <div className="flex flex-col items-center mb-10">
+          <div className="bg-purple-600 p-3 rounded-2xl mb-4 shadow-2xl shadow-purple-600/30">
+            <Shield size={28} className="text-white" />
           </div>
-          <button className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-600">
-            <ArrowUpDown size={14} /> Newest First
-          </button>
+          <h2 className="text-xl font-black italic text-white uppercase tracking-tighter">
+            Luu<span className="text-purple-600">Safety.</span>
+          </h2>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {products.map((p) => (
-            <div key={p.id} className="bg-white rounded-2xl border border-slate-100 overflow-hidden group hover:shadow-xl transition-all duration-300">
-              <div className="h-64 relative bg-slate-50 overflow-hidden">
-                <img 
-                  src={p.image} 
-                  alt={p.name} 
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
-                />
-                {/* Purple Add to Cart Button */}
-                <button className="absolute bottom-4 left-4 right-4 bg-purple-600 text-white py-3 rounded-xl text-[10px] font-black uppercase flex items-center justify-center gap-2 translate-y-20 group-hover:translate-y-0 transition-transform shadow-xl">
-                  <ShoppingCart size={14} /> Add to Cart
-                </button>
+        <div className="bg-white/[0.03] backdrop-blur-2xl border border-white/10 p-8 md:p-10 shadow-3xl rounded-[2.5rem] overflow-hidden">
+          
+          {isSuccess ? (
+            <div className="py-12 flex flex-col items-center justify-center text-center animate-in fade-in zoom-in duration-500">
+              <div className="w-20 h-20 bg-green-500/20 rounded-full flex items-center justify-center mb-6">
+                <CheckCircle2 size={48} className="text-green-500" />
               </div>
-              <div className="p-5">
-                <h4 className="font-black text-slate-800 text-sm uppercase mb-1">{p.name}</h4>
-                <div className="flex items-center gap-1.5 mb-3">
-                  <Star size={10} className="fill-purple-400 text-purple-400" />
-                  <span className="text-[9px] font-black text-slate-400">{p.rating} (Verified)</span>
+              <h2 className="text-2xl font-black text-white uppercase tracking-[0.2em]">Deployment Ready</h2>
+              <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-2">Operator Registered Successfully</p>
+              <div className="flex items-center gap-3 mt-8">
+                <Loader2 className="animate-spin text-purple-500" size={16} />
+                <p className="text-[10px] text-purple-500 font-black uppercase tracking-widest">Initializing Shop Interface...</p>
+              </div>
+            </div>
+          ) : (
+            <>
+              <div className="mb-10">
+                <h1 className="text-4xl font-black text-white uppercase tracking-tighter leading-none italic">
+                  Join Hub
+                </h1>
+                <p className="text-[10px] text-purple-500 font-black uppercase tracking-[0.3em] mt-3 ml-1">
+                  Create Personnel Account
+                </p>
+              </div>
+
+              {error && (
+                <div className="mb-6 flex items-center gap-3 bg-red-500/10 border border-red-500/20 p-4 rounded-2xl text-red-400 text-[10px] uppercase font-black tracking-widest">
+                  <AlertCircle size={16} /> {error}
                 </div>
-                <p className="text-slate-900 font-black text-2xl tracking-tighter">${p.price.toFixed(2)}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </main>
+              )}
 
-      {/* Reused Professional Footer */}
-      <footer className="bg-black text-white rounded-t-[3rem] pt-20 pb-10 px-10">
-        <div className="max-w-[1440px] mx-auto grid grid-cols-1 md:grid-cols-3 gap-12 border-b border-white/10 pb-16">
-          <div>
-            <div className="flex items-center gap-2 mb-6">
-              <Shield className="text-purple-500" />
-              <h2 className="text-2xl font-black italic tracking-tighter uppercase">
-                Luu<span className="text-purple-500">Safety.</span>
-              </h2>
-            </div>
-            <p className="text-slate-400 text-[10px] font-bold leading-relaxed uppercase tracking-widest max-w-[250px]">
-              Providing excellent service across Ethiopia.
-            </p>
-          </div>
-          <div className="flex justify-around md:col-span-2">
-            <div>
-              <h4 className="font-black uppercase text-[10px] mb-8 tracking-[4px]">Quick Links</h4>
-              <ul className="space-y-4 text-[11px] font-black uppercase text-slate-400">
-                <li className="hover:text-purple-500 cursor-pointer">Shop</li>
-                <li className="hover:text-purple-500 cursor-pointer">Account</li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-black uppercase text-[10px] mb-8 tracking-[4px]">Headquarters</h4>
-              <p className="text-[11px] font-black uppercase text-slate-400">Bole Road, Addis Ababa</p>
-            </div>
-          </div>
+              <form className="space-y-6" onSubmit={handleSignup}>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 ml-1">Full Name</label>
+                  <div className="relative group">
+                    <User className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-600 group-focus-within:text-purple-500 transition-colors" size={18} />
+                    <input required type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="Full Name"
+                      className="w-full bg-white/[0.05] border border-white/5 rounded-2xl py-4 pl-12 pr-4 text-sm outline-none focus:border-purple-500/50 focus:bg-white/[0.08] transition-all text-white placeholder:text-slate-700"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 ml-1">Email Address</label>
+                  <div className="relative group">
+                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-600 group-focus-within:text-purple-500 transition-colors" size={18} />
+                    <input required type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="operator@luusafety.com"
+                      className="w-full bg-white/[0.05] border border-white/5 rounded-2xl py-4 pl-12 pr-4 text-sm outline-none focus:border-purple-500/50 focus:bg-white/[0.08] transition-all text-white placeholder:text-slate-700"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 ml-1">Security Key (Password)</label>
+                  <div className="relative group">
+                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-600 group-focus-within:text-purple-500 transition-colors" size={18} />
+                    <input required type={showPassword ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••••••"
+                      className="w-full bg-white/[0.05] border border-white/5 rounded-2xl py-4 pl-12 pr-4 text-sm outline-none focus:border-purple-500/50 focus:bg-white/[0.08] transition-all text-white placeholder:text-slate-700"
+                    />
+                    <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-600 hover:text-purple-500 transition-colors">
+                      {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                    </button>
+                  </div>
+                </div>
+
+                <button type="submit" disabled={loading} className="w-full bg-purple-600 hover:bg-purple-700 text-white py-5 rounded-2xl font-black text-[11px] uppercase tracking-[0.4em] transition-all flex items-center justify-center gap-3 mt-4 shadow-2xl shadow-purple-600/30 disabled:opacity-50 group">
+                  {loading ? <Loader2 className="animate-spin" size={18} /> : <>Confirm Account <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" /></>}
+                </button>
+              </form>
+
+              <div className="mt-10 text-center border-t border-white/5 pt-8">
+                <p className="text-[10px] text-slate-500 font-black uppercase tracking-[0.2em]">Already Registered?</p>
+                <Link to="/login" className="inline-block mt-2 text-purple-500 font-black text-[11px] uppercase tracking-widest hover:text-purple-400 transition-colors underline underline-offset-8 decoration-purple-500/30">
+                    Login to Security Node
+                </Link>
+              </div>
+            </>
+          )}
         </div>
-        <p className="pt-10 text-[9px] font-black text-slate-500 uppercase tracking-[5px] text-center">
-          © 2026 Luu Safety Marketplace. All rights reserved.
+        <p className="text-center mt-8 text-[9px] font-black text-slate-700 uppercase tracking-[5px]">
+          © 2026 Luu Safety Systems
         </p>
-      </footer>
+      </div>
     </div>
   );
 };
 
-export default ProductScreen;
+export default SignupScreen;
