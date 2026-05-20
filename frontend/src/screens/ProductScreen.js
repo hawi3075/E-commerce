@@ -1,148 +1,235 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React from 'react';
+import { Link } from 'react-router-dom';
 import { 
-  User, Mail, Lock, ArrowRight, AlertCircle, 
-  Eye, EyeOff, CheckCircle2, Loader2, Shield 
+  Shield, Zap, ArrowRight, Star, ShoppingCart, 
+  MapPin, Phone, Sparkles, Flame, Eye, Heart, Info
 } from 'lucide-react';
-import axios from 'axios';
 
-const SignupScreen = () => {
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState('');
-  const [isSuccess, setIsSuccess] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const navigate = useNavigate();
+// Shared Global Navbar
+import Navbar from '../components/Navbar';
 
-  const handleSignup = async (e) => {
-    e.preventDefault();
-    setError('');
-    setLoading(true);
+const HomeScreen = () => {
+  const products = [
+    { id: 1, name: 'Industrial Hard Hat', price: 25.00, rating: 5.0, sold: 124, stock: 18, image: 'https://images.unsplash.com/photo-1584285418504-0051b6d51f6e' },
+    { id: 2, name: 'High-Vis Safety Vest', price: 12.99, rating: 4.9, sold: 89, stock: 46, image: 'https://images.unsplash.com/photo-1622560480605-d83c853bc5c3' },
+    { id: 3, name: 'Steel Toe Work Boots', price: 85.00, rating: 4.8, sold: 45, stock: 12, image: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff' },
+    { id: 4, name: 'Anti-Fog Goggles', price: 15.00, rating: 4.7, sold: 210, stock: 51, image: 'https://images.unsplash.com/photo-1599493758264-36cc4247f820' },
+  ];
 
-    try {
-      const { data } = await axios.post('http://localhost:5000/api/users', { name, email, password });
+  const ProductCard = ({ p, label }) => (
+    <div className="bg-slate-900/40 backdrop-blur-md rounded-[2.5rem] p-5 border border-white/5 hover:border-purple-500/30 transition-all duration-500 group relative flex flex-col justify-between">
       
-      localStorage.setItem('userInfo', JSON.stringify(data));
-      setIsSuccess(true);
-      
-      setTimeout(() => navigate('/shop'), 2000);
-    } catch (err) {
-      setError(err.response?.data?.message || 'Registration failed. Check your connection.');
-    } finally {
-      setLoading(false);
-    }
-  };
+      {/* Image Wrapper */}
+      <div className="relative h-60 bg-slate-950/60 rounded-3xl mb-5 overflow-hidden flex items-center justify-center border border-white/5">
+        <img 
+          src={p.image} 
+          alt={p.name} 
+          className="w-44 h-44 object-contain group-hover:scale-110 transition-transform duration-500" 
+        />
+        
+        {/* Badges */}
+        {label && (
+          <span className="absolute top-4 left-4 bg-purple-600 text-white text-[8px] font-black px-3 py-1 rounded-full uppercase tracking-widest">
+            {label}
+          </span>
+        )}
+        <span className="absolute top-4 right-4 bg-purple-500/10 text-purple-400 border border-purple-500/20 text-[8px] font-black px-2.5 py-1 rounded-md uppercase">
+          {p.stock} Available
+        </span>
+
+        {/* Floating Quick Action Overlays */}
+        <div className="absolute top-1/2 -translate-y-1/2 right-4 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+          <button className="p-2.5 bg-slate-900 border border-white/10 rounded-xl text-slate-400 hover:text-purple-400 transition-colors">
+            <Heart size={14} />
+          </button>
+          <Link to={`/product/${p.id}`} className="p-2.5 bg-slate-900 border border-white/10 rounded-xl text-slate-400 hover:text-purple-400 transition-colors">
+            <Eye size={14} />
+          </Link>
+        </div>
+      </div>
+
+      {/* Content */}
+      <div className="space-y-3 flex-1 flex flex-col justify-between">
+        <div>
+          <div className="flex items-center gap-1 mb-1.5">
+            {[...Array(5)].map((_, i) => (
+              <Star key={i} size={10} className={`${i < Math.floor(p.rating) ? 'fill-purple-500 text-purple-500' : 'text-slate-700'}`} />
+            ))}
+            <span className="text-[9px] text-slate-500 font-bold ml-1">({p.sold} orders)</span>
+          </div>
+          
+          <h4 className="font-black text-white text-[13px] uppercase tracking-wide line-clamp-1 mb-1">
+            {p.name}
+          </h4>
+        </div>
+
+        {/* Pricing and Primary Action Area */}
+        <div className="pt-3 border-t border-white/5 flex items-center justify-between gap-2">
+          <div>
+            <span className="text-[8px] font-bold text-slate-500 uppercase block tracking-wider">Price</span>
+            <p className="text-white font-black text-xl tracking-tight">${p.price.toFixed(2)}</p>
+          </div>
+          
+          <button className="bg-purple-600 hover:bg-purple-700 active:scale-95 text-white p-3.5 rounded-2xl transition-all shadow-xl shadow-purple-600/10 flex items-center justify-center group/btn">
+            <ShoppingCart size={16} className="group-hover/btn:rotate-12 transition-transform" />
+          </button>
+        </div>
+      </div>
+    </div>
+  );
 
   return (
-    <div className="min-h-screen w-full relative flex items-center justify-center py-12 bg-slate-950 font-sans overflow-hidden">
-      {/* Background Image Overlay */}
-      <div className="absolute inset-0 z-0">
-        <img 
-          src="https://images.unsplash.com/photo-1504307651254-35680f356dfd" 
-          className="w-full h-full object-cover brightness-[0.2] grayscale" 
-          alt="bg" 
-        />
-        <div className="absolute inset-0 bg-gradient-to-b from-purple-900/20 to-slate-950/80"></div>
-      </div>
+    <div className="bg-[#05050a] min-h-screen font-sans antialiased text-slate-200 overflow-hidden relative">
+      
+      {/* Decorative Ambient Background Glows */}
+      <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-purple-900/10 rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute top-[40%] right-[-10%] w-[600px] h-[600px] bg-purple-800/5 rounded-full blur-[150px] pointer-events-none" />
 
-      <div className="relative z-10 w-full max-w-[420px] mx-6">
-        {/* Top Branding */}
-        <div className="flex flex-col items-center mb-10">
-          <div className="bg-purple-600 p-3 rounded-2xl mb-4 shadow-2xl shadow-purple-600/30">
-            <Shield size={28} className="text-white" />
-          </div>
-          <h2 className="text-xl font-black italic text-white uppercase tracking-tighter">
-            Luu<span className="text-purple-600">Safety.</span>
-          </h2>
-        </div>
+      <Navbar />
 
-        <div className="bg-white/[0.03] backdrop-blur-2xl border border-white/10 p-8 md:p-10 shadow-3xl rounded-[2.5rem] overflow-hidden">
+      {/* Hero Showcase Area */}
+      <section className="relative min-h-[85vh] flex items-center pt-20">
+        <div className="max-w-[1440px] mx-auto px-10 grid grid-cols-1 lg:grid-cols-12 gap-12 items-center w-full relative z-10">
           
-          {isSuccess ? (
-            <div className="py-12 flex flex-col items-center justify-center text-center animate-in fade-in zoom-in duration-500">
-              <div className="w-20 h-20 bg-green-500/20 rounded-full flex items-center justify-center mb-6">
-                <CheckCircle2 size={48} className="text-green-500" />
+          {/* Hero Left Content */}
+          <div className="lg:col-span-7 space-y-8">
+            <div className="inline-flex items-center gap-2 bg-purple-500/10 border border-purple-500/20 px-4 py-2 rounded-full">
+              <Flame size={14} className="text-purple-400 animate-pulse" />
+              <span className="text-[9px] font-black uppercase tracking-[3px] text-purple-300">Premium Industrial Resource</span>
+            </div>
+            
+            <h1 className="text-6xl md:text-[85px] font-black text-white uppercase tracking-tighter leading-[0.85]">
+              Defend <br /> Your <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-purple-600 italic">Workforce.</span>
+            </h1>
+            
+            <p className="text-slate-400 text-base md:text-lg font-medium leading-relaxed max-w-xl">
+              High-fidelity protective armor, visibility gear, and high-tier utility instruments tailored for ASTU engineers and complex industrial operations.
+            </p>
+
+            <div className="flex flex-wrap items-center gap-4 pt-4">
+              <Link to="/shop" className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-500 hover:to-purple-600 text-white px-10 py-5 rounded-2xl font-black uppercase text-xs tracking-[2px] flex items-center gap-3 transition-all shadow-2xl shadow-purple-600/30">
+                Enter Marketplace <ArrowRight size={16} />
+              </Link>
+              <Link to="/about" className="border border-white/10 hover:border-white/20 bg-white/[0.02] text-white px-8 py-5 rounded-2xl font-black uppercase text-xs tracking-[2px] flex items-center gap-2 transition-all">
+                Specifications <Info size={14} className="text-slate-400" />
+              </Link>
+            </div>
+          </div>
+
+          {/* Hero Right Visual Element */}
+          <div className="lg:col-span-5 relative hidden lg:flex items-center justify-center">
+            <div className="absolute w-[350px] h-[350px] bg-purple-600/20 rounded-full blur-[80px] -z-10 animate-pulse" />
+            <div className="border border-white/5 bg-slate-900/40 p-8 rounded-[3rem] backdrop-blur-xl shadow-3xl max-w-sm w-full relative">
+              <div className="absolute -top-4 -right-4 bg-purple-600 text-white p-3 rounded-2xl shadow-xl">
+                <Shield size={20} />
               </div>
-              <h2 className="text-2xl font-black text-white uppercase tracking-[0.2em]">Deployment Ready</h2>
-              <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-2">Operator Registered Successfully</p>
-              <div className="flex items-center gap-3 mt-8">
-                <Loader2 className="animate-spin text-purple-500" size={16} />
-                <p className="text-[10px] text-purple-500 font-black uppercase tracking-widest">Initializing Shop Interface...</p>
+              <img 
+                src="https://images.unsplash.com/photo-1584285418504-0051b6d51f6e" 
+                alt="Featured Product" 
+                className="w-full h-64 object-contain mb-6 drop-shadow-[0_20px_30px_rgba(147,51,234,0.3)]"
+              />
+              <span className="text-[9px] font-black text-purple-400 uppercase tracking-widest block mb-1">Featured Spec</span>
+              <h3 className="text-white font-black text-lg uppercase tracking-tight">Vanguard Hard Hat v2</h3>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Trust Grid / Metrics Banner */}
+      <section className="border-y border-white/5 bg-slate-900/20 backdrop-blur-md py-10">
+        <div className="max-w-[1440px] mx-auto px-10 grid grid-cols-2 md:grid-cols-4 gap-8">
+          {[
+            { value: '100%', label: 'Certified Standards' },
+            { value: '24/7', label: 'Operations Sync' },
+            { value: 'ASTU', label: 'Official Hardware' },
+            { value: 'FAST', label: 'National Delivery' }
+          ].map((item, idx) => (
+            <div key={idx} className="text-center space-y-1">
+              <p className="text-2xl font-black text-white tracking-tight">{item.value}</p>
+              <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest">{item.label}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Main Grid Section */}
+      <main className="max-w-[1440px] mx-auto px-10 py-24 space-y-28">
+        
+        {/* Core Showcase Grid */}
+        <section>
+          <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 border-b border-white/5 pb-8 gap-4">
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <Sparkles className="text-purple-500" size={16} />
+                <h2 className="text-4xl font-black uppercase tracking-tighter text-white">
+                  Prime <span className="text-purple-500 italic">Inventory</span>
+                </h2>
+              </div>
+              <p className="text-slate-500 text-[10px] font-bold uppercase tracking-[4px]">
+                High-Performance Field Operations Configuration
+              </p>
+            </div>
+            <Link to="/shop" className="text-[10px] font-black uppercase tracking-[2px] text-purple-400 hover:text-purple-300 transition-colors flex items-center gap-1.5 self-start md:self-auto">
+              View Entire Node <ArrowRight size={12} />
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {products.map(p => <ProductCard key={p.id} p={p} label="Active Spec" />)}
+          </div>
+        </section>
+
+      </main>
+
+      {/* Footer Area */}
+      <footer className="p-6">
+        <div className="bg-slate-900/30 border border-white/5 rounded-[3rem] p-12 max-w-[1440px] mx-auto">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 border-b border-white/5 pb-16">
+            
+            <div className="lg:col-span-5 space-y-6">
+              <div className="flex items-center gap-2.5">
+                <div className="bg-purple-600 p-2 rounded-xl text-white"><Shield size={18} /></div>
+                <h2 className="text-2xl font-black italic tracking-tighter uppercase text-white">Luu<span className="text-purple-600">Safety.</span></h2>
+              </div>
+              <p className="text-slate-500 text-[11px] font-bold uppercase tracking-widest leading-relaxed max-w-sm">
+                Strategic industrial protection assets deployment. Operating under high-fidelity enterprise standards.
+              </p>
+            </div>
+            
+            <div className="lg:col-span-7 grid grid-cols-2 sm:grid-cols-3 gap-8">
+              <div>
+                <h4 className="font-black uppercase text-[10px] text-purple-400 mb-6 tracking-[3px]">System</h4>
+                <ul className="space-y-3 text-[11px] font-black uppercase tracking-[1px] text-slate-400">
+                  <li><Link to="/shop" className="hover:text-purple-400 transition-colors">Marketplace</Link></li>
+                  <li><Link to="/about" className="hover:text-purple-400 transition-colors">Project Hub</Link></li>
+                </ul>
+              </div>
+              <div>
+                <h4 className="font-black uppercase text-[10px] text-purple-400 mb-6 tracking-[3px]">Security</h4>
+                <ul className="space-y-3 text-[11px] font-black uppercase tracking-[1px] text-slate-400">
+                  <li><Link to="/login" className="hover:text-purple-400 transition-colors">Operator Login</Link></li>
+                  <li><Link to="/signup" className="hover:text-purple-400 transition-colors">Register Node</Link></li>
+                </ul>
+              </div>
+              <div className="col-span-2 sm:col-span-1">
+                <h4 className="font-black uppercase text-[10px] text-purple-400 mb-6 tracking-[3px]">Contact</h4>
+                <div className="space-y-3 text-[11px] font-black uppercase tracking-[1px] text-slate-500">
+                  <p className="flex items-center gap-2"><MapPin size={12} /> Addis Ababa</p>
+                  <p className="flex items-center gap-2"><Phone size={12} /> +251 900 000</p>
+                </div>
               </div>
             </div>
-          ) : (
-            <>
-              <div className="mb-10">
-                <h1 className="text-4xl font-black text-white uppercase tracking-tighter leading-none italic">
-                  Join Hub
-                </h1>
-                <p className="text-[10px] text-purple-500 font-black uppercase tracking-[0.3em] mt-3 ml-1">
-                  Create Personnel Account
-                </p>
-              </div>
 
-              {error && (
-                <div className="mb-6 flex items-center gap-3 bg-red-500/10 border border-red-500/20 p-4 rounded-2xl text-red-400 text-[10px] uppercase font-black tracking-widest">
-                  <AlertCircle size={16} /> {error}
-                </div>
-              )}
-
-              <form className="space-y-6" onSubmit={handleSignup}>
-                <div className="space-y-2">
-                  <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 ml-1">Full Name</label>
-                  <div className="relative group">
-                    <User className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-600 group-focus-within:text-purple-500 transition-colors" size={18} />
-                    <input required type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="Full Name"
-                      className="w-full bg-white/[0.05] border border-white/5 rounded-2xl py-4 pl-12 pr-4 text-sm outline-none focus:border-purple-500/50 focus:bg-white/[0.08] transition-all text-white placeholder:text-slate-700"
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 ml-1">Email Address</label>
-                  <div className="relative group">
-                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-600 group-focus-within:text-purple-500 transition-colors" size={18} />
-                    <input required type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="operator@luusafety.com"
-                      className="w-full bg-white/[0.05] border border-white/5 rounded-2xl py-4 pl-12 pr-4 text-sm outline-none focus:border-purple-500/50 focus:bg-white/[0.08] transition-all text-white placeholder:text-slate-700"
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 ml-1">Security Key (Password)</label>
-                  <div className="relative group">
-                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-600 group-focus-within:text-purple-500 transition-colors" size={18} />
-                    <input required type={showPassword ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••••••"
-                      className="w-full bg-white/[0.05] border border-white/5 rounded-2xl py-4 pl-12 pr-4 text-sm outline-none focus:border-purple-500/50 focus:bg-white/[0.08] transition-all text-white placeholder:text-slate-700"
-                    />
-                    <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-600 hover:text-purple-500 transition-colors">
-                      {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                    </button>
-                  </div>
-                </div>
-
-                <button type="submit" disabled={loading} className="w-full bg-purple-600 hover:bg-purple-700 text-white py-5 rounded-2xl font-black text-[11px] uppercase tracking-[0.4em] transition-all flex items-center justify-center gap-3 mt-4 shadow-2xl shadow-purple-600/30 disabled:opacity-50 group">
-                  {loading ? <Loader2 className="animate-spin" size={18} /> : <>Confirm Account <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" /></>}
-                </button>
-              </form>
-
-              <div className="mt-10 text-center border-t border-white/5 pt-8">
-                <p className="text-[10px] text-slate-500 font-black uppercase tracking-[0.2em]">Already Registered?</p>
-                <Link to="/login" className="inline-block mt-2 text-purple-500 font-black text-[11px] uppercase tracking-widest hover:text-purple-400 transition-colors underline underline-offset-8 decoration-purple-500/30">
-                    Login to Security Node
-                </Link>
-              </div>
-            </>
-          )}
+          </div>
+          <div className="pt-10 text-center">
+            <p className="text-[10px] font-black text-slate-700 uppercase tracking-[6px]">
+              © 2026 Luu Safety Systems • Efoy Engine
+            </p>
+          </div>
         </div>
-        <p className="text-center mt-8 text-[9px] font-black text-slate-700 uppercase tracking-[5px]">
-          © 2026 Luu Safety Systems
-        </p>
-      </div>
+      </footer>
     </div>
   );
 };
 
-export default SignupScreen;
+export default HomeScreen;
