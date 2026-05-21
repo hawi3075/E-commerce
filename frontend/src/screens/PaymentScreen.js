@@ -1,133 +1,235 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { ShieldCheck, Smartphone, CreditCard, ChevronLeft, Lock } from 'lucide-react';
+import React from 'react';
+import { Link } from 'react-router-dom';
+import { 
+  Shield, Zap, ArrowRight, Star, ShoppingCart, 
+  MapPin, Phone, Sparkles, Flame, Eye, Heart, Info
+} from 'lucide-react';
 
-const PaymentScreen = () => {
-  const [method, setMethod] = useState('telebirr');
-  const [isProcessing, setIsProcessing] = useState(false);
-  const navigate = useNavigate();
+// Shared Global Navbar
+import Navbar from '../components/Navbar';
 
-  const handlePayment = () => {
-    setIsProcessing(true);
-    // Simulate API call to Telebirr Gateway
-    setTimeout(() => {
-      setIsProcessing(false);
-      navigate('/orders'); // Redirect to the orders page you just built!
-    }, 3000);
-  };
+const HomeScreen = () => {
+  const products = [
+    { id: 1, name: 'Industrial Hard Hat', price: 25.00, rating: 5.0, sold: 124, stock: 18, image: 'https://images.unsplash.com/photo-1584285418504-0051b6d51f6e' },
+    { id: 2, name: 'High-Vis Safety Vest', price: 12.99, rating: 4.9, sold: 89, stock: 46, image: 'https://images.unsplash.com/photo-1622560480605-d83c853bc5c3' },
+    { id: 3, name: 'Steel Toe Work Boots', price: 85.00, rating: 4.8, sold: 45, stock: 12, image: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff' },
+    { id: 4, name: 'Anti-Fog Goggles', price: 15.00, rating: 4.7, sold: 210, stock: 51, image: 'https://images.unsplash.com/photo-1599493758264-36cc4247f820' },
+  ];
 
-  return (
-    <div className="min-h-screen bg-gray-50 pt-32 pb-12 px-6 md:px-16">
-      <div className="max-w-5xl mx-auto grid md:grid-cols-12 gap-12">
+  const ProductCard = ({ p, label }) => (
+    <div className="bg-slate-900/40 backdrop-blur-md rounded-[2.5rem] p-5 border border-white/5 hover:border-purple-500/30 transition-all duration-500 group relative flex flex-col justify-between">
+      
+      {/* Image Wrapper */}
+      <div className="relative h-60 bg-slate-950/60 rounded-3xl mb-5 overflow-hidden flex items-center justify-center border border-white/5">
+        <img 
+          src={p.image} 
+          alt={p.name} 
+          className="w-44 h-44 object-contain group-hover:scale-110 transition-transform duration-500" 
+        />
         
-        {/* LEFT: PAYMENT SELECTION */}
-        <div className="md:col-span-7">
-          <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-xs font-bold text-gray-400 uppercase tracking-widest mb-8 hover:text-blue-600 transition-colors">
-            <ChevronLeft size={16} /> Back to Cart
+        {/* Badges */}
+        {label && (
+          <span className="absolute top-4 left-4 bg-purple-600 text-white text-[8px] font-black px-3 py-1 rounded-full uppercase tracking-widest">
+            {label}
+          </span>
+        )}
+        <span className="absolute top-4 right-4 bg-purple-500/10 text-purple-400 border border-purple-500/20 text-[8px] font-black px-2.5 py-1 rounded-md uppercase">
+          {p.stock} Available
+        </span>
+
+        {/* Floating Quick Action Overlays */}
+        <div className="absolute top-1/2 -translate-y-1/2 right-4 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+          <button className="p-2.5 bg-slate-900 border border-white/10 rounded-xl text-slate-400 hover:text-purple-400 transition-colors">
+            <Heart size={14} />
           </button>
+          <Link to={`/product/${p.id}`} className="p-2.5 bg-slate-900 border border-white/10 rounded-xl text-slate-400 hover:text-purple-400 transition-colors">
+            <Eye size={14} />
+          </Link>
+        </div>
+      </div>
 
-          <h1 className="text-3xl font-black text-gray-900 mb-2 uppercase tracking-tight">Checkout</h1>
-          <p className="text-gray-500 text-sm mb-10">Select your preferred secure payment method.</p>
-
-          <div className="space-y-4">
-            {/* Telebirr Option */}
-            <div 
-              onClick={() => setMethod('telebirr')}
-              className={`p-6 rounded-2xl border-2 cursor-pointer transition-all flex items-center justify-between ${method === 'telebirr' ? 'border-blue-600 bg-blue-50/50' : 'border-gray-100 bg-white'}`}
-            >
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center text-white font-black text-xs">
-                  TB
-                </div>
-                <div>
-                  <h3 className="font-bold text-gray-900">Telebirr</h3>
-                  <p className="text-xs text-gray-500">Pay securely using your mobile account</p>
-                </div>
-              </div>
-              <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${method === 'telebirr' ? 'border-blue-600' : 'border-gray-300'}`}>
-                {method === 'telebirr' && <div className="w-2.5 h-2.5 bg-blue-600 rounded-full"></div>}
-              </div>
-            </div>
-
-            {/* Credit Card Option (Placeholder) */}
-            <div 
-              onClick={() => setMethod('card')}
-              className={`p-6 rounded-2xl border-2 cursor-pointer transition-all flex items-center justify-between ${method === 'card' ? 'border-blue-600 bg-blue-50/50' : 'border-gray-100 bg-white'}`}
-            >
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center text-gray-400">
-                  <CreditCard size={20} />
-                </div>
-                <div>
-                  <h3 className="font-bold text-gray-900">Credit / Debit Card</h3>
-                  <p className="text-xs text-gray-500">Visa, Mastercard, or American Express</p>
-                </div>
-              </div>
-              <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${method === 'card' ? 'border-blue-600' : 'border-gray-300'}`}>
-                {method === 'card' && <div className="w-2.5 h-2.5 bg-blue-600 rounded-full"></div>}
-              </div>
-            </div>
+      {/* Content */}
+      <div className="space-y-3 flex-1 flex flex-col justify-between">
+        <div>
+          <div className="flex items-center gap-1 mb-1.5">
+            {[...Array(5)].map((_, i) => (
+              <Star key={i} size={10} className={`${i < Math.floor(p.rating) ? 'fill-purple-500 text-purple-500' : 'text-slate-700'}`} />
+            ))}
+            <span className="text-[9px] text-slate-500 font-bold ml-1">({p.sold} orders)</span>
           </div>
-
-          {method === 'telebirr' && (
-            <div className="mt-8 bg-white p-8 rounded-3xl border border-gray-100 shadow-sm animate-in fade-in slide-in-from-top-4">
-              <label className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-4 block">Enter Telebirr Phone Number</label>
-              <div className="flex gap-2">
-                <div className="bg-gray-100 px-4 py-4 rounded-xl font-bold text-gray-500">+251</div>
-                <input 
-                  type="text" 
-                  placeholder="911 22 33 44"
-                  className="flex-grow bg-gray-50 border-none rounded-xl px-4 py-4 focus:ring-2 focus:ring-blue-600 font-bold"
-                />
-              </div>
-              <p className="text-[10px] text-gray-400 mt-4 leading-relaxed italic">
-                * After clicking pay, you will receive a push notification on your mobile device to authorize the transaction.
-              </p>
-            </div>
-          )}
+          
+          <h4 className="font-black text-white text-[13px] uppercase tracking-wide line-clamp-1 mb-1">
+            {p.name}
+          </h4>
         </div>
 
-        {/* RIGHT: ORDER SUMMARY */}
-        <div className="md:col-span-5">
-          <div className="bg-gray-900 rounded-[2rem] p-8 text-white sticky top-32">
-            <h2 className="text-xl font-bold mb-8">Order Summary</h2>
-            
-            <div className="space-y-4 mb-8">
-              <div className="flex justify-between text-sm">
-                <span className="text-gray-400">Subtotal</span>
-                <span className="font-bold">$165.00</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-gray-400">Shipping</span>
-                <span className="text-green-400 font-bold">FREE</span>
-              </div>
-              <div className="h-px bg-gray-800 my-4"></div>
-              <div className="flex justify-between text-xl">
-                <span className="font-bold">Total</span>
-                <span className="font-black text-blue-500">$165.00</span>
-              </div>
-            </div>
-
-            <button 
-              onClick={handlePayment}
-              disabled={isProcessing}
-              className={`w-full py-5 rounded-2xl font-black uppercase tracking-widest text-xs flex items-center justify-center gap-3 transition-all ${isProcessing ? 'bg-gray-700 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-500 active:scale-95 shadow-xl shadow-blue-900/20'}`}
-            >
-              {isProcessing ? (
-                <>Processing...</>
-              ) : (
-                <>Pay with Telebirr <Smartphone size={16} /></>
-              )}
-            </button>
-
-            <div className="mt-8 flex items-center justify-center gap-2 text-gray-500 text-[10px] font-bold uppercase tracking-widest">
-              <Lock size={12} /> 256-bit SSL Secure Payment
-            </div>
+        {/* Pricing and Primary Action Area */}
+        <div className="pt-3 border-t border-white/5 flex items-center justify-between gap-2">
+          <div>
+            <span className="text-[8px] font-bold text-slate-500 uppercase block tracking-wider">Price</span>
+            <p className="text-white font-black text-xl tracking-tight">${p.price.toFixed(2)}</p>
           </div>
+          
+          <button className="bg-purple-600 hover:bg-purple-700 active:scale-95 text-white p-3.5 rounded-2xl transition-all shadow-xl shadow-purple-600/10 flex items-center justify-center group/btn">
+            <ShoppingCart size={16} className="group-hover/btn:rotate-12 transition-transform" />
+          </button>
         </div>
       </div>
     </div>
   );
+
+  return (
+    <div className="bg-[#05050a] min-h-screen font-sans antialiased text-slate-200 overflow-hidden relative">
+      
+      {/* Decorative Ambient Background Glows */}
+      <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-purple-900/10 rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute top-[40%] right-[-10%] w-[600px] h-[600px] bg-purple-800/5 rounded-full blur-[150px] pointer-events-none" />
+
+      <Navbar />
+
+      {/* Hero Showcase Area */}
+      <section className="relative min-h-[85vh] flex items-center pt-20">
+        <div className="max-w-[1440px] mx-auto px-10 grid grid-cols-1 lg:grid-cols-12 gap-12 items-center w-full relative z-10">
+          
+          {/* Hero Left Content */}
+          <div className="lg:col-span-7 space-y-8">
+            <div className="inline-flex items-center gap-2 bg-purple-500/10 border border-purple-500/20 px-4 py-2 rounded-full">
+              <Flame size={14} className="text-purple-400 animate-pulse" />
+              <span className="text-[9px] font-black uppercase tracking-[3px] text-purple-300">Premium Industrial Resource</span>
+            </div>
+            
+            <h1 className="text-6xl md:text-[85px] font-black text-white uppercase tracking-tighter leading-[0.85]">
+              Defend <br /> Your <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-purple-600 italic">Workforce.</span>
+            </h1>
+            
+            <p className="text-slate-400 text-base md:text-lg font-medium leading-relaxed max-w-xl">
+              High-fidelity protective armor, visibility gear, and high-tier utility instruments tailored for ASTU engineers and complex industrial operations.
+            </p>
+
+            <div className="flex flex-wrap items-center gap-4 pt-4">
+              <Link to="/shop" className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-500 hover:to-purple-600 text-white px-10 py-5 rounded-2xl font-black uppercase text-xs tracking-[2px] flex items-center gap-3 transition-all shadow-2xl shadow-purple-600/30">
+                Enter Marketplace <ArrowRight size={16} />
+              </Link>
+              <Link to="/about" className="border border-white/10 hover:border-white/20 bg-white/[0.02] text-white px-8 py-5 rounded-2xl font-black uppercase text-xs tracking-[2px] flex items-center gap-2 transition-all">
+                Specifications <Info size={14} className="text-slate-400" />
+              </Link>
+            </div>
+          </div>
+
+          {/* Hero Right Visual Element */}
+          <div className="lg:col-span-5 relative hidden lg:flex items-center justify-center">
+            <div className="absolute w-[350px] h-[350px] bg-purple-600/20 rounded-full blur-[80px] -z-10 animate-pulse" />
+            <div className="border border-white/5 bg-slate-900/40 p-8 rounded-[3rem] backdrop-blur-xl shadow-3xl max-w-sm w-full relative">
+              <div className="absolute -top-4 -right-4 bg-purple-600 text-white p-3 rounded-2xl shadow-xl">
+                <Shield size={20} />
+              </div>
+              <img 
+                src="https://images.unsplash.com/photo-1584285418504-0051b6d51f6e" 
+                alt="Featured Product" 
+                className="w-full h-64 object-contain mb-6 drop-shadow-[0_20px_30px_rgba(147,51,234,0.3)]"
+              />
+              <span className="text-[9px] font-black text-purple-400 uppercase tracking-widest block mb-1">Featured Spec</span>
+              <h3 className="text-white font-black text-lg uppercase tracking-tight">Vanguard Hard Hat v2</h3>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Trust Grid / Metrics Banner */}
+      <section className="border-y border-white/5 bg-slate-900/20 backdrop-blur-md py-10">
+        <div className="max-w-[1440px] mx-auto px-10 grid grid-cols-2 md:grid-cols-4 gap-8">
+          {[
+            { value: '100%', label: 'Certified Standards' },
+            { value: '24/7', label: 'Operations Sync' },
+            { value: 'ASTU', label: 'Official Hardware' },
+            { value: 'FAST', label: 'National Delivery' }
+          ].map((item, idx) => (
+            <div key={idx} className="text-center space-y-1">
+              <p className="text-2xl font-black text-white tracking-tight">{item.value}</p>
+              <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest">{item.label}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Main Grid Section */}
+      <main className="max-w-[1440px] mx-auto px-10 py-24 space-y-28">
+        
+        {/* Core Showcase Grid */}
+        <section>
+          <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 border-b border-white/5 pb-8 gap-4">
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <Sparkles className="text-purple-500" size={16} />
+                <h2 className="text-4xl font-black uppercase tracking-tighter text-white">
+                  Prime <span className="text-purple-500 italic">Inventory</span>
+                </h2>
+              </div>
+              <p className="text-slate-500 text-[10px] font-bold uppercase tracking-[4px]">
+                High-Performance Field Operations Configuration
+              </p>
+            </div>
+            <Link to="/shop" className="text-[10px] font-black uppercase tracking-[2px] text-purple-400 hover:text-purple-300 transition-colors flex items-center gap-1.5 self-start md:self-auto">
+              View Entire Node <ArrowRight size={12} />
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {products.map(p => <ProductCard key={p.id} p={p} label="Active Spec" />)}
+          </div>
+        </section>
+
+      </main>
+
+      {/* Footer Area */}
+      <footer className="p-6">
+        <div className="bg-slate-900/30 border border-white/5 rounded-[3rem] p-12 max-w-[1440px] mx-auto">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 border-b border-white/5 pb-16">
+            
+            <div className="lg:col-span-5 space-y-6">
+              <div className="flex items-center gap-2.5">
+                <div className="bg-purple-600 p-2 rounded-xl text-white"><Shield size={18} /></div>
+                <h2 className="text-2xl font-black italic tracking-tighter uppercase text-white">Luu<span className="text-purple-600">Safety.</span></h2>
+              </div>
+              <p className="text-slate-500 text-[11px] font-bold uppercase tracking-widest leading-relaxed max-w-sm">
+                Strategic industrial protection assets deployment. Operating under high-fidelity enterprise standards.
+              </p>
+            </div>
+            
+            <div className="lg:col-span-7 grid grid-cols-2 sm:grid-cols-3 gap-8">
+              <div>
+                <h4 className="font-black uppercase text-[10px] text-purple-400 mb-6 tracking-[3px]">System</h4>
+                <ul className="space-y-3 text-[11px] font-black uppercase tracking-[1px] text-slate-400">
+                  <li><Link to="/shop" className="hover:text-purple-400 transition-colors">Marketplace</Link></li>
+                  <li><Link to="/about" className="hover:text-purple-400 transition-colors">Project Hub</Link></li>
+                </ul>
+              </div>
+              <div>
+                <h4 className="font-black uppercase text-[10px] text-purple-400 mb-6 tracking-[3px]">Security</h4>
+                <ul className="space-y-3 text-[11px] font-black uppercase tracking-[1px] text-slate-400">
+                  <li><Link to="/login" className="hover:text-purple-400 transition-colors">Operator Login</Link></li>
+                  <li><Link to="/signup" className="hover:text-purple-400 transition-colors">Register Node</Link></li>
+                </ul>
+              </div>
+              <div className="col-span-2 sm:col-span-1">
+                <h4 className="font-black uppercase text-[10px] text-purple-400 mb-6 tracking-[3px]">Contact</h4>
+                <div className="space-y-3 text-[11px] font-black uppercase tracking-[1px] text-slate-500">
+                  <p className="flex items-center gap-2"><MapPin size={12} /> Addis Ababa</p>
+                  <p className="flex items-center gap-2"><Phone size={12} /> +251 900 000</p>
+                </div>
+              </div>
+            </div>
+
+          </div>
+          <div className="pt-10 text-center">
+            <p className="text-[10px] font-black text-slate-700 uppercase tracking-[6px]">
+              © 2026 Luu Safety Systems • Efoy Engine
+            </p>
+          </div>
+        </div>
+      </footer>
+    </div>
+  );
 };
 
-export default PaymentScreen;
+export default HomeScreen;
