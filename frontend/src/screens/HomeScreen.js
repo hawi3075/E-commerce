@@ -89,35 +89,40 @@ const HomeScreen = () => {
     <div className="bg-white min-h-screen font-sans antialiased text-slate-600 relative">
       <Navbar />
 
-      {/* ================= HERO SECTION (LIGHT SPEC) ================= */}
-      <section className="relative min-h-[70vh] flex items-center pt-20 bg-slate-50/50 border-b border-slate-100">
-        <div className="max-w-[1200px] mx-auto px-6 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center w-full relative z-10 py-12">
-          <div className="lg:col-span-7 space-y-5">
-            <div className="inline-flex items-center gap-1.5 bg-purple-50 border border-purple-100 px-3 py-1 rounded-full">
-              <Flame size={12} className="text-purple-600" />
-              <span className="text-[8px] font-bold uppercase tracking-[2px] text-purple-600">Premium Industrial Resource</span>
+      {/* ================= HERO SECTION (FULL-WIDTH BACKGROUND IMAGE OVERLAY) ================= */}
+      <section className="relative min-h-[70vh] sm:min-h-[75vh] flex items-center overflow-hidden bg-slate-950 pt-20">
+        
+        {/* Absolute Background Layer */}
+        <div className="absolute inset-0 z-0">
+          <img 
+            src="https://images.unsplash.com/photo-1504307651254-35680f356dfd" // High-quality structural industrial canvas
+            alt="Luu Safety Industrial Canvas"
+            className="w-full h-full object-cover object-center"
+          />
+          {/* Subtle light mode friendly fade: transforms dark contrast background safely into clean readability overlay */}
+          <div className="absolute inset-0 bg-gradient-to-r from-slate-950/95 via-slate-950/70 to-slate-900/20" />
+        </div>
+
+        {/* Hero Content Container */}
+        <div className="relative z-10 max-w-[1200px] mx-auto px-6 w-full py-16 sm:py-24">
+          <div className="max-w-xl space-y-5">
+            <div className="inline-flex items-center gap-1.5 bg-purple-500/10 border border-purple-500/30 px-3 py-1 rounded-full backdrop-blur-sm">
+              <Flame size={12} className="text-purple-400" />
+              <span className="text-[8px] font-bold uppercase tracking-[2px] text-purple-300">Premium Industrial Resource</span>
             </div>
-            {/* Minimized Hero Text Size */}
-            <h1 className="text-4xl md:text-5xl font-black text-slate-900 uppercase tracking-tight leading-none">
-              Defend <br /> Your <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-purple-800 italic">Workforce.</span>
+            
+            <h1 className="text-4xl md:text-5xl font-black text-white uppercase tracking-tight leading-none">
+              Defend <br /> Your <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-purple-300 italic">Workforce.</span>
             </h1>
-            <p className="text-slate-500 text-sm font-medium leading-relaxed max-w-md">
+            
+            <p className="text-slate-300 text-sm font-medium leading-relaxed max-w-md">
               High-fidelity protective armor, visibility gear, and high-tier utility instruments tailored for ASTU engineers and complex industrial operations.
             </p>
+            
             <div className="pt-2">
-              <Link to="/shop" className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3.5 rounded-xl font-bold uppercase text-[10px] tracking-wider inline-flex items-center gap-2 transition-all shadow-md shadow-purple-600/20">
+              <Link to="/shop" className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3.5 rounded-xl font-bold uppercase text-[10px] tracking-wider inline-flex items-center gap-2 transition-all shadow-md shadow-purple-600/20 active:scale-[0.98]">
                 Enter Marketplace <ArrowRight size={14} />
               </Link>
-            </div>
-          </div>
-          <div className="lg:col-span-5 relative hidden lg:flex items-center justify-center">
-            <div className="border border-slate-100 bg-white p-6 rounded-3xl shadow-md max-w-xs w-full relative">
-              <div className="absolute -top-3 -right-3 bg-purple-600 text-white p-2.5 rounded-xl shadow-md">
-                <Shield size={16} />
-              </div>
-              <img src="https://images.unsplash.com/photo-1584285418504-0051b6d51f6e" alt="Featured hardhat" className="w-full h-48 object-contain mb-4" />
-              <span className="text-[8px] font-bold text-purple-600 uppercase tracking-widest block mb-0.5">Featured Spec</span>
-              <h3 className="text-slate-800 font-bold text-sm uppercase tracking-tight">Vanguard Hard Hat v2</h3>
             </div>
           </div>
         </div>
@@ -142,7 +147,6 @@ const HomeScreen = () => {
             <Grid size={12} />
             <span className="text-[9px] font-bold uppercase tracking-[2px]">Structural Sorting</span>
           </div>
-          {/* Minimized Header Size */}
           <h2 className="text-xl font-bold text-slate-900 uppercase tracking-tight">Shop By Category</h2>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -174,7 +178,6 @@ const HomeScreen = () => {
                 <TrendingUp size={12} />
                 <span className="text-[9px] font-bold uppercase tracking-[2px]">Top Moving Assets</span>
               </div>
-              {/* Minimized Header Size */}
               <h2 className="text-xl font-bold text-slate-900 uppercase tracking-tight">Best Sellers</h2>
             </div>
             <Link to="/shop?sort=best" className="text-[9px] font-bold uppercase tracking-wider text-purple-600 hover:text-purple-700 transition-colors flex items-center gap-1">
@@ -206,7 +209,6 @@ const HomeScreen = () => {
                 <Clock size={12} />
                 <span className="text-[9px] font-bold uppercase tracking-[2px]">Fresh Infrastructure</span>
               </div>
-              {/* Minimized Header Size */}
               <h2 className="text-xl font-bold text-slate-900 uppercase tracking-tight">New Arrivals</h2>
             </div>
             <Link to="/shop?sort=new" className="text-[9px] font-bold uppercase tracking-wider text-purple-600 hover:text-purple-700 transition-colors flex items-center gap-1">
@@ -225,7 +227,6 @@ const HomeScreen = () => {
               <UserCheck size={12} />
               <span className="text-[9px] font-bold uppercase tracking-[2px]">Engine Matching Intelligence</span>
             </div>
-            {/* Minimized Header Size */}
             <h2 className="text-xl font-bold text-slate-900 uppercase tracking-tight">Suggested For You</h2>
           </div>
           
