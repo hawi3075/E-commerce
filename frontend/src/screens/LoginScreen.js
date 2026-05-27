@@ -1,12 +1,17 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Mail, Lock, ArrowRight, ChevronLeft, AlertCircle, Loader2, Shield } from 'lucide-react';
+import { 
+  Mail, Lock, ArrowRight, AlertCircle, 
+  Eye, EyeOff, CheckCircle2, Loader2, Shield 
+} from 'lucide-react';
 import axios from 'axios';
 
 const LoginScreen = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
+  const [isSuccess, setIsSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
@@ -16,123 +21,155 @@ const LoginScreen = () => {
     setLoading(true);
 
     try {
-      // Adjusted to use local environment variables or your standard 5000 port
-      const { data } = await axios.post('http://localhost:5000/api/users/login', { 
-        email, 
-        password 
-      });
+      // Direct integration with your backend auth infrastructure
+      const { data } = await axios.post('http://localhost:5000/api/users/login', { email, password });
       
       localStorage.setItem('userInfo', JSON.stringify(data));
-      navigate('/shop');
+      setIsSuccess(true);
+      
+      setTimeout(() => navigate('/shop'), 2000);
     } catch (err) {
-      setError(err.response?.data?.message || 'Invalid Email or Password');
+      setError(err.response?.data?.message || 'Authentication failed. Check your security credentials.');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen w-full relative flex items-center justify-center py-12 overflow-hidden bg-slate-950 font-sans">
-      {/* Background Image with stronger industrial feel */}
-      <div className="absolute inset-0 z-0">
-        <img 
-          src="https://images.unsplash.com/photo-1504307651254-35680f356dfd" 
-          alt="Industrial Background" 
-          className="w-full h-full object-cover brightness-[0.2] grayscale"
-        />
-        <div className="absolute inset-0 bg-gradient-to-b from-purple-900/20 to-slate-950/80"></div>
+    <div className="min-h-screen w-full relative flex items-center justify-center py-12 bg-slate-50 font-sans overflow-hidden antialiased text-slate-600">
+      
+      {/* Background Fluid Graphic Accents */}
+      <div className="absolute inset-0 z-0 opacity-40 mix-blend-multiply pointer-events-none">
+        <div className="absolute top-[-20%] right-[-10%] w-[600px] h-[600px] bg-purple-200 rounded-full blur-[120px]" />
+        <div className="absolute bottom-[-20%] left-[-10%] w-[500px] h-[500px] bg-blue-100 rounded-full blur-[100px]" />
       </div>
 
       <div className="relative z-10 w-full max-w-[420px] mx-6">
-        {/* Top Branding */}
-        <div className="flex flex-col items-center mb-10">
-          <div className="bg-purple-600 p-3 rounded-2xl mb-4 shadow-2xl shadow-purple-600/30">
-            <Shield size={28} className="text-white" />
+        
+        {/* Top Branding Section */}
+        <div className="flex flex-col items-center mb-8">
+          <div className="bg-purple-600 p-3 rounded-2xl mb-3 shadow-lg shadow-purple-600/10">
+            <Shield size={24} className="text-white" />
           </div>
-          <h2 className="text-xl font-black italic text-white uppercase tracking-tighter">
+          <h2 className="text-lg font-black italic text-slate-900 uppercase tracking-tight">
             Luu<span className="text-purple-600">Safety.</span>
           </h2>
         </div>
 
-        {/* Login Card with Deep Glassmorphism */}
-        <div className="bg-white/[0.03] backdrop-blur-2xl border border-white/10 p-8 md:p-10 shadow-3xl rounded-[2.5rem]">
+        {/* Premium Light Interface Card */}
+        <div className="bg-white border border-slate-100 p-8 md:p-10 shadow-xl rounded-[2.5rem] transition-all">
           
-          <Link to="/" className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[3px] text-slate-500 hover:text-purple-500 transition-all mb-8">
-            <ChevronLeft size={14} /> Back to Hub
-          </Link>
-
-          <div className="mb-10">
-            <h1 className="text-4xl font-black text-white uppercase tracking-tighter leading-none italic">
-              Authentication
-            </h1>
-            <p className="text-[10px] text-purple-500 font-black uppercase tracking-[0.3em] mt-3 ml-1">
-              Secure Access Node
-            </p>
-          </div>
-
-          {error && (
-            <div className="mb-6 flex items-center gap-3 bg-red-500/10 border border-red-500/20 p-4 rounded-2xl text-red-400 text-[10px] uppercase font-black tracking-widest">
-              <AlertCircle size={16} /> {error}
-            </div>
-          )}
-
-          <form className="space-y-7" onSubmit={handleLogin}>
-            <div className="space-y-2">
-              <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 ml-1">Operator ID (Email)</label>
-              <div className="relative group">
-                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-600 group-focus-within:text-purple-500 transition-colors" size={18} />
-                <input 
-                  type="email" 
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="operator@luusafety.com"
-                  className="w-full bg-white/[0.05] border border-white/5 rounded-2xl py-4 pl-12 pr-4 text-sm outline-none focus:border-purple-500/50 focus:bg-white/[0.08] transition-all text-white placeholder:text-slate-700"
-                />
+          {isSuccess ? (
+            /* Success Authentication Interstitial */
+            <div className="py-10 flex flex-col items-center justify-center text-center animate-in fade-in zoom-in duration-500">
+              <div className="w-16 h-16 bg-purple-50 border border-purple-100 rounded-full flex items-center justify-center mb-5">
+                <CheckCircle2 size={36} className="text-purple-600" />
+              </div>
+              <h2 className="text-xl font-black text-slate-900 uppercase tracking-wider">Access Granted</h2>
+              <p className="text-[9px] text-slate-400 font-bold uppercase tracking-widest mt-1.5">Credentials Verified Successfully</p>
+              
+              <div className="flex items-center gap-2 mt-8 bg-purple-50 border border-purple-100/60 px-4 py-2 rounded-xl">
+                <Loader2 className="animate-spin text-purple-600" size={14} />
+                <p className="text-[9px] text-purple-600 font-black uppercase tracking-wider">Connecting to Security Node...</p>
               </div>
             </div>
-
-            <div className="space-y-2">
-              <div className="flex justify-between items-center ml-1">
-                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">Security Key</label>
-                <Link to="/forgot-password" size={14} className="text-[9px] font-black text-slate-600 hover:text-purple-500 uppercase tracking-widest transition-colors">Forgot?</Link>
+          ) : (
+            /* Main Login Controls */
+            <>
+              <div className="mb-8">
+                <h1 className="text-3xl font-black text-slate-900 uppercase tracking-tight italic">
+                  Login Hub
+                </h1>
+                <p className="text-[8px] text-purple-600 font-bold uppercase tracking-[0.25em] mt-1">
+                  Authenticate Node Personnel
+                </p>
               </div>
-              <div className="relative group">
-                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-600 group-focus-within:text-purple-500 transition-colors" size={18} />
-                <input 
-                  type="password" 
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••••••"
-                  className="w-full bg-white/[0.05] border border-white/5 rounded-2xl py-4 pl-12 pr-4 text-sm outline-none focus:border-purple-500/50 focus:bg-white/[0.08] transition-all text-white placeholder:text-slate-700"
-                />
-              </div>
-            </div>
 
-            <button 
-              disabled={loading}
-              type="submit"
-              className="w-full bg-purple-600 hover:bg-purple-700 text-white py-5 rounded-2xl font-black text-[11px] uppercase tracking-[0.4em] transition-all flex items-center justify-center gap-3 mt-4 shadow-2xl shadow-purple-600/30 disabled:opacity-50 disabled:cursor-not-allowed group"
-            >
-              {loading ? (
-                <Loader2 className="animate-spin" size={18} /> 
-              ) : (
-                <>Authorize <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" /></>
+              {error && (
+                <div className="mb-6 flex items-center gap-2.5 bg-red-50 border border-red-100 p-3.5 rounded-xl text-red-600 text-[9px] uppercase font-bold tracking-wider">
+                  <AlertCircle size={14} className="shrink-0" /> 
+                  <span>{error}</span>
+                </div>
               )}
-            </button>
-          </form>
 
-          <div className="mt-10 text-center border-t border-white/5 pt-8">
-            <p className="text-[10px] text-slate-500 font-black uppercase tracking-[0.2em]">
-              New Personnel? 
-              <Link to="/signup" className="text-purple-500 ml-3 hover:text-purple-400 transition-colors underline decoration-purple-500/30 underline-offset-4">Join Hub</Link>
-            </p>
-          </div>
+              <form className="space-y-5" onSubmit={handleLogin}>
+                
+                {/* Email Address Input */}
+                <div className="space-y-1.5">
+                  <label className="text-[9px] font-bold uppercase tracking-wider text-slate-400 ml-0.5">Email Address</label>
+                  <div className="relative group">
+                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-purple-600 transition-colors" size={16} />
+                    <input 
+                      required 
+                      type="email" 
+                      value={email} 
+                      onChange={(e) => setEmail(e.target.value)} 
+                      placeholder="operator@luusafety.com"
+                      className="w-full bg-slate-50 border border-slate-100 rounded-xl py-3.5 pl-11 pr-4 text-xs font-medium text-slate-800 outline-none focus:border-purple-200 focus:bg-white transition-all placeholder:text-slate-400"
+                    />
+                  </div>
+                </div>
+
+                {/* Password Input */}
+                <div className="space-y-1.5">
+                  <div className="flex items-center justify-between px-0.5">
+                    <label className="text-[9px] font-bold uppercase tracking-wider text-slate-400">Security Key</label>
+                    <Link to="/forgot-password" className="text-[9px] font-bold text-slate-400 hover:text-purple-600 tracking-wide uppercase transition-colors">
+                      Forgot?
+                    </Link>
+                  </div>
+                  <div className="relative group">
+                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-purple-600 transition-colors" size={16} />
+                    <input 
+                      required 
+                      type={showPassword ? "text" : "password"} 
+                      value={password} 
+                      onChange={(e) => setPassword(e.target.value)} 
+                      placeholder="••••••••••••"
+                      className="w-full bg-slate-50 border border-slate-100 rounded-xl py-3.5 pl-11 pr-11 text-xs font-medium text-slate-800 outline-none focus:border-purple-200 focus:bg-white transition-all placeholder:text-slate-400"
+                    />
+                    <button 
+                      type="button" 
+                      onClick={() => setShowPassword(!showPassword)} 
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-purple-600 transition-colors"
+                    >
+                      {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Submit Action */}
+                <button 
+                  type="submit" 
+                  disabled={loading} 
+                  className="w-full bg-purple-600 hover:bg-purple-700 text-white py-4 rounded-xl font-bold text-[10px] uppercase tracking-wider transition-all flex items-center justify-center gap-2 mt-2 shadow-lg shadow-purple-600/10 disabled:opacity-50 group active:scale-[0.99]"
+                >
+                  {loading ? (
+                    <Loader2 className="animate-spin" size={16} />
+                  ) : (
+                    <>
+                      Enter Security Node 
+                      <ArrowRight size={14} className="group-hover:translate-x-0.5 transition-transform" />
+                    </>
+                  )}
+                </button>
+              </form>
+
+              {/* Form Footer Redirect */}
+              <div className="mt-8 text-center border-t border-slate-100 pt-6">
+                <p className="text-[9px] text-slate-400 font-bold uppercase tracking-wider">New operative?</p>
+                <Link 
+                  to="/signup" 
+                  className="inline-block mt-1.5 text-purple-600 font-bold text-[10px] uppercase tracking-wide hover:text-purple-700 transition-colors underline underline-offset-4 decoration-purple-600/20"
+                >
+                  Create Personnel Account
+                </Link>
+              </div>
+            </>
+          )}
         </div>
-
-        {/* Footer info */}
-        <p className="text-center mt-8 text-[9px] font-black text-slate-700 uppercase tracking-[5px]">
+        
+        <p className="text-center mt-6 text-[8px] font-bold text-slate-400 uppercase tracking-widest">
           © 2026 Luu Safety Systems
         </p>
       </div>
