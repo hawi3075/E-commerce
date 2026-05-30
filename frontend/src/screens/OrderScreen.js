@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { Package, Clock, Truck, CheckCircle, ChevronRight, ChevronDown, MapPin } from 'lucide-react';
 
@@ -6,7 +6,7 @@ const OrderScreen = () => {
   // State to handle expanded details for individual orders
   const [expandedOrders, setExpandedOrders] = useState({});
 
-  // Mock data for orders (Added an explicit tracking history array for the details drop-down)
+  // Mock data for orders
   const myOrders = [
     {
       id: "ORD-9921",
@@ -47,8 +47,8 @@ const OrderScreen = () => {
     }));
   };
 
-  // Helper function to get status-specific UI configurations
-  const getStatusConfig = (status) => {
+  // Memoized helper function to optimize runtime configuration calculations
+  const getStatusConfig = useCallback((status) => {
     switch (status) {
       case "In Transit":
         return {
@@ -91,7 +91,7 @@ const OrderScreen = () => {
           stepIndex: -1
         };
     }
-  };
+  }, []);
 
   const steps = ["Processing", "In Transit", "Delivered"];
 
@@ -106,7 +106,7 @@ const OrderScreen = () => {
         <div className="space-y-6">
           {myOrders.map((order) => {
             const config = getStatusConfig(order.status);
-            const isExpanded = !!expandedOrders[order.id];
+            const isExpanded = Boolean(expandedOrders[order.id]);
             
             return (
               <div key={order.id} className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden hover:border-gray-200 transition-all">
