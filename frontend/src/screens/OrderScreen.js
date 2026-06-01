@@ -1,6 +1,54 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Package, Clock, Truck, CheckCircle, ChevronRight, ChevronDown, MapPin } from 'lucide-react';
+
+// Configuration lookup helper moved outside to prevent re-creation on render
+const getStatusConfig = (status) => {
+  switch (status) {
+    case "In Transit":
+      return {
+        bg: "bg-blue-50 border-blue-100",
+        text: "text-blue-700",
+        subtext: "text-blue-500",
+        dotColor: "bg-blue-500 animate-pulse",
+        icon: <Truck size={16} />,
+        label: "Until Delivery",
+        stepIndex: 1
+      };
+    case "Processing":
+      return {
+        bg: "bg-orange-50 border-orange-100",
+        text: "text-orange-700",
+        subtext: "text-orange-500",
+        dotColor: "bg-orange-400",
+        icon: <Clock size={16} />,
+        label: "In Production",
+        stepIndex: 0
+      };
+    case "Delivered":
+      return {
+        bg: "bg-green-50 border-green-100",
+        text: "text-green-700",
+        subtext: "text-green-500",
+        dotColor: "bg-green-500",
+        icon: <CheckCircle size={16} />,
+        label: "Completed",
+        stepIndex: 2
+      };
+    default:
+      return {
+        bg: "bg-gray-50 border-gray-100",
+        text: "text-gray-700",
+        subtext: "text-gray-500",
+        dotColor: "bg-gray-400",
+        icon: <Package size={16} />,
+        label: "Status Pending",
+        stepIndex: -1
+      };
+  }
+};
+
+const steps = ["Processing", "In Transit", "Delivered"];
 
 const OrderScreen = () => {
   // State to handle expanded details for individual orders
@@ -46,54 +94,6 @@ const OrderScreen = () => {
       [orderId]: !prev[orderId]
     }));
   };
-
-  // Memoized helper function to optimize runtime configuration calculations
-  const getStatusConfig = useCallback((status) => {
-    switch (status) {
-      case "In Transit":
-        return {
-          bg: "bg-blue-50 border-blue-100",
-          text: "text-blue-700",
-          subtext: "text-blue-500",
-          dotColor: "bg-blue-500 animate-pulse",
-          icon: <Truck size={16} />,
-          label: "Until Delivery",
-          stepIndex: 1
-        };
-      case "Processing":
-        return {
-          bg: "bg-orange-50 border-orange-100",
-          text: "text-orange-700",
-          subtext: "text-orange-500",
-          dotColor: "bg-orange-400",
-          icon: <Clock size={16} />,
-          label: "In Production",
-          stepIndex: 0
-        };
-      case "Delivered":
-        return {
-          bg: "bg-green-50 border-green-100",
-          text: "text-green-700",
-          subtext: "text-green-500",
-          dotColor: "bg-green-500",
-          icon: <CheckCircle size={16} />,
-          label: "Completed",
-          stepIndex: 2
-        };
-      default:
-        return {
-          bg: "bg-gray-50 border-gray-100",
-          text: "text-gray-700",
-          subtext: "text-gray-500",
-          dotColor: "bg-gray-400",
-          icon: <Package size={16} />,
-          label: "Status Pending",
-          stepIndex: -1
-        };
-    }
-  }, []);
-
-  const steps = ["Processing", "In Transit", "Delivered"];
 
   return (
     <div className="min-h-screen bg-gray-50 pt-32 pb-12 px-6 md:px-16">
