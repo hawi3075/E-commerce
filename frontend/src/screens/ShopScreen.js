@@ -4,23 +4,43 @@ import { useNavigate } from 'react-router-dom';
 
 const ShopScreen = () => {
   const [products, setProducts] = useState([]);
+  const [filteredProducts, setFilteredProducts] = useState([]);
+  const [selectedCategory, setSelectedCategory] = useState('All Gear');
   const [expandedId, setExpandedId] = useState(null); // Track which product shows details
+  const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
+
+  const categories = ['All Gear', 'Headwear', 'Workwear', 'Footwear'];
 
   useEffect(() => {
     const fetchProducts = async () => {
       try {
+        setIsLoading(true);
         const { data } = await axios.get('/api/products');
         setProducts(data);
+        setFilteredProducts(data);
       } catch (error) {
         console.error("Error fetching equipment:", error);
+      } finally {
+        setIsLoading(false);
       }
     };
     fetchProducts();
   }, []);
 
+  // Handle local filtering when category changes
+  useEffect(() => {
+    if (selectedCategory === 'All Gear') {
+      setFilteredProducts(products);
+    } else {
+      const filtered = products.filter(
+        (p) => p.category?.toLowerCase() === selectedCategory.toLowerCase()
+      );
+      setFilteredProducts(filtered);
+    }
+  }, [selectedCategory, products]);
+
   const handleBuyNow = (productId) => {
-    // Redirecting to payment page as requested
     navigate(`/payment/${productId}`);
   };
 
@@ -39,19 +59,27 @@ const ShopScreen = () => {
       
       {/* Category Tabs */}
       <div className="flex gap-3 mb-10 overflow-x-auto pb-2 no-scrollbar">
-        {['All Gear', 'Headwear', 'Workwear', 'Footwear'].map((cat) => (
-          <button 
-            key={cat}
-            className="whitespace-nowrap bg-white border border-gray-200 px-6 py-2 rounded-full font-bold text-sm hover:bg-slate-900 hover:text-white transition-all shadow-sm"
-          >
-            {cat}
-          </button>
-        ))}
+        {categories.map((cat) => {
+          const isActive = selectedCategory === cat;
+          return (
+            <button 
+              key={cat}
+              onClick={() => setSelectedCategory(cat)}
+              className={`whitespace-nowrap px-6 py-2 rounded-full font-bold text-sm transition-all shadow-sm border ${
+                isActive 
+                  ? 'bg-slate-900 text-white border-slate-900' 
+                  : 'bg-white text-slate-600 border-gray-200 hover:bg-gray-100'
+              }`}
+            >
+              {cat}
+            </button>
+          );
+        })}
       </div>
 
       {/* Product Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        {products.map((p) => (
+        {filteredProducts.map((p) => (
           <div key={p._id} className="group bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 flex flex-col">
             
             {/* Image Section */}
@@ -75,6 +103,7 @@ const ShopScreen = () => {
                 <button 
                   onClick={() => toggleDetails(p._id)}
                   className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                  aria-label="Toggle details"
                 >
                   <span className={`text-2xl transition-transform inline-block ${expandedId === p._id ? 'rotate-90' : ''}`}>
                     🚀 
@@ -108,9 +137,16 @@ const ShopScreen = () => {
         ))}
       </div>
       
-      {products.length === 0 && (
+      {/* Conditional States */}
+      {isLoading && (
         <div className="text-center py-20 bg-white rounded-3xl border-2 border-dashed border-gray-200">
-          <p className="text-gray-400 font-bold uppercase tracking-widest">Scanning Inventory...</p>
+          <p className="text-gray-400 font-bold uppercase tracking-widest animate-pulse">Scanning Inventory...</p>
+        </div>
+      )}
+
+      {!isLoading && filteredProducts.length === 0 && (
+        <div className="text-center py-20 bg-white rounded-3xl border-2 border-dashed border-gray-200">
+          <p className="text-gray-400 font-bold uppercase tracking-widest">No equipment found in this section.</p>
         </div>
       )}
     </div>
