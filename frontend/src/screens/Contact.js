@@ -21,7 +21,7 @@ const Contact = () => {
     e.preventDefault();
 
     // VALIDATION
-    if (!form.name || !form.email || !form.message) {
+    if (!form.name.trim() || !form.email.trim() || !form.message.trim()) {
       setStatus({ type: 'error', msg: 'All fields are required' });
       return;
     }
@@ -30,7 +30,7 @@ const Contact = () => {
       setLoading(true);
       setStatus(null);
 
-      // 👉 connect this to your backend later
+      // Connects to your backend base URL configuration
       await axios.post('/api/contact', form);
 
       setStatus({ type: 'success', msg: 'Message sent successfully!' });
@@ -38,7 +38,8 @@ const Contact = () => {
       // reset form
       setForm({ name: '', email: '', message: '' });
     } catch (error) {
-      setStatus({ type: 'error', msg: 'Failed to send message' });
+      const errorMsg = error.response?.data?.message || 'Failed to send message';
+      setStatus({ type: 'error', msg: errorMsg });
     } finally {
       setLoading(false);
     }
@@ -50,10 +51,10 @@ const Contact = () => {
 
         {/* HEADER */}
         <div style={{ textAlign: 'center', marginBottom: '50px' }}>
-          <h1 style={{ fontSize: '3.5rem', fontWeight: '900', color: '#0f172a' }}>
+          <h1 style={{ fontSize: '3.5rem', fontWeight: '900', color: '#0f172a', letterSpacing: '-0.05em' }}>
             GET IN <span style={{ color: '#2563eb' }}>TOUCH</span>
           </h1>
-          <p style={{ color: '#64748b' }}>
+          <p style={{ color: '#64748b', marginTop: '10px', fontSize: '1.1rem' }}>
             Technical support for LUU SAFETY equipment and AuraSync protocols.
           </p>
         </div>
@@ -61,30 +62,37 @@ const Contact = () => {
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '30px' }}>
 
           {/* LEFT INFO */}
-          <div style={{ backgroundColor: 'white', padding: '40px', borderRadius: '30px' }}>
-            <h3 style={{ color: '#2563eb' }}>Support Channels</h3>
-
-            <p><strong>Location:</strong> Adama, Ethiopia</p>
-            <p><strong>Email:</strong> support@aurasync.astu.edu</p>
+          <div style={{ backgroundColor: 'white', padding: '40px', borderRadius: '30px', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.05)' }}>
+            <h3 style={{ color: '#2563eb', fontSize: '1.5rem', fontWeight: '700', marginBottom: '20px' }}>Support Channels</h3>
+            
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '15px', color: '#334155' }}>
+              <p style={{ margin: 0 }}><strong style={{ color: '#0f172a' }}>Location:</strong> Adama, Ethiopia</p>
+              <p style={{ margin: 0 }}><strong style={{ color: '#0f172a' }}>Email:</strong> support@aurasync.astu.edu</p>
+            </div>
           </div>
 
           {/* FORM */}
           <form
             onSubmit={handleSubmit}
-            style={{ backgroundColor: '#1e293b', padding: '40px', borderRadius: '30px' }}
+            style={{ backgroundColor: '#1e293b', padding: '40px', borderRadius: '30px', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
           >
-            <h3 style={{ color: 'white', marginBottom: '20px' }}>
+            <h3 style={{ color: 'white', marginBottom: '20px', fontSize: '1.5rem', fontWeight: '700' }}>
               Quick Inquiry
             </h3>
 
             {/* STATUS MESSAGE */}
             {status && (
-              <p style={{
-                color: status.type === 'success' ? 'lightgreen' : 'salmon',
-                marginBottom: '15px'
+              <div style={{
+                padding: '12px 15px',
+                borderRadius: '12px',
+                backgroundColor: status.type === 'success' ? 'rgba(34, 197, 94, 0.2)' : 'rgba(239, 68, 68, 0.2)',
+                color: status.type === 'success' ? '#4ade80' : '#f87171',
+                marginBottom: '20px',
+                fontSize: '0.95rem',
+                fontWeight: '500'
               }}>
                 {status.msg}
-              </p>
+              </div>
             )}
 
             <input
@@ -111,7 +119,7 @@ const Contact = () => {
               rows="4"
               value={form.message}
               onChange={handleChange}
-              style={inputStyle}
+              style={{ ...inputStyle, resize: 'vertical' }}
             />
 
             <button
@@ -124,8 +132,10 @@ const Contact = () => {
                 color: 'white',
                 border: 'none',
                 borderRadius: '15px',
-                fontWeight: '900',
-                cursor: 'pointer'
+                fontWeight: '700',
+                cursor: loading ? 'not-allowed' : 'pointer',
+                transition: 'background-color 0.2s ease',
+                fontSize: '1rem'
               }}
             >
               {loading ? 'SENDING...' : 'SEND MESSAGE'}
@@ -133,7 +143,7 @@ const Contact = () => {
           </form>
         </div>
 
-        <p style={{ textAlign: 'center', marginTop: '60px', color: '#94a3b8' }}>
+        <p style={{ textAlign: 'center', marginTop: '60px', color: '#94a3b8', fontSize: '0.9rem' }}>
           AuraSync Protocol © 2026
         </p>
       </div>
@@ -150,7 +160,9 @@ const inputStyle = {
   border: 'none',
   backgroundColor: '#334155',
   color: 'white',
-  outline: 'none'
+  outline: 'none',
+  fontFamily: 'inherit',
+  boxSizing: 'border-box' // Prevents padding overflow layout issues
 };
 
 export default Contact;
