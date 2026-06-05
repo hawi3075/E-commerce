@@ -11,6 +11,20 @@ const Contact = () => {
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState(null); // success / error
 
+  // REUSABLE INTERNAL STYLE
+  const inputStyle = {
+    width: '100%',
+    padding: '15px',
+    marginBottom: '15px',
+    borderRadius: '15px',
+    border: 'none',
+    backgroundColor: '#334155',
+    color: 'white',
+    outline: 'none',
+    fontFamily: 'inherit',
+    boxSizing: 'border-box'
+  };
+
   // HANDLE INPUT
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -102,6 +116,7 @@ const Contact = () => {
               value={form.name}
               onChange={handleChange}
               style={inputStyle}
+              required
             />
 
             <input
@@ -111,6 +126,7 @@ const Contact = () => {
               value={form.email}
               onChange={handleChange}
               style={inputStyle}
+              required
             />
 
             <textarea
@@ -120,6 +136,7 @@ const Contact = () => {
               value={form.message}
               onChange={handleChange}
               style={{ ...inputStyle, resize: 'vertical' }}
+              required
             />
 
             <button
@@ -149,20 +166,6 @@ const Contact = () => {
       </div>
     </div>
   );
-};
-
-// REUSABLE STYLE
-const inputStyle = {
-  width: '100%',
-  padding: '15px',
-  marginBottom: '15px',
-  borderRadius: '15px',
-  border: 'none',
-  backgroundColor: '#334155',
-  color: 'white',
-  outline: 'none',
-  fontFamily: 'inherit',
-  boxSizing: 'border-box' // Prevents padding overflow layout issues
 };
 
 export default Contact;
