@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { 
   Shield, ArrowRight, Star, ShoppingCart, 
@@ -11,62 +11,78 @@ import {
 import Navbar from '../components/Navbar';
 
 // Reusable Modular Layout Components (Light Mode)
-const ProductCard = ({ p, ribbon }) => (
-  <div className="bg-white rounded-3xl p-4 border border-slate-100 hover:border-purple-200 shadow-sm hover:shadow-md transition-all duration-300 group relative flex flex-col justify-between">
-    <div className="relative h-48 bg-slate-50 rounded-2xl mb-4 overflow-hidden flex items-center justify-center border border-slate-100">
-      <img 
-        src={p.image} 
-        alt={p.name} 
-        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" 
-      />
-      
-      {ribbon && (
-        <span className="absolute top-3 left-3 bg-purple-600 text-white text-[9px] font-bold px-2 py-0.5 rounded-full uppercase tracking-widest shadow-sm z-10">
-          {ribbon}
+const ProductCard = ({ p, ribbon, onAddToCart }) => {
+  const [isLiked, setIsLiked] = useState(false);
+
+  return (
+    <div className="bg-white rounded-3xl p-4 border border-slate-100 hover:border-purple-200 shadow-sm hover:shadow-md transition-all duration-300 group relative flex flex-col justify-between">
+      <div className="relative h-48 bg-slate-50 rounded-2xl mb-4 overflow-hidden flex items-center justify-center border border-slate-100">
+        <img 
+          src={p.image} 
+          alt={p.name} 
+          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" 
+          loading="lazy"
+        />
+        
+        {ribbon && (
+          <span className="absolute top-3 left-3 bg-purple-600 text-white text-[9px] font-bold px-2 py-0.5 rounded-full uppercase tracking-widest shadow-sm z-10">
+            {ribbon}
+          </span>
+        )}
+        <span className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm text-slate-700 border border-slate-100 text-[9px] font-bold px-2 py-0.5 rounded-md uppercase z-10">
+          {p.stock ? `${p.stock} Units` : 'In Stock'}
         </span>
-      )}
-      <span className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm text-slate-700 border border-slate-100 text-[9px] font-bold px-2 py-0.5 rounded-md uppercase z-10">
-        {p.stock ? `${p.stock} Units` : 'In Stock'}
-      </span>
 
-      <div className="absolute top-1/2 -translate-y-1/2 right-3 flex flex-col gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10">
-        <button className="p-2 bg-white border border-slate-100 rounded-lg text-slate-400 hover:text-purple-600 shadow-sm transition-colors">
-          <Heart size={14} />
-        </button>
-        <Link to={`/product/${p.id}`} className="p-2 bg-white border border-slate-100 rounded-lg text-slate-400 hover:text-purple-600 shadow-sm transition-colors">
-          <Eye size={14} />
-        </Link>
-      </div>
-    </div>
-
-    <div className="space-y-2 flex-1 flex flex-col justify-between">
-      <div>
-        <div className="flex items-center gap-0.5 mb-1">
-          {[...Array(5)].map((_, i) => (
-            <Star key={i} size={10} className={`${i < Math.floor(p.rating) ? 'fill-amber-400 text-amber-400' : 'text-slate-200'}`} />
-          ))}
-          {p.sold && <span className="text-[10px] text-slate-400 font-medium ml-1">({p.sold} Sold)</span>}
+        <div className="absolute top-1/2 -translate-y-1/2 right-3 flex flex-col gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10">
+          <button 
+            onClick={() => setIsLiked(!isLiked)}
+            aria-label={isLiked ? "Remove from wishlist" : "Add to wishlist"}
+            className="p-2 bg-white border border-slate-100 rounded-lg text-slate-400 hover:text-purple-600 shadow-sm transition-colors"
+          >
+            <Heart size={14} className={isLiked ? "fill-purple-600 text-purple-600" : ""} />
+          </button>
+          <Link 
+            to={`/product/${p.id}`} 
+            aria-label={`View quick details for ${p.name}`}
+            className="p-2 bg-white border border-slate-100 rounded-lg text-slate-400 hover:text-purple-600 shadow-sm transition-colors"
+          >
+            <Eye size={14} />
+          </Link>
         </div>
-        <h4 className="font-bold text-slate-800 text-xs uppercase tracking-wide line-clamp-2 mb-0.5 min-h-[2rem]">{p.name}</h4>
-        {p.efficiency && <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">{p.efficiency}</p>}
-        {p.release && <p className="text-[9px] font-bold text-purple-600 uppercase tracking-wider">{p.release}</p>}
       </div>
 
-      <div className="pt-2 border-t border-slate-100 flex items-center justify-between gap-2">
+      <div className="space-y-2 flex-1 flex flex-col justify-between">
         <div>
-          <span className="text-[9px] font-semibold text-slate-400 uppercase tracking-wider block">Asset Value</span>
-          <p className="text-slate-900 font-black text-base">${p.price.toFixed(2)}</p>
+          <div className="flex items-center gap-0.5 mb-1">
+            {[...Array(5)].map((_, i) => (
+              <Star key={i} size={10} className={`${i < Math.floor(p.rating) ? 'fill-amber-400 text-amber-400' : 'text-slate-200'}`} />
+            ))}
+            {p.sold && <span className="text-[10px] text-slate-400 font-medium ml-1">({p.sold} Sold)</span>}
+          </div>
+          <h4 className="font-bold text-slate-800 text-xs uppercase tracking-wide line-clamp-2 mb-0.5 min-h-[2rem]">{p.name}</h4>
+          {p.efficiency && <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">{p.efficiency}</p>}
+          {p.release && <p className="text-[9px] font-bold text-purple-600 uppercase tracking-wider">{p.release}</p>}
         </div>
-        <button className="bg-purple-600 hover:bg-purple-700 text-white p-2.5 rounded-xl transition-all shadow-md shadow-purple-600/10 flex items-center justify-center">
-          <ShoppingCart size={14} />
-        </button>
+
+        <div className="pt-2 border-t border-slate-100 flex items-center justify-between gap-2">
+          <div>
+            <span className="text-[9px] font-semibold text-slate-400 uppercase tracking-wider block">Asset Value</span>
+            <p className="text-slate-900 font-black text-base">${p.price.toFixed(2)}</p>
+          </div>
+          <button 
+            onClick={() => onAddToCart(p)}
+            aria-label={`Add ${p.name} to cart`}
+            className="bg-purple-600 hover:bg-purple-700 text-white p-2.5 rounded-xl transition-all shadow-md shadow-purple-600/10 flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
+          >
+            <ShoppingCart size={14} />
+          </button>
+        </div>
       </div>
     </div>
-  </div>
-);
+  );
+};
 
 const HomeScreen = () => {
-  // 1. Core State & Data Configurations
   const categories = [
     { id: 'head', name: 'Cranial Protection', count: 14, icon: Shield, gradient: 'from-purple-100 to-purple-50' },
     { id: 'body', name: 'Tactical Vests & Body', count: 28, icon: Layers, gradient: 'from-blue-100 to-blue-50' },
@@ -93,24 +109,26 @@ const HomeScreen = () => {
     { id: 10, name: 'Premium Ergo Fall-Arrest Harness', price: 145.00, rating: 4.9, match: '95% Match', image: 'https://images.unsplash.com/photo-1606166325683-e6deb697d30a?auto=format&fit=crop&q=80&w=500' },
   ];
 
+  const handleAddToCart = (product) => {
+    console.log(`Dispatched ${product.name} to checkout session tracking array.`);
+    // Implement global context actions or Redux hooks here
+  };
+
   return (
     <div className="bg-white min-h-screen font-sans antialiased text-slate-600 relative">
       <Navbar />
 
       {/* ================= HERO SECTION ================= */}
       <section className="relative min-h-[70vh] sm:min-h-[75vh] flex items-center overflow-hidden bg-slate-950 pt-20">
-        
-        {/* Absolute Background Layer */}
         <div className="absolute inset-0 z-0">
           <img 
             src="https://images.unsplash.com/photo-1541888946425-d81bb19240f5?auto=format&fit=crop&q=80&w=1200" 
-            alt="Luu Safety Industrial Canvas"
+            alt="Luu Safety Industrial Canvas background"
             className="w-full h-full object-cover object-center"
           />
           <div className="absolute inset-0 bg-gradient-to-r from-slate-950/95 via-slate-950/70 to-slate-900/20" />
         </div>
 
-        {/* Hero Content Container */}
         <div className="relative z-10 max-w-[1200px] mx-auto px-6 w-full py-16 sm:py-24">
           <div className="max-w-xl space-y-5">
             <div className="inline-flex items-center gap-1.5 bg-purple-500/10 border border-purple-500/30 px-3 py-1 rounded-full backdrop-blur-sm">
@@ -192,7 +210,7 @@ const HomeScreen = () => {
             </Link>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {bestSellers.map(p => <ProductCard key={p.id} p={p} ribbon="Top Value" />)}
+            {bestSellers.map(p => <ProductCard key={p.id} p={p} ribbon="Top Value" onAddToCart={handleAddToCart} />)}
           </div>
         </section>
 
@@ -223,7 +241,7 @@ const HomeScreen = () => {
             </Link>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {newArrivals.map(p => <ProductCard key={p.id} p={p} ribbon="2026 Spec" />)}
+            {newArrivals.map(p => <ProductCard key={p.id} p={p} ribbon="2026 Spec" onAddToCart={handleAddToCart} />)}
           </div>
         </section>
 
@@ -241,7 +259,7 @@ const HomeScreen = () => {
             {forYouItems.map((item) => (
               <div key={item.id} className="bg-white border border-slate-100 rounded-2xl p-4 flex flex-col sm:flex-row items-center gap-4 group shadow-sm">
                 <div className="w-24 h-24 bg-slate-50 rounded-xl overflow-hidden flex items-center justify-center shrink-0 border border-slate-100 relative">
-                  <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
+                  <img src={item.image} alt={item.name} className="w-full h-full object-cover" loading="lazy" />
                   <span className="absolute bottom-1.5 left-1.5 bg-emerald-50 text-emerald-600 border border-emerald-100 text-[8px] font-bold px-1.5 py-0.5 rounded uppercase">
                     {item.match}
                   </span>
