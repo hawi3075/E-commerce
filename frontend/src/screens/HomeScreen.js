@@ -7,7 +7,6 @@ import {
   Clock, UserCheck
 } from 'lucide-react';
 
-// Shared Global Navbar
 import Navbar from '../components/Navbar';
 
 // Reusable Modular Layout Components (Light Mode)
@@ -33,7 +32,8 @@ const ProductCard = ({ p, ribbon, onAddToCart }) => {
           {p.stock ? `${p.stock} Units` : 'In Stock'}
         </span>
 
-        <div className="absolute top-1/2 -translate-y-1/2 right-3 flex flex-col gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10">
+        {/* Action Panel Panel Row layout */}
+        <div className="absolute inset-y-0 right-3 flex flex-col justify-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10">
           <button 
             onClick={() => setIsLiked(!isLiked)}
             aria-label={isLiked ? "Remove from wishlist" : "Add to wishlist"}
@@ -55,7 +55,7 @@ const ProductCard = ({ p, ribbon, onAddToCart }) => {
         <div>
           <div className="flex items-center gap-0.5 mb-1">
             {[...Array(5)].map((_, i) => (
-              <Star key={i} size={10} className={`${i < Math.floor(p.rating) ? 'fill-amber-400 text-amber-400' : 'text-slate-200'}`} />
+              <Star key={i} size={10} className={`${i < Math.round(p.rating) ? 'fill-amber-400 text-amber-400' : 'text-slate-200'}`} />
             ))}
             {p.sold && <span className="text-[10px] text-slate-400 font-medium ml-1">({p.sold} Sold)</span>}
           </div>
@@ -111,7 +111,6 @@ const HomeScreen = () => {
 
   const handleAddToCart = (product) => {
     console.log(`Dispatched ${product.name} to checkout session tracking array.`);
-    // Implement global context actions or Redux hooks here
   };
 
   return (
