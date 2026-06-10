@@ -121,8 +121,8 @@ const HomeScreen = () => {
       <section className="relative min-h-[70vh] sm:min-h-[75vh] flex items-center overflow-hidden bg-slate-950 pt-20">
         <div className="absolute inset-0 z-0">
           <img 
-            src="https://images.unsplash.com/photo-1541888946425-d81bb19240f5?auto=format&fit=crop&q=80&w=1200" 
-            alt="Luu Safety Industrial Canvas background"
+            src="https://images.unsplash.com/photo-1628348068343-c6a848d2b6dd?auto=format&fit=crop&q=80&w=1200" 
+            alt="High visibility safety clothing and personal protective equipment background"
             className="w-full h-full object-cover object-center"
           />
           <div className="absolute inset-0 bg-gradient-to-r from-slate-950/95 via-slate-950/70 to-slate-900/20" />
