@@ -101,7 +101,7 @@ const HomeScreen = () => {
     { id: 5, name: 'Mantis Thermal Shield Gloves', price: 19.50, rating: 5.0, sold: 34, stock: 8, image: 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&q=80&w=500', release: '2026 Batch A' }, 
     { id: 6, name: 'Pro Arc Welding Face Shield', price: 42.00, rating: 4.9, sold: 12, stock: 15, image: 'https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?auto=format&fit=crop&q=80&w=500', release: 'Next-Gen Core' },
     { id: 7, name: 'Apex Multi-Pocket Cargo Rig', price: 49.99, rating: 4.6, sold: 18, stock: 22, image: 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&q=80&w=500', release: '2026 Batch B' },
-    { id: 8, name: 'Kevlar Reinforced Sleeves', price: 29.00, rating: 4.8, sold: 25, stock: 30, image: 'https://images.unsplash.com/photo-1581092335397-9583fe92d232?auto=format&fit=crop&q=80&w=500', release: 'Ultra Shield' }
+    { id: 8, name: 'Kevlar Reinforced Sleeves', price: 29.00, rating: 4.8, sold: 25, stock: 30, image: 'https://images.unsplash.com/photo-158109335397-9583fe92d232?auto=format&fit=crop&q=80&w=500', release: 'Ultra Shield' }
   ];
 
   const forYouItems = [
@@ -121,11 +121,12 @@ const HomeScreen = () => {
       <section className="relative min-h-[70vh] sm:min-h-[75vh] flex items-center overflow-hidden bg-slate-950 pt-20">
         <div className="absolute inset-0 z-0">
           <img 
-            src="https://images.unsplash.com/photo-1601584115197-04ecc0da31d7?auto=format&fit=crop&q=80&w=1200" 
-            alt="Professional premium industrial protective clothing and apparel safety layout"
+            src="https://images.unsplash.com/photo-1581092335397-9583fe92d232?auto=format&fit=crop&q=80&w=1200" 
+            alt="Visible civil engineer wearing yellow hardhat, protective safety glasses, and industrial coat safety gear details"
             className="w-full h-full object-cover object-center"
           />
-          <div className="absolute inset-0 bg-gradient-to-r from-slate-950/95 via-slate-950/70 to-slate-900/20" />
+          {/* Adjusted opacity on the overlay gradient to make the image significantly more visible */}
+          <div className="absolute inset-0 bg-gradient-to-r from-slate-950/85 via-slate-950/50 to-slate-900/10" />
         </div>
 
         <div className="relative z-10 max-w-[1200px] mx-auto px-6 w-full py-16 sm:py-24">
