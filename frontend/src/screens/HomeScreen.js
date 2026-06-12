@@ -245,7 +245,7 @@ const HomeScreen = () => {
           </div>
         </section>
 
-        {/* ================= SECTION 4: FOR YOU ================= */}
+        
         <section className="bg-slate-50 border border-slate-100 rounded-3xl p-6 md:p-8">
           <div className="mb-6 pb-3 border-b border-slate-100">
             <div className="flex items-center gap-1.5 text-purple-600 mb-1">
