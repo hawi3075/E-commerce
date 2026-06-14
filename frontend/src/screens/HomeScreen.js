@@ -117,20 +117,12 @@ const HomeScreen = () => {
     <div className="bg-white min-h-screen font-sans antialiased text-slate-600 relative">
       <Navbar />
 
-      {/* ================= HERO SECTION ================= */}
-      <section className="relative min-h-[70vh] sm:min-h-[75vh] flex items-center overflow-hidden bg-slate-950 pt-20">
-        <div className="absolute inset-0 z-0">
-          <img 
-            src="https://images.unsplash.com/photo-1581092335397-9583fe92d232?auto=format&fit=crop&q=80&w=1200" 
-            alt="Visible civil engineer wearing yellow hardhat, protective safety glasses, and industrial coat safety gear details"
-            className="w-full h-full object-cover object-center"
-          />
-          {/* Adjusted opacity on the overlay gradient to make the image significantly more visible */}
-          <div className="absolute inset-0 bg-gradient-to-r from-slate-950/85 via-slate-950/50 to-slate-900/10" />
-        </div>
-
-        <div className="relative z-10 max-w-[1200px] mx-auto px-6 w-full py-16 sm:py-24">
-          <div className="max-w-xl space-y-5">
+      {/* ================= REDESIGNED TWO-COLUMN HERO SECTION ================= */}
+      <section className="relative min-h-[75vh] flex items-center bg-slate-950 pt-20 overflow-hidden">
+        <div className="max-w-[1200px] mx-auto px-6 w-full grid grid-cols-1 lg:grid-cols-12 gap-8 items-center py-12 lg:py-0">
+          
+          {/* Left Text Column */}
+          <div className="max-w-xl space-y-5 lg:col-span-6 relative z-10">
             <div className="inline-flex items-center gap-1.5 bg-purple-500/10 border border-purple-500/30 px-3 py-1 rounded-full backdrop-blur-sm">
               <Flame size={12} className="text-purple-400" />
               <span className="text-[9px] font-bold uppercase tracking-[2px] text-purple-300">Premium Industrial Resource</span>
@@ -150,6 +142,19 @@ const HomeScreen = () => {
               </Link>
             </div>
           </div>
+
+          {/* Right Image Column - Unlocked, 100% visible with a modern geometric frame */}
+          <div className="w-full lg:col-span-6 h-[320px] lg:h-[500px] relative mt-6 lg:mt-0">
+            <div className="absolute inset-0 bg-purple-600/10 rounded-[36px] transform rotate-2 scale-105" />
+            <div className="w-full h-full rounded-[32px] overflow-hidden border border-slate-800 shadow-2xl relative z-10">
+              <img 
+                src="https://images.unsplash.com/photo-1581092335397-9583fe92d232?auto=format&fit=crop&q=80&w=800" 
+                alt="Highly visible industrial engineer wearing safety gear and hardhat"
+                className="w-full h-full object-cover object-center"
+              />
+            </div>
+          </div>
+
         </div>
       </section>
 
@@ -245,7 +250,7 @@ const HomeScreen = () => {
           </div>
         </section>
 
-        
+        {/* ================= SECTION 4: FOR YOU ================= */}
         <section className="bg-slate-50 border border-slate-100 rounded-3xl p-6 md:p-8">
           <div className="mb-6 pb-3 border-b border-slate-100">
             <div className="flex items-center gap-1.5 text-purple-600 mb-1">
