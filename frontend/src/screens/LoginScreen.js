@@ -56,7 +56,7 @@ const LoginScreen = () => {
           </h2>
         </div>
 
-        {/* Premium Light Interface Card */}
+        
         <div className="bg-white border border-slate-100 p-8 md:p-10 shadow-xl rounded-[2.5rem] transition-all">
           
           {isSuccess ? (
