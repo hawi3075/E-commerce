@@ -60,7 +60,7 @@ const LoginScreen = () => {
         <div className="bg-white border border-slate-100 p-8 md:p-10 shadow-xl rounded-[2.5rem] transition-all">
           
           {isSuccess ? (
-            /* Success Authentication Interstitial */
+        
             <div className="py-10 flex flex-col items-center justify-center text-center animate-in fade-in zoom-in duration-500">
               <div className="w-16 h-16 bg-purple-50 border border-purple-100 rounded-full flex items-center justify-center mb-5">
                 <CheckCircle2 size={36} className="text-purple-600" />
