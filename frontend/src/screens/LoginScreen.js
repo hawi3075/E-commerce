@@ -18,7 +18,7 @@ const LoginScreen = () => {
   const handleLogin = async (e) => {
     e.preventDefault();
     setError('');
-    setLoading(true);
+    loading(true);
 
     try {
       // Direct integration with your backend auth infrastructure
