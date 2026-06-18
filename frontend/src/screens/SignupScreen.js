@@ -166,7 +166,7 @@ const SignupScreen = () => {
                 </button>
               </form>
 
-              {/* Login Redirection Anchor */}
+              
               <div className="mt-8 text-center border-t border-slate-100 pt-6">
                 <p className="text-[9px] text-slate-400 font-bold uppercase tracking-wider">Already Registered?</p>
                 <Link 
