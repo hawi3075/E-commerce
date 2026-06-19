@@ -19,7 +19,7 @@ const SignupScreen = () => {
   const handleSignup = async (e) => {
     e.preventDefault();
     setError('');
-    loading(true);
+    setLoading(true); // Fixed: Changed 'loading(true)' to 'setLoading(true)'
 
     try {
       const { data } = await axios.post('http://localhost:5000/api/users', { name, email, password });
@@ -166,7 +166,6 @@ const SignupScreen = () => {
                 </button>
               </form>
 
-              
               <div className="mt-8 text-center border-t border-slate-100 pt-6">
                 <p className="text-[9px] text-slate-400 font-bold uppercase tracking-wider">Already Registered?</p>
                 <Link 
