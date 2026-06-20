@@ -149,7 +149,7 @@ const SignupScreen = () => {
                   </div>
                 </div>
 
-                {/* Submit Action Button */}
+                
                 <button 
                   type="submit" 
                   disabled={loading} 
