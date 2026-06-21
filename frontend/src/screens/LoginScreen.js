@@ -138,7 +138,7 @@ const LoginScreen = () => {
                   </div>
                 </div>
 
-                {/* Submit Action */}
+                
                 <button 
                   type="submit" 
                   disabled={loading} 
