@@ -94,7 +94,7 @@ const LoginScreen = () => {
 
               <form className="space-y-5" onSubmit={handleLogin}>
                 
-                {/* Email Address Input */}
+                
                 <div className="space-y-1.5">
                   <label className="text-[9px] font-bold uppercase tracking-wider text-slate-400 ml-0.5">Email Address</label>
                   <div className="relative group">
