@@ -38,7 +38,7 @@ const LoginScreen = () => {
   return (
     <div className="min-h-screen w-full relative flex items-center justify-center py-12 bg-slate-50 font-sans overflow-hidden antialiased text-slate-600">
       
-      {/* Background Fluid Graphic Accents */}
+      
       <div className="absolute inset-0 z-0 opacity-40 mix-blend-multiply pointer-events-none">
         <div className="absolute top-[-20%] right-[-10%] w-[600px] h-[600px] bg-purple-200 rounded-full blur-[120px]" />
         <div className="absolute bottom-[-20%] left-[-10%] w-[500px] h-[500px] bg-blue-100 rounded-full blur-[100px]" />
