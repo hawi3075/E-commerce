@@ -21,7 +21,7 @@ const LoginScreen = () => {
     loading(true);
 
     try {
-      // Direct integration with your backend auth infrastructure
+      
       const { data } = await axios.post('http://localhost:5000/api/users/login', { email, password });
       
       localStorage.setItem('userInfo', JSON.stringify(data));
