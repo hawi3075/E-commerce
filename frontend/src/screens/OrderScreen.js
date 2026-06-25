@@ -164,7 +164,7 @@ const OrderScreen = () => {
                   </div>
                 )}
 
-                {/* Progress Visual Tracker Step Bar */}
+                
                 <div className="bg-gray-50 px-6 py-4 border-t border-gray-50 flex flex-col sm:flex-row gap-4 justify-between sm:items-center">
                   <div className="flex items-center gap-4 flex-grow max-w-md">
                     {steps.map((step, index) => {
