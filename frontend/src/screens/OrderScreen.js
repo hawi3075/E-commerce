@@ -128,7 +128,7 @@ const OrderScreen = () => {
                     <p className="text-blue-600 font-black text-sm mt-1">{order.price}</p>
                   </div>
 
-                  {/* Dynamic Delivery Status Card */}
+                  
                   <div className={`${config.bg} border rounded-2xl p-4 flex flex-col items-center justify-center min-w-[160px]`}>
                     <div className={`flex items-center gap-2 ${config.text} mb-1`}>
                       {config.icon}
