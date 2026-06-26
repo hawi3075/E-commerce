@@ -194,7 +194,7 @@ const OrderScreen = () => {
           })}
         </div>
 
-        {/* Empty State Link */}
+        
         <div className="mt-12 text-center border-2 border-dashed border-gray-200 rounded-3xl p-10">
           <Package className="mx-auto text-gray-300 mb-4" size={40} />
           <p className="text-gray-500 font-bold text-sm mb-6">Need more protection for your team?</p>
