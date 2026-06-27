@@ -112,7 +112,7 @@ const OrderScreen = () => {
               <div key={order.id} className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden hover:border-gray-200 transition-all">
                 <div className="p-6 flex flex-col md:flex-row gap-6 items-center">
                   
-                  {/* Product Image */}
+                  
                   <div className="w-24 h-24 rounded-xl overflow-hidden bg-gray-100 flex-shrink-0">
                     <img src={order.img} alt={order.name} className="w-full h-full object-cover" />
                   </div>
