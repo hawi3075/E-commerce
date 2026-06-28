@@ -117,7 +117,7 @@ const OrderScreen = () => {
                     <img src={order.img} alt={order.name} className="w-full h-full object-cover" />
                   </div>
 
-                  {/* Order Details */}
+                  
                   <div className="flex-grow text-center md:text-left">
                     <div className="flex flex-col md:flex-row md:items-center gap-2 mb-1">
                       <span className="text-[10px] font-black text-blue-600 uppercase tracking-widest">{order.id}</span>
