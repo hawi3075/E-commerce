@@ -124,7 +124,7 @@ const ShopScreen = () => {
                   </p>
                 </div>
 
-                {/* Price & Action */}
+                
                 <div className="mt-auto pt-6 flex items-center justify-between border-t border-gray-50">
                   <div>
                     <p className="text-[10px] font-bold text-gray-400 uppercase">Unit Price</p>
