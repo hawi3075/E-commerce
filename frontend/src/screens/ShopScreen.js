@@ -117,7 +117,7 @@ const ShopScreen = () => {
                   </button>
                 </div>
 
-                {/* Collapsible Details */}
+                
                 <div className={`overflow-hidden transition-all duration-300 ${expandedId === p._id ? 'max-h-40 mt-4' : 'max-h-12 mt-2'}`}>
                   <p className="text-gray-500 text-sm leading-relaxed">
                     {p.description}
