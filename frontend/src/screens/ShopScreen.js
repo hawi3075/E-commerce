@@ -88,7 +88,7 @@ const ShopScreen = () => {
           {filteredProducts.map((p) => (
             <div key={p._id} className="group bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 flex flex-col">
               
-              {/* Image Section */}
+              
               <div className="relative h-72 overflow-hidden">
                 <img 
                   src={p.image} 
