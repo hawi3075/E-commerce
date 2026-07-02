@@ -73,7 +73,7 @@ const ShopScreen = () => {
         })}
       </div>
 
-      {/* Conditional States */}
+      
       {isLoading ? (
         <div className="text-center py-20 bg-white rounded-3xl border-2 border-dashed border-gray-200">
           <p className="text-gray-400 font-bold uppercase tracking-widest animate-pulse">Scanning Inventory...</p>
