@@ -100,7 +100,7 @@ const ShopScreen = () => {
                 </div>
               </div>
 
-              {/* Content Section */}
+              
               <div className="p-6 flex flex-col flex-grow">
                 <div className="flex justify-between items-start">
                   <h2 className="text-xl font-black uppercase text-slate-800 leading-tight">
