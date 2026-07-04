@@ -13,7 +13,7 @@ import SignupScreen from './screens/SignupScreen';
 import OrderScreen from './screens/OrderScreen';
 import PaymentScreen from './screens/PaymentScreen';
 
-// --- FIXED IMPORTS ---
+
 import AboutScreen from './screens/About'; 
 import ContactScreen from './screens/Contact';
 
