@@ -8,7 +8,7 @@ import AdminSidebar from './components/AdminSidebar';
 // Screen Imports
 import HomeScreen from './screens/HomeScreen';
 import LoginScreen from './screens/LoginScreen';
-import ProductScreen from './screens/ProductScreen'; // This file now contains your Shop UI
+import ProductScreen from './screens/ProductScreen'; 
 import SignupScreen from './screens/SignupScreen';
 import OrderScreen from './screens/OrderScreen';
 import PaymentScreen from './screens/PaymentScreen';
