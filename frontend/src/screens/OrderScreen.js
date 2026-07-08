@@ -87,7 +87,7 @@ const OrderScreen = () => {
     }
   ];
 
-  // Toggles the details panel visibility
+
   const toggleDetails = (orderId) => {
     setExpandedOrders(prev => ({
       ...prev,
