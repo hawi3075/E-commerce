@@ -291,7 +291,7 @@ const HomeScreen = () => {
 
       </main>
 
-      {/* ================= FOOTER AREA ================= */}
+      
       <footer className="p-4 bg-slate-50 border-t border-slate-100">
         <div className="max-w-[1200px] mx-auto py-8 px-2">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-xs border-b border-slate-200/60 pb-8">
