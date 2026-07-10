@@ -200,7 +200,7 @@ const HomeScreen = () => {
 
       <main className="max-w-[1200px] mx-auto px-6 py-16 space-y-16">
         
-        {/* ================= SECTION 2: BEST SELLERS ================= */}
+        
         <section>
           <div className="flex items-end justify-between mb-6 border-b border-slate-100 pb-4">
             <div>
