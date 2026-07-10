@@ -170,7 +170,7 @@ const HomeScreen = () => {
         </div>
       </section>
 
-      {/* ================= SECTION 1: SHOP BY CATEGORY ================= */}
+      
       <section className="max-w-[1200px] mx-auto px-6 pt-16">
         <div className="mb-6">
           <div className="flex items-center gap-1.5 text-purple-600 mb-1">
