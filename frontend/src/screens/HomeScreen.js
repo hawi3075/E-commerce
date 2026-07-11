@@ -32,7 +32,7 @@ const ProductCard = ({ p, ribbon, onAddToCart }) => {
           {p.stock ? `${p.stock} Units` : 'In Stock'}
         </span>
 
-        {/* Action Panel Panel Row layout */}
+        
         <div className="absolute inset-y-0 right-3 flex flex-col justify-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10">
           <button 
             onClick={() => setIsLiked(!isLiked)}
