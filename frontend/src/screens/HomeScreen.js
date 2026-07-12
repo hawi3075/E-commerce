@@ -117,7 +117,7 @@ const HomeScreen = () => {
     <div className="bg-white min-h-screen font-sans antialiased text-slate-600 relative">
       <Navbar />
 
-      {/* ================= REDESIGNED TWO-COLUMN HERO SECTION ================= */}
+      
       <section className="relative min-h-[75vh] flex items-center bg-slate-950 pt-20 overflow-hidden">
         <div className="max-w-[1200px] mx-auto px-6 w-full grid grid-cols-1 lg:grid-cols-12 gap-8 items-center py-12 lg:py-0">
           
