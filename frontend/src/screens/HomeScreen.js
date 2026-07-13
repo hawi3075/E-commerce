@@ -121,7 +121,7 @@ const HomeScreen = () => {
       <section className="relative min-h-[75vh] flex items-center bg-slate-950 pt-20 overflow-hidden">
         <div className="max-w-[1200px] mx-auto px-6 w-full grid grid-cols-1 lg:grid-cols-12 gap-8 items-center py-12 lg:py-0">
           
-          {/* Left Text Column */}
+          
           <div className="max-w-xl space-y-5 lg:col-span-6 relative z-10">
             <div className="inline-flex items-center gap-1.5 bg-purple-500/10 border border-purple-500/30 px-3 py-1 rounded-full backdrop-blur-sm">
               <Flame size={12} className="text-purple-400" />
