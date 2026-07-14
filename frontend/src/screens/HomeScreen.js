@@ -32,7 +32,6 @@ const ProductCard = ({ p, ribbon, onAddToCart }) => {
           {p.stock ? `${p.stock} Units` : 'In Stock'}
         </span>
 
-        
         <div className="absolute inset-y-0 right-3 flex flex-col justify-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10">
           <button 
             onClick={() => setIsLiked(!isLiked)}
@@ -83,11 +82,36 @@ const ProductCard = ({ p, ribbon, onAddToCart }) => {
 };
 
 const HomeScreen = () => {
+  // Category mapping featuring sample product images instead of generic icons
   const categories = [
-    { id: 'head', name: 'Cranial Protection', count: 14, icon: Shield, gradient: 'from-purple-100 to-purple-50' },
-    { id: 'body', name: 'Tactical Vests & Body', count: 28, icon: Layers, gradient: 'from-blue-100 to-blue-50' },
-    { id: 'footwear', name: 'Reinforced Footwear', count: 19, icon: Hammer, gradient: 'from-amber-100 to-amber-50' },
-    { id: 'optics', name: 'Ballistic & Anti-Fog', count: 12, icon: Eye, gradient: 'from-emerald-100 to-emerald-50' },
+    { 
+      id: 'head', 
+      name: 'Cranial Protection', 
+      count: 14, 
+      image: 'https://images.unsplash.com/photo-1590483736622-39da8caf3ef8?auto=format&fit=crop&q=80&w=200', 
+      gradient: 'from-purple-100 to-purple-50' 
+    },
+    { 
+      id: 'body', 
+      name: 'Tactical Vests & Body', 
+      count: 28, 
+      image: 'https://images.unsplash.com/photo-1578328819058-b69f3a3b0f6b?auto=format&fit=crop&q=80&w=200', 
+      gradient: 'from-blue-100 to-blue-50' 
+    },
+    { 
+      id: 'footwear', 
+      name: 'Reinforced Footwear', 
+      count: 19, 
+      image: 'https://images.unsplash.com/photo-1608256246200-53e635b5b65f?auto=format&fit=crop&q=80&w=200', 
+      gradient: 'from-amber-100 to-amber-50' 
+    },
+    { 
+      id: 'optics', 
+      name: 'Ballistic & Anti-Fog', 
+      count: 12, 
+      image: 'https://images.unsplash.com/photo-1551150431-993b1139ecc5?auto=format&fit=crop&q=80&w=200', 
+      gradient: 'from-emerald-100 to-emerald-50' 
+    },
   ];
 
   const bestSellers = [
@@ -105,7 +129,7 @@ const HomeScreen = () => {
   ];
 
   const forYouItems = [
-    { id: 9, name: 'ASTU Standard Engineer Kit', price: 120.00, rating: 5.0, match: '98% Match', image: 'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?auto=format&fit=crop&q=80&w=500' },
+    { id: 9, name: 'Universal Heavy Duty Gear Package', price: 120.00, rating: 5.0, match: '98% Match', image: 'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?auto=format&fit=crop&q=80&w=500' },
     { id: 10, name: 'Premium Ergo Fall-Arrest Harness', price: 145.00, rating: 4.9, match: '95% Match', image: 'https://images.unsplash.com/photo-1606166325683-e6deb697d30a?auto=format&fit=crop&q=80&w=500' },
   ];
 
@@ -114,44 +138,47 @@ const HomeScreen = () => {
   };
 
   return (
-    <div className="bg-white min-h-screen font-sans antialiased text-slate-600 relative">
+    <div className="bg-white min-h-screen font-sans antialiased text-slate-600 relative overflow-x-hidden">
+      
+      {/* Injecting Tailwind Animation Styles directly into the layout */}
+      <style>{`
+        @keyframes float {
+          0%, 100% { transform: translateY(0px); }
+          50% { transform: translateY(-10px); }
+        }
+        .animate-float {
+          animation: float 5s ease-in-out infinite;
+        }
+      `}</style>
+
       <Navbar />
 
-      
-      <section className="relative min-h-[75vh] flex items-center bg-slate-950 pt-20 overflow-hidden">
-        <div className="max-w-[1200px] mx-auto px-6 w-full grid grid-cols-1 lg:grid-cols-12 gap-8 items-center py-12 lg:py-0">
+      {/* Header / Hero Section with floating text overlay */}
+      <section 
+        className="relative min-h-[85vh] flex items-center pt-20 overflow-hidden bg-cover bg-center bg-no-repeat"
+        style={{ backgroundImage: `url('https://images.unsplash.com/photo-1504307651254-35680f356dfd?auto=format&fit=crop&q=80&w=1600')` }}
+      >
+        <div className="max-w-[1200px] mx-auto px-6 w-full relative z-10 py-16">
           
-          
-          <div className="max-w-xl space-y-5 lg:col-span-6 relative z-10">
-            <div className="inline-flex items-center gap-1.5 bg-purple-500/10 border border-purple-500/30 px-3 py-1 rounded-full backdrop-blur-sm">
-              <Flame size={12} className="text-purple-400" />
-              <span className="text-[9px] font-bold uppercase tracking-[2px] text-purple-300">Premium Industrial Resource</span>
+          {/* Main animated text cluster */}
+          <div className="max-w-xl space-y-5 animate-float">
+            <div className="inline-flex items-center gap-1.5 bg-slate-950/70 border border-white/10 px-3 py-1 rounded-full shadow-lg">
+              <Flame size={12} className="text-purple-300 animate-pulse" />
+              <span className="text-[9px] font-bold uppercase tracking-[2px] text-white">Premium Industrial Resource</span>
             </div>
             
-            <h1 className="text-4xl md:text-5xl font-black text-white uppercase tracking-tight leading-none">
-              Defend <br /> Your <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-purple-300 italic">Workforce.</span>
+            <h1 className="text-4xl sm:text-5xl md:text-6xl font-black text-white uppercase tracking-tight leading-none drop-shadow-[0_4px_12px_rgba(0,0,0,0.95)]">
+              Defend <br /> Your <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-purple-300 italic drop-shadow-[0_4px_12px_rgba(147,51,234,0.5)]">Workforce.</span>
             </h1>
             
-            <p className="text-slate-300 text-sm font-medium leading-relaxed max-w-md">
-              High-fidelity protective armor, visibility gear, and high-tier utility instruments tailored for ASTU engineers and complex industrial operations.
+            <p className="text-white text-sm sm:text-base font-semibold leading-relaxed max-w-lg drop-shadow-[0_2px_8px_rgba(0,0,0,1)]">
+              High-fidelity protective armor, visibility gear, and high-tier utility instruments tailored for engineers and complex industrial operations.
             </p>
             
             <div className="pt-2">
-              <Link to="/shop" className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3.5 rounded-xl font-bold uppercase text-[10px] tracking-wider inline-flex items-center gap-2 transition-all shadow-md shadow-purple-600/20 active:scale-[0.98]">
+              <Link to="/shop" className="bg-purple-600 hover:bg-purple-700 text-white px-7 py-4 rounded-xl font-bold uppercase text-[10px] tracking-wider inline-flex items-center gap-2 transition-all shadow-xl shadow-slate-950/40 hover:shadow-purple-600/50 active:scale-[0.98]">
                 Enter Marketplace <ArrowRight size={14} />
               </Link>
-            </div>
-          </div>
-
-          {/* Right Image Column - Unlocked, 100% visible with a modern geometric frame */}
-          <div className="w-full lg:col-span-6 h-[320px] lg:h-[500px] relative mt-6 lg:mt-0">
-            <div className="absolute inset-0 bg-purple-600/10 rounded-[36px] transform rotate-2 scale-105" />
-            <div className="w-full h-full rounded-[32px] overflow-hidden border border-slate-800 shadow-2xl relative z-10">
-              <img 
-                src="https://images.unsplash.com/photo-1581092335397-9583fe92d232?auto=format&fit=crop&q=80&w=800" 
-                alt="Highly visible industrial engineer wearing safety gear and hardhat"
-                className="w-full h-full object-cover object-center"
-              />
             </div>
           </div>
 
@@ -161,7 +188,7 @@ const HomeScreen = () => {
       {/* Global Trust Banner */}
       <section className="border-b border-slate-100 bg-white py-6">
         <div className="max-w-[1200px] mx-auto px-6 grid grid-cols-2 md:grid-cols-4 gap-6">
-          {[{ value: '100%', label: 'Certified Standards' }, { value: '24/7', label: 'Operations Sync' }, { value: 'ASTU', label: 'Official Hardware' }, { value: 'FAST', label: 'National Delivery' }].map((item, idx) => (
+          {[{ value: '100%', label: 'Certified Standards' }, { value: '24/7', label: 'Operations Sync' }, { value: 'OFFICIAL', label: 'Validated Hardware' }, { value: 'FAST', label: 'National Delivery' }].map((item, idx) => (
             <div key={idx} className="text-center space-y-0.5">
               <p className="text-lg font-black text-slate-800 tracking-tight">{item.value}</p>
               <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{item.label}</p>
@@ -170,7 +197,7 @@ const HomeScreen = () => {
         </div>
       </section>
 
-      
+      {/* Categories (Upgraded with Sample Images and Explore links) */}
       <section className="max-w-[1200px] mx-auto px-6 pt-16">
         <div className="mb-6">
           <div className="flex items-center gap-1.5 text-purple-600 mb-1">
@@ -179,28 +206,42 @@ const HomeScreen = () => {
           </div>
           <h2 className="text-xl font-bold text-slate-900 uppercase tracking-tight">Shop By Category</h2>
         </div>
+        
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {categories.map((cat) => {
-            const IconComponent = cat.icon;
-            return (
-              <Link to={`/shop?category=${cat.id}`} key={cat.id} className="p-5 rounded-2xl border border-slate-100 bg-slate-50/50 hover:border-purple-200 transition-all duration-300 relative overflow-hidden group flex items-center gap-4">
-                <div className={`absolute inset-0 bg-gradient-to-br ${cat.gradient} opacity-20`} />
-                <div className="relative z-10 p-2.5 bg-white rounded-xl border border-slate-100 text-purple-600 shadow-sm">
-                  <IconComponent size={16} />
-                </div>
-                <div className="relative z-10">
+          {categories.map((cat) => (
+            <Link 
+              to={`/shop?category=${cat.id}`} 
+              key={cat.id} 
+              className="p-4 rounded-2xl border border-slate-100 bg-slate-50/50 hover:border-purple-200 transition-all duration-300 relative overflow-hidden group flex flex-col justify-between h-48"
+            >
+              {/* Soft overlay tint */}
+              <div className={`absolute inset-0 bg-gradient-to-br ${cat.gradient} opacity-20`} />
+              
+              <div className="relative z-10 flex items-start justify-between w-full">
+                <div>
                   <h3 className="text-xs font-bold uppercase text-slate-800 tracking-wide">{cat.name}</h3>
                   <span className="text-[10px] text-slate-400 font-medium">{cat.count} Items</span>
                 </div>
-              </Link>
-            );
-          })}
+                
+                {/* Real Product Sample Image Preview */}
+                <div className="w-12 h-12 rounded-xl overflow-hidden border border-slate-200/60 shadow-sm shrink-0">
+                  <img src={cat.image} alt={cat.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" />
+                </div>
+              </div>
+
+              {/* Interactive explore link at the bottom of card */}
+              <div className="relative z-10 flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-purple-600 group-hover:text-purple-700 transition-colors pt-4 border-t border-slate-100/60 w-full">
+                Explore Category 
+                <ArrowRight size={10} className="transform group-hover:translate-x-1 transition-transform" />
+              </div>
+            </Link>
+          ))}
         </div>
       </section>
 
       <main className="max-w-[1200px] mx-auto px-6 py-16 space-y-16">
         
-        
+        {/* Best Sellers */}
         <section>
           <div className="flex items-end justify-between mb-6 border-b border-slate-100 pb-4">
             <div>
@@ -231,7 +272,7 @@ const HomeScreen = () => {
           </div>
         </section>
 
-        {/* ================= SECTION 3: NEW ARRIVALS ================= */}
+        {/* New Arrivals */}
         <section>
           <div className="flex items-end justify-between mb-6 border-b border-slate-100 pb-4">
             <div>
@@ -250,7 +291,7 @@ const HomeScreen = () => {
           </div>
         </section>
 
-        
+        {/* Suggested for You */}
         <section className="bg-slate-50 border border-slate-100 rounded-3xl p-6 md:p-8">
           <div className="mb-6 pb-3 border-b border-slate-100">
             <div className="flex items-center gap-1.5 text-purple-600 mb-1">
@@ -275,10 +316,10 @@ const HomeScreen = () => {
                       {[...Array(5)].map((_, i) => <Star key={i} size={8} className="fill-amber-400 text-amber-400" />)}
                     </div>
                     <h3 className="text-slate-800 font-bold text-xs uppercase tracking-wide line-clamp-1">{item.name}</h3>
-                    <p className="text-slate-400 text-[9px] uppercase font-bold tracking-wider mt-0.5">Configured for ASTU Operators</p>
+                    <p className="text-slate-400 text-[9px] uppercase font-bold tracking-wider mt-0.5">Configured for High-Performance Operators</p>
                   </div>
                   <div className="flex items-center justify-between pt-2 border-t border-slate-100">
-                    <p className="text-slate-900 font-black text-base">${item.price.toFixed(2)}</p>
+                    <p className="text-slate-950 font-black text-base">${item.price.toFixed(2)}</p>
                     <Link to={`/product/${item.id}`} className="text-purple-600 hover:text-purple-700 text-[10px] font-bold uppercase tracking-wider flex items-center gap-0.5">
                       Configure <ArrowRight size={10} />
                     </Link>
@@ -291,7 +332,7 @@ const HomeScreen = () => {
 
       </main>
 
-      
+      {/* Footer */}
       <footer className="p-4 bg-slate-50 border-t border-slate-100">
         <div className="max-w-[1200px] mx-auto py-8 px-2">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-xs border-b border-slate-200/60 pb-8">
