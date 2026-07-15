@@ -83,7 +83,7 @@ const ShopScreen = () => {
           <p className="text-gray-400 font-bold uppercase tracking-widest">No equipment found in this section.</p>
         </div>
       ) : (
-        /* Product Grid */
+        
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {filteredProducts.map((p) => (
             <div key={p._id} className="group bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 flex flex-col">
