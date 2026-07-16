@@ -53,7 +53,7 @@ const ShopScreen = () => {
         <p className="text-gray-500 font-medium">High-performance safety equipment for ASTU engineers.</p>
       </header>
       
-      {/* Category Tabs */}
+      
       <div className="flex gap-3 mb-10 overflow-x-auto pb-2 no-scrollbar">
         {categories.map((cat) => {
           const isActive = selectedCategory === cat;
