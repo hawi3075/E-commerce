@@ -26,7 +26,7 @@ const ShopScreen = () => {
     fetchProducts();
   }, []);
 
-  // Compute filtered products locally based on selection without triggering an extra state set
+  
   const filteredProducts = useMemo(() => {
     if (selectedCategory === 'All Gear') {
       return products;
