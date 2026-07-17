@@ -1,16 +1,29 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { 
+  ChevronDown, Grid, ShoppingCart, Star, 
+  SlidersHorizontal, Eye, Heart 
+} from 'lucide-react';
+
+import Navbar from '../components/Navbar';
 
 const ShopScreen = () => {
   const [products, setProducts] = useState([]);
-  const [selectedCategory, setSelectedCategory] = useState('All Gear');
-  const [expandedId, setExpandedId] = useState(null); // Track which product shows details
+  const [selectedCategory, setSelectedCategory] = useState('All Products');
+  const [sortBy, setSortBy] = useState('newest');
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
 
-  const categories = ['All Gear', 'Headwear', 'Workwear', 'Footwear'];
+  // Defined static categories list matching typical LuuSafety inventory segments
+  const categoriesList = [
+    'All Products', 
+    'Headwear', 
+    'Workwear', 
+    'Footwear'
+  ];
 
+  // Fetch API Products
   useEffect(() => {
     const fetchProducts = async () => {
       try {
@@ -26,9 +39,9 @@ const ShopScreen = () => {
     fetchProducts();
   }, []);
 
-  
+  // Filter Logic
   const filteredProducts = useMemo(() => {
-    if (selectedCategory === 'All Gear') {
+    if (selectedCategory === 'All Products') {
       return products;
     }
     return products.filter(
@@ -36,113 +49,214 @@ const ShopScreen = () => {
     );
   }, [selectedCategory, products]);
 
+  // Sorting Logic
+  const sortedProducts = useMemo(() => {
+    const list = [...filteredProducts];
+    if (sortBy === 'low-to-high') {
+      return list.sort((a, b) => a.price - b.price);
+    }
+    if (sortBy === 'high-to-low') {
+      return list.sort((a, b) => b.price - a.price);
+    }
+    return list; // 'newest' / default fallback
+  }, [filteredProducts, sortBy]);
+
   const handleBuyNow = (productId) => {
     navigate(`/payment/${productId}`);
   };
 
-  const toggleDetails = (id) => {
-    setExpandedId(expandedId === id ? null : id);
-  };
-
   return (
-    <div className="min-h-screen bg-gray-50 p-4 md:p-10">
-      <header className="mb-10 text-center md:text-left">
-        <h1 className="text-4xl font-black uppercase tracking-tighter text-slate-900">
-          Professional <span className="text-blue-600">Gear</span>
-        </h1>
-        <p className="text-gray-500 font-medium">High-performance safety equipment for ASTU engineers.</p>
+    <div className="bg-slate-50/50 min-h-screen font-sans antialiased text-slate-700">
+      <Navbar />
+
+      {/* Hero Header exactly matching the reference layout style */}
+      <header className="bg-white border-b border-slate-100 pt-28 pb-12">
+        <div className="max-w-[1280px] mx-auto px-6 space-y-2">
+          <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">Shop Collection</h1>
+          <p className="text-sm text-slate-400 font-medium">Find exactly what you are looking for.</p>
+        </div>
       </header>
-      
-      
-      <div className="flex gap-3 mb-10 overflow-x-auto pb-2 no-scrollbar">
-        {categories.map((cat) => {
-          const isActive = selectedCategory === cat;
-          return (
-            <button 
-              key={cat}
-              onClick={() => setSelectedCategory(cat)}
-              className={`whitespace-nowrap px-6 py-2 rounded-full font-bold text-sm transition-all shadow-sm border ${
-                isActive 
-                  ? 'bg-slate-900 text-white border-slate-900' 
-                  : 'bg-white text-slate-600 border-gray-200 hover:bg-gray-100'
-              }`}
-            >
-              {cat}
-            </button>
-          );
-        })}
-      </div>
 
-      
-      {isLoading ? (
-        <div className="text-center py-20 bg-white rounded-3xl border-2 border-dashed border-gray-200">
-          <p className="text-gray-400 font-bold uppercase tracking-widest animate-pulse">Scanning Inventory...</p>
-        </div>
-      ) : filteredProducts.length === 0 ? (
-        <div className="text-center py-20 bg-white rounded-3xl border-2 border-dashed border-gray-200">
-          <p className="text-gray-400 font-bold uppercase tracking-widest">No equipment found in this section.</p>
-        </div>
-      ) : (
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {filteredProducts.map((p) => (
-            <div key={p._id} className="group bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 flex flex-col">
-              
-              
-              <div className="relative h-72 overflow-hidden">
-                <img 
-                  src={p.image} 
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
-                  alt={p.product_name} 
-                />
-                <div className="absolute top-4 right-4 bg-white/90 backdrop-blur px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest text-slate-900">
-                  {p.product_code || 'PPE-77'}
-                </div>
-              </div>
+      {/* Main Container */}
+      <main className="max-w-[1280px] mx-auto px-6 py-10">
+        <div className="flex flex-col lg:flex-row gap-8 items-start">
+          
+          {/* ================= SIDEBAR (LEFT COLUMN) ================= */}
+          <aside className="w-full lg:w-64 shrink-0 space-y-6 lg:sticky lg:top-24">
+            <div className="flex items-center gap-2 pb-3 border-b border-slate-200/60">
+              <SlidersHorizontal size={14} className="text-slate-800" />
+              <h2 className="text-xs font-bold uppercase tracking-wider text-slate-800">Categories</h2>
+            </div>
+            
+            <div className="flex flex-col gap-1.5">
+              {categoriesList.map((cat) => {
+                const isSelected = selectedCategory === cat;
+                
+                // Calculate quantity counts inside each category dynamically
+                const count = cat === 'All Products' 
+                  ? products.length 
+                  : products.filter(p => p.category?.toLowerCase() === cat.toLowerCase()).length;
 
-              
-              <div className="p-6 flex flex-col flex-grow">
-                <div className="flex justify-between items-start">
-                  <h2 className="text-xl font-black uppercase text-slate-800 leading-tight">
-                    {p.product_name}
-                  </h2>
-                  <button 
-                    onClick={() => toggleDetails(p._id)}
-                    className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-                    aria-label="Toggle details"
+                return (
+                  <button
+                    key={cat}
+                    onClick={() => setSelectedCategory(cat)}
+                    className={`w-full flex items-center justify-between px-4 py-3 rounded-xl text-left text-xs font-bold uppercase tracking-wide transition-all ${
+                      isSelected 
+                        ? 'bg-purple-50 text-purple-700 border border-purple-100/80' 
+                        : 'bg-white hover:bg-slate-100/50 text-slate-500 border border-transparent'
+                    }`}
                   >
-                    <span className={`text-2xl transition-transform inline-block ${expandedId === p._id ? 'rotate-90' : ''}`}>
-                      🚀 
+                    <div className="flex items-center gap-2">
+                      <Grid size={12} className={isSelected ? "text-purple-600" : "text-slate-400"} />
+                      <span>{cat}</span>
+                    </div>
+                    <span className={`text-[10px] px-2 py-0.5 rounded-full ${isSelected ? 'bg-purple-100 text-purple-700' : 'bg-slate-100 text-slate-400'}`}>
+                      {count}
                     </span>
                   </button>
-                </div>
+                );
+              })}
+            </div>
+          </aside>
 
-                
-                <div className={`overflow-hidden transition-all duration-300 ${expandedId === p._id ? 'max-h-40 mt-4' : 'max-h-12 mt-2'}`}>
-                  <p className="text-gray-500 text-sm leading-relaxed">
-                    {p.description}
-                  </p>
-                </div>
-
-                
-                <div className="mt-auto pt-6 flex items-center justify-between border-t border-gray-50">
-                  <div>
-                    <p className="text-[10px] font-bold text-gray-400 uppercase">Unit Price</p>
-                    <span className="text-2xl font-black text-slate-900">${p.price}</span>
-                  </div>
-                  
-                  <button 
-                    onClick={() => handleBuyNow(p._id)}
-                    className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-2xl font-bold uppercase text-xs tracking-widest shadow-lg shadow-blue-200 transition-all active:scale-95"
-                  >
-                    Buy Now
-                  </button>
-                </div>
+          {/* ================= PRODUCTS DISPLAY (RIGHT COLUMN) ================= */}
+          <section className="flex-1 w-full space-y-6">
+            
+            {/* Toolbar showing result summary metrics and sorting configurations */}
+            <div className="flex items-center justify-between bg-white border border-slate-100 p-4 rounded-2xl shadow-sm">
+              <p className="text-xs text-slate-400 font-semibold uppercase tracking-wider">
+                Showing <span className="text-slate-800 font-extrabold">{sortedProducts.length}</span> Products
+              </p>
+              
+              {/* Sort Selector Dropdown */}
+              <div className="relative flex items-center gap-2 bg-slate-50 border border-slate-200/70 hover:border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-slate-800 transition-colors cursor-pointer">
+                <select 
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value)}
+                  className="bg-transparent pr-6 appearance-none cursor-pointer focus:outline-none focus:ring-0 text-xs font-extrabold uppercase tracking-wider"
+                >
+                  <option value="newest">Newest First</option>
+                  <option value="low-to-high">Price: Low to High</option>
+                  <option value="high-to-low">Price: High to Low</option>
+                </select>
+                <ChevronDown size={14} className="text-slate-500 absolute right-3 pointer-events-none" />
               </div>
             </div>
-          ))}
+
+            {/* Content states (Loading, Empty, or Product Grid list) */}
+            {isLoading ? (
+              <div className="text-center py-24 bg-white rounded-3xl border border-dashed border-slate-200">
+                <p className="text-slate-400 font-bold uppercase tracking-widest animate-pulse text-xs">Scanning Inventory...</p>
+              </div>
+            ) : sortedProducts.length === 0 ? (
+              <div className="text-center py-24 bg-white rounded-3xl border border-dashed border-slate-200 space-y-2">
+                <Grid size={32} className="text-slate-200 mx-auto" />
+                <p className="text-slate-800 font-bold uppercase tracking-wide text-sm">No items configured</p>
+                <p className="text-slate-400 text-xs">We couldn't find any products in this specific category selection.</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {sortedProducts.map((p) => {
+                  const isSoldOut = p.stock === 0;
+
+                  return (
+                    <div 
+                      key={p._id}
+                      className="bg-white rounded-3xl border border-slate-100 hover:border-purple-200 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col justify-between overflow-hidden group"
+                    >
+                      {/* Image block container */}
+                      <div className="relative h-56 bg-slate-50 flex items-center justify-center overflow-hidden border-b border-slate-100/80">
+                        <img 
+                          src={p.image} 
+                          alt={p.product_name} 
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
+                          loading="lazy"
+                        />
+
+                        {/* Inventory stock banner indicators */}
+                        {isSoldOut ? (
+                          <span className="absolute top-4 right-4 bg-red-50 text-red-600 border border-red-100 text-[10px] font-extrabold px-2.5 py-1 rounded-lg uppercase tracking-wide">
+                            Sold out
+                          </span>
+                        ) : (
+                          <span className="absolute top-4 right-4 bg-emerald-50 text-emerald-600 border border-emerald-100 text-[10px] font-extrabold px-2.5 py-1 rounded-lg uppercase tracking-wide">
+                            {p.stock || p.quantity || 'In Stock'}
+                          </span>
+                        )}
+
+                        {/* Interactive overlay buttons */}
+                        <div className="absolute inset-0 bg-slate-900/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-2">
+                          <button className="p-3 bg-white rounded-xl shadow-lg text-slate-600 hover:text-purple-600 hover:scale-110 transition-all">
+                            <Heart size={16} />
+                          </button>
+                          <button 
+                            onClick={() => navigate(`/product/${p._id}`)} 
+                            className="p-3 bg-white rounded-xl shadow-lg text-slate-600 hover:text-purple-600 hover:scale-110 transition-all"
+                          >
+                            <Eye size={16} />
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Info & Details Section */}
+                      <div className="p-5 space-y-4 flex-grow flex flex-col justify-between">
+                        <div>
+                          {/* Average review placeholder rating */}
+                          <div className="flex items-center gap-1 mb-1.5">
+                            <div className="flex items-center">
+                              {[...Array(5)].map((_, i) => (
+                                <Star 
+                                  key={i} 
+                                  size={11} 
+                                  className="fill-amber-400 text-amber-400" 
+                                />
+                              ))}
+                            </div>
+                            <span className="text-[10px] font-bold text-slate-400 ml-1">5.0</span>
+                          </div>
+
+                          <h3 className="font-extrabold text-slate-800 text-sm uppercase tracking-wide line-clamp-2 min-h-[2.5rem] leading-snug group-hover:text-purple-600 transition-colors">
+                            {p.product_name}
+                          </h3>
+                        </div>
+
+                        {/* Action section footer bar */}
+                        <div className="pt-4 border-t border-slate-100 flex items-center justify-between">
+                          <div>
+                            <span className="text-[9px] font-semibold text-slate-400 uppercase tracking-widest block">Unit Value</span>
+                            <span className="text-slate-900 font-black text-lg">${p.price}</span>
+                          </div>
+
+                          {isSoldOut ? (
+                            <button 
+                              disabled
+                              className="bg-slate-100 text-slate-400 px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider cursor-not-allowed"
+                            >
+                              Unavailable
+                            </button>
+                          ) : (
+                            <button 
+                              onClick={() => handleBuyNow(p._id)}
+                              className="bg-purple-600 hover:bg-purple-700 text-white px-5 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 transition-all shadow-md shadow-purple-600/10 hover:shadow-purple-600/25 active:scale-95"
+                            >
+                              <ShoppingCart size={13} />
+                              Buy Now
+                            </button>
+                          )}
+                        </div>
+                      </div>
+
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+
+          </section>
+
         </div>
-      )}
+      </main>
     </div>
   );
 };

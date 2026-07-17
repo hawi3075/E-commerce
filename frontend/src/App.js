@@ -4,14 +4,15 @@ import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from 'r
 import Navbar from './components/Navbar';
 import AdminSidebar from './components/AdminSidebar';
 
-
 import HomeScreen from './screens/HomeScreen';
 import LoginScreen from './screens/LoginScreen';
-import ProductScreen from './screens/ProductScreen'; 
 import SignupScreen from './screens/SignupScreen';
 import OrderScreen from './screens/OrderScreen';
 import PaymentScreen from './screens/PaymentScreen';
 
+// --- ROUTE COMPONENTS ---
+import ShopScreen from './screens/ShopScreen';      // <-- Import the grid/sidebar list component
+import ProductScreen from './screens/ProductScreen';   // <-- Keep this as your single-product details view
 
 import AboutScreen from './screens/About'; 
 import ContactScreen from './screens/Contact';
@@ -50,10 +51,11 @@ function App() {
           <Route path="/about" element={<AboutScreen />} />
           <Route path="/contact" element={<ContactScreen />} />
 
-          {/* --- FIX: Pointing /shop to ProductScreen where the new UI is --- */}
-          <Route path="/shop" element={<ProductScreen />} />
+          {/* --- FIXED ROUTING --- */}
+          {/* 1. Point "/shop" to the grid-sidebar list screen */}
+          <Route path="/shop" element={<ShopScreen />} />
           
-          {/* If you have a specific detailed view, keep this; otherwise, redirect to shop */}
+          {/* 2. Point "/product/:id" to the single-product details view */}
           <Route path="/product/:id" element={<ProductScreen />} />
           
           <Route path="/orders" element={<ProtectedRoute><OrderScreen /></ProtectedRoute>} />
