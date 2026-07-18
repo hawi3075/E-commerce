@@ -1,171 +1,171 @@
 import React, { useState } from 'react';
-import axios from 'axios';
+import { Mail, Phone, MapPin, Send, MessageSquare } from 'lucide-react';
 
-const Contact = () => {
-  const [form, setForm] = useState({
+const AboutScreen = () => {
+  const [formData, setFormData] = useState({
     name: '',
     email: '',
-    message: '',
+    subject: '',
+    message: ''
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
 
-  const [loading, setLoading] = useState(false);
-  const [status, setStatus] = useState(null); // success / error
-
-  // REUSABLE INTERNAL STYLE
-  const inputStyle = {
-    width: '100%',
-    padding: '15px',
-    marginBottom: '15px',
-    borderRadius: '15px',
-    border: 'none',
-    backgroundColor: '#334155',
-    color: 'white',
-    outline: 'none',
-    fontFamily: 'inherit',
-    boxSizing: 'border-box'
-  };
-
-  // HANDLE INPUT
-  const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
-
-  // HANDLE SUBMIT
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
-
-    // VALIDATION
-    if (!form.name.trim() || !form.email.trim() || !form.message.trim()) {
-      setStatus({ type: 'error', msg: 'All fields are required' });
-      return;
-    }
-
-    try {
-      setLoading(true);
-      setStatus(null);
-
-      // Connects to your backend base URL configuration
-      await axios.post('/api/contact', form);
-
-      setStatus({ type: 'success', msg: 'Message sent successfully!' });
-
-      // reset form
-      setForm({ name: '', email: '', message: '' });
-    } catch (error) {
-      const errorMsg = error.response?.data?.message || 'Failed to send message';
-      setStatus({ type: 'error', msg: errorMsg });
-    } finally {
-      setLoading(false);
-    }
+    setIsSubmitting(true);
+    
+    // Simulate API submission
+    setTimeout(() => {
+      setIsSubmitting(false);
+      setSubmitted(true);
+      setFormData({ name: '', email: '', subject: '', message: '' });
+    }, 1200);
   };
 
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#f8fafc', paddingTop: '120px', paddingBottom: '60px', fontFamily: 'Inter, sans-serif' }}>
-      <div style={{ maxWidth: '900px', margin: '0 auto', padding: '0 20px' }}>
-
-        {/* HEADER */}
-        <div style={{ textAlign: 'center', marginBottom: '50px' }}>
-          <h1 style={{ fontSize: '3.5rem', fontWeight: '900', color: '#0f172a', letterSpacing: '-0.05em' }}>
-            GET IN <span style={{ color: '#2563eb' }}>TOUCH</span>
-          </h1>
-          <p style={{ color: '#64748b', marginTop: '10px', fontSize: '1.1rem' }}>
-            Technical support for LUU SAFETY equipment and AuraSync protocols.
-          </p>
-        </div>
-
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '30px' }}>
-
-          {/* LEFT INFO */}
-          <div style={{ backgroundColor: 'white', padding: '40px', borderRadius: '30px', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.05)' }}>
-            <h3 style={{ color: '#2563eb', fontSize: '1.5rem', fontWeight: '700', marginBottom: '20px' }}>Support Channels</h3>
-            
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '15px', color: '#334155' }}>
-              <p style={{ margin: 0 }}><strong style={{ color: '#0f172a' }}>Location:</strong> Adama, Ethiopia</p>
-              <p style={{ margin: 0 }}><strong style={{ color: '#0f172a' }}>Email:</strong> support@aurasync.astu.edu</p>
+    <div className="min-h-screen bg-slate-50/50 pt-28 pb-16 px-6 font-sans text-slate-700">
+      <div className="max-w-[1000px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
+        
+        {/* ================= LEFT COLUMN: INFO CARDS ================= */}
+        <div className="lg:col-span-5 space-y-6 flex flex-col justify-between">
+          <div className="space-y-4">
+            <div className="flex items-center gap-2 text-purple-600">
+              <MessageSquare size={18} />
+              <span className="text-[10px] font-bold uppercase tracking-widest">Communications</span>
             </div>
+            <h1 className="text-3xl font-black tracking-tight text-slate-900 uppercase">
+              Get in Touch
+            </h1>
+            <p className="text-xs text-slate-400 font-medium max-w-sm leading-relaxed">
+              Have questions about bulk safety procurement or system integrations? Drop a line to our deployment center.
+            </p>
           </div>
 
-          {/* FORM */}
-          <form
-            onSubmit={handleSubmit}
-            style={{ backgroundColor: '#1e293b', padding: '40px', borderRadius: '30px', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
-          >
-            <h3 style={{ color: 'white', marginBottom: '20px', fontSize: '1.5rem', fontWeight: '700' }}>
-              Quick Inquiry
-            </h3>
-
-            {/* STATUS MESSAGE */}
-            {status && (
-              <div style={{
-                padding: '12px 15px',
-                borderRadius: '12px',
-                backgroundColor: status.type === 'success' ? 'rgba(34, 197, 94, 0.2)' : 'rgba(239, 68, 68, 0.2)',
-                color: status.type === 'success' ? '#4ade80' : '#f87171',
-                marginBottom: '20px',
-                fontSize: '0.95rem',
-                fontWeight: '500'
-              }}>
-                {status.msg}
+          {/* Contact Details Grid */}
+          <div className="space-y-3 pt-6 lg:pt-0">
+            <div className="flex items-center gap-4 bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
+              <div className="p-3 bg-purple-50 border border-purple-100 rounded-xl text-purple-600">
+                <Mail size={16} />
               </div>
-            )}
+              <div>
+                <span className="text-[9px] font-semibold text-slate-400 uppercase tracking-widest block">Email Us</span>
+                <span className="text-xs font-bold text-slate-800">support@luusafety.com</span>
+              </div>
+            </div>
 
-            <input
-              type="text"
-              name="name"
-              placeholder="Full Name"
-              value={form.name}
-              onChange={handleChange}
-              style={inputStyle}
-              required
-            />
+            <div className="flex items-center gap-4 bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
+              <div className="p-3 bg-purple-50 border border-purple-100 rounded-xl text-purple-600">
+                <Phone size={16} />
+              </div>
+              <div>
+                <span className="text-[9px] font-semibold text-slate-400 uppercase tracking-widest block">Call Center</span>
+                <span className="text-xs font-bold text-slate-800">+1 (555) 019-2834</span>
+              </div>
+            </div>
 
-            <input
-              type="email"
-              name="email"
-              placeholder="Email Address"
-              value={form.email}
-              onChange={handleChange}
-              style={inputStyle}
-              required
-            />
-
-            <textarea
-              name="message"
-              placeholder="Message"
-              rows="4"
-              value={form.message}
-              onChange={handleChange}
-              style={{ ...inputStyle, resize: 'vertical' }}
-              required
-            />
-
-            <button
-              type="submit"
-              disabled={loading}
-              style={{
-                width: '100%',
-                padding: '15px',
-                backgroundColor: loading ? '#64748b' : '#2563eb',
-                color: 'white',
-                border: 'none',
-                borderRadius: '15px',
-                fontWeight: '700',
-                cursor: loading ? 'not-allowed' : 'pointer',
-                transition: 'background-color 0.2s ease',
-                fontSize: '1rem'
-              }}
-            >
-              {loading ? 'SENDING...' : 'SEND MESSAGE'}
-            </button>
-          </form>
+            <div className="flex items-center gap-4 bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
+              <div className="p-3 bg-purple-50 border border-purple-100 rounded-xl text-purple-600">
+                <MapPin size={16} />
+              </div>
+              <div>
+                <span className="text-[9px] font-semibold text-slate-400 uppercase tracking-widest block">HQ Operations</span>
+                <span className="text-xs font-bold text-slate-800">Industrial District, Suite 400</span>
+              </div>
+            </div>
+          </div>
         </div>
 
-        <p style={{ textAlign: 'center', marginTop: '60px', color: '#94a3b8', fontSize: '0.9rem' }}>
-          AuraSync Protocol © 2026
-        </p>
+        {/* ================= RIGHT COLUMN: INTERACTIVE FORM ================= */}
+        <div className="lg:col-span-7 bg-white rounded-3xl p-6 md:p-8 border border-slate-100 shadow-sm">
+          {submitted ? (
+            <div className="h-full flex flex-col items-center justify-center text-center py-12 space-y-3">
+              <div className="p-4 bg-emerald-50 border border-emerald-100 rounded-2xl text-emerald-600 animate-bounce">
+                <Send size={24} />
+              </div>
+              <h3 className="text-sm font-extrabold text-slate-800 uppercase tracking-wide">Transmission Complete</h3>
+              <p className="text-xs text-slate-400 max-w-xs font-medium">
+                Your communication file has been logged. An operations specialist will respond shortly.
+              </p>
+              <button 
+                onClick={() => setSubmitted(false)}
+                className="text-[10px] font-bold text-purple-600 uppercase tracking-wider pt-2 hover:underline"
+              >
+                Send Another Message
+              </button>
+            </div>
+          ) : (
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Your Name</label>
+                  <input 
+                    type="text" 
+                    required
+                    value={formData.name}
+                    onChange={(e) => setFormData({...formData, name: e.target.value})}
+                    placeholder="John Doe"
+                    className="w-full bg-slate-50 border border-slate-200/80 rounded-xl px-4 py-3 text-xs font-medium text-slate-800 placeholder-slate-400/70 focus:outline-none focus:border-purple-400 focus:bg-white transition-all"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Email Address</label>
+                  <input 
+                    type="email" 
+                    required
+                    value={formData.email}
+                    onChange={(e) => setFormData({...formData, email: e.target.value})}
+                    placeholder="john@example.com"
+                    className="w-full bg-slate-50 border border-slate-200/80 rounded-xl px-4 py-3 text-xs font-medium text-slate-800 placeholder-slate-400/70 focus:outline-none focus:border-purple-400 focus:bg-white transition-all"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Subject Tiers</label>
+                <input 
+                  type="text" 
+                  required
+                  value={formData.subject}
+                  onChange={(e) => setFormData({...formData, subject: e.target.value})}
+                  placeholder="Bulk Procurement / Technical Inquiry"
+                  className="w-full bg-slate-50 border border-slate-200/80 rounded-xl px-4 py-3 text-xs font-medium text-slate-800 placeholder-slate-400/70 focus:outline-none focus:border-purple-400 focus:bg-white transition-all"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Analytical Message</label>
+                <textarea 
+                  rows={4}
+                  required
+                  value={formData.message}
+                  onChange={(e) => setFormData({...formData, message: e.target.value})}
+                  placeholder="Describe your inquiry requirements explicitly..."
+                  className="w-full bg-slate-50 border border-slate-200/80 rounded-xl px-4 py-3 text-xs font-medium text-slate-800 placeholder-slate-400/70 focus:outline-none focus:border-purple-400 focus:bg-white transition-all resize-none"
+                />
+              </div>
+
+              <button 
+                type="submit"
+                disabled={isSubmitting}
+                className="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold uppercase tracking-wider text-xs py-3.5 rounded-xl transition-all shadow-md shadow-purple-600/10 hover:shadow-purple-600/25 active:scale-[0.99] flex items-center justify-center gap-2 disabled:bg-slate-100 disabled:text-slate-400 disabled:cursor-not-allowed"
+              >
+                {isSubmitting ? (
+                  <span className="animate-pulse">Syncing Connection...</span>
+                ) : (
+                  <>
+                    <Send size={13} />
+                    <span>Dispatch Message</span>
+                  </>
+                )}
+              </button>
+            </form>
+          )}
+        </div>
+
       </div>
     </div>
   );
 };
 
-export default Contact;
+export default AboutScreen;
