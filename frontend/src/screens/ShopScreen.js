@@ -6,7 +6,57 @@ import {
   SlidersHorizontal, Eye, Heart 
 } from 'lucide-react';
 
-import Navbar from '../components/Navbar';
+// Beautiful Mock Database fallback in case your API/Database is empty
+const MOCK_PRODUCTS = [
+  { 
+    _id: 'p1', 
+    product_name: 'Vanguard Helmet X', 
+    price: 89.99, 
+    stock: 18, 
+    category: 'Headwear', 
+    image: 'https://images.unsplash.com/photo-1590483736622-39da8caf3ef8?auto=format&fit=crop&q=80&w=500' 
+  },
+  { 
+    _id: 'p2', 
+    product_name: 'Aegis High-Vis Safety Vest', 
+    price: 24.99, 
+    stock: 0, // Sold out sample
+    category: 'Workwear', 
+    image: 'https://images.unsplash.com/photo-1578328819058-b69f3a3b0f6b?auto=format&fit=crop&q=80&w=500' 
+  },
+  { 
+    _id: 'p3', 
+    product_name: 'Titan Steel Toe Work Boots', 
+    price: 145.00, 
+    stock: 12, 
+    category: 'Footwear', 
+    image: 'https://images.unsplash.com/photo-1608256246200-53e635b5b65f?auto=format&fit=crop&q=80&w=500' 
+  },
+  { 
+    _id: 'p4', 
+    product_name: 'Anti-Fog Ballistic Goggles', 
+    price: 18.50, 
+    stock: 72, 
+    category: 'Headwear', 
+    image: 'https://images.unsplash.com/photo-1551150431-993b1139ecc5?auto=format&fit=crop&q=80&w=500' 
+  },
+  { 
+    _id: 'p5', 
+    product_name: 'Mantis Thermal Gloves', 
+    price: 19.50, 
+    stock: 8, 
+    category: 'Workwear', 
+    image: 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&q=80&w=500' 
+  },
+  { 
+    _id: 'p6', 
+    product_name: 'Elite Shield Welding Mask', 
+    price: 112.00, 
+    stock: 15, 
+    category: 'Headwear', 
+    image: 'https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?auto=format&fit=crop&q=80&w=500' 
+  }
+];
 
 const ShopScreen = () => {
   const [products, setProducts] = useState([]);
@@ -15,7 +65,7 @@ const ShopScreen = () => {
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
 
-  // Defined static categories list matching typical LuuSafety inventory segments
+  // Defined static categories list matching your sidebar
   const categoriesList = [
     'All Products', 
     'Headwear', 
@@ -23,15 +73,22 @@ const ShopScreen = () => {
     'Footwear'
   ];
 
-  // Fetch API Products
+  // Fetch API Products with Mock Fallback
   useEffect(() => {
     const fetchProducts = async () => {
       try {
         setIsLoading(true);
         const { data } = await axios.get('/api/products');
-        setProducts(data);
+        
+        // If API returns successfully but has no products, fallback to Mock Data
+        if (data && data.length > 0) {
+          setProducts(data);
+        } else {
+          setProducts(MOCK_PRODUCTS);
+        }
       } catch (error) {
-        console.error("Error fetching equipment:", error);
+        console.warn("API offline or failed. Sourcing fallback mock database.", error);
+        setProducts(MOCK_PRODUCTS); // Set mock fallback on network failure
       } finally {
         setIsLoading(false);
       }
@@ -58,18 +115,17 @@ const ShopScreen = () => {
     if (sortBy === 'high-to-low') {
       return list.sort((a, b) => b.price - a.price);
     }
-    return list; // 'newest' / default fallback
+    return list; 
   }, [filteredProducts, sortBy]);
 
   const handleBuyNow = (productId) => {
-    navigate(`/payment/${productId}`);
+    navigate(`/product/${productId}`);
   };
 
   return (
     <div className="bg-slate-50/50 min-h-screen font-sans antialiased text-slate-700">
-      <Navbar />
-
-      {/* Hero Header exactly matching the reference layout style */}
+      
+      {/* Hero Header */}
       <header className="bg-white border-b border-slate-100 pt-28 pb-12">
         <div className="max-w-[1280px] mx-auto px-6 space-y-2">
           <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">Shop Collection</h1>
@@ -92,7 +148,7 @@ const ShopScreen = () => {
               {categoriesList.map((cat) => {
                 const isSelected = selectedCategory === cat;
                 
-                // Calculate quantity counts inside each category dynamically
+                // Calculate dynamic quantity counts
                 const count = cat === 'All Products' 
                   ? products.length 
                   : products.filter(p => p.category?.toLowerCase() === cat.toLowerCase()).length;
@@ -120,16 +176,15 @@ const ShopScreen = () => {
             </div>
           </aside>
 
-          {/* ================= PRODUCTS DISPLAY (RIGHT COLUMN) ================= */}
+          {/* ================= PRODUCTS GRID (RIGHT COLUMN) ================= */}
           <section className="flex-1 w-full space-y-6">
             
-            {/* Toolbar showing result summary metrics and sorting configurations */}
+            {/* Toolbar Summary & Sorting */}
             <div className="flex items-center justify-between bg-white border border-slate-100 p-4 rounded-2xl shadow-sm">
               <p className="text-xs text-slate-400 font-semibold uppercase tracking-wider">
                 Showing <span className="text-slate-800 font-extrabold">{sortedProducts.length}</span> Products
               </p>
               
-              {/* Sort Selector Dropdown */}
               <div className="relative flex items-center gap-2 bg-slate-50 border border-slate-200/70 hover:border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-slate-800 transition-colors cursor-pointer">
                 <select 
                   value={sortBy}
@@ -144,7 +199,7 @@ const ShopScreen = () => {
               </div>
             </div>
 
-            {/* Content states (Loading, Empty, or Product Grid list) */}
+            {/* Content States */}
             {isLoading ? (
               <div className="text-center py-24 bg-white rounded-3xl border border-dashed border-slate-200">
                 <p className="text-slate-400 font-bold uppercase tracking-widest animate-pulse text-xs">Scanning Inventory...</p>
@@ -165,7 +220,7 @@ const ShopScreen = () => {
                       key={p._id}
                       className="bg-white rounded-3xl border border-slate-100 hover:border-purple-200 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col justify-between overflow-hidden group"
                     >
-                      {/* Image block container */}
+                      {/* Image Block */}
                       <div className="relative h-56 bg-slate-50 flex items-center justify-center overflow-hidden border-b border-slate-100/80">
                         <img 
                           src={p.image} 
@@ -174,24 +229,23 @@ const ShopScreen = () => {
                           loading="lazy"
                         />
 
-                        {/* Inventory stock banner indicators */}
                         {isSoldOut ? (
                           <span className="absolute top-4 right-4 bg-red-50 text-red-600 border border-red-100 text-[10px] font-extrabold px-2.5 py-1 rounded-lg uppercase tracking-wide">
                             Sold out
                           </span>
                         ) : (
                           <span className="absolute top-4 right-4 bg-emerald-50 text-emerald-600 border border-emerald-100 text-[10px] font-extrabold px-2.5 py-1 rounded-lg uppercase tracking-wide">
-                            {p.stock || p.quantity || 'In Stock'}
+                            {p.stock} In Stock
                           </span>
                         )}
 
-                        {/* Interactive overlay buttons */}
+                        {/* Interactive overlays */}
                         <div className="absolute inset-0 bg-slate-900/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-2">
                           <button className="p-3 bg-white rounded-xl shadow-lg text-slate-600 hover:text-purple-600 hover:scale-110 transition-all">
                             <Heart size={16} />
                           </button>
                           <button 
-                            onClick={() => navigate(`/product/${p._id}`)} 
+                            onClick={() => handleBuyNow(p._id)} 
                             className="p-3 bg-white rounded-xl shadow-lg text-slate-600 hover:text-purple-600 hover:scale-110 transition-all"
                           >
                             <Eye size={16} />
@@ -199,10 +253,9 @@ const ShopScreen = () => {
                         </div>
                       </div>
 
-                      {/* Info & Details Section */}
+                      {/* Detail Section */}
                       <div className="p-5 space-y-4 flex-grow flex flex-col justify-between">
                         <div>
-                          {/* Average review placeholder rating */}
                           <div className="flex items-center gap-1 mb-1.5">
                             <div className="flex items-center">
                               {[...Array(5)].map((_, i) => (
@@ -221,11 +274,11 @@ const ShopScreen = () => {
                           </h3>
                         </div>
 
-                        {/* Action section footer bar */}
+                        {/* Purchase Options Footer */}
                         <div className="pt-4 border-t border-slate-100 flex items-center justify-between">
                           <div>
                             <span className="text-[9px] font-semibold text-slate-400 uppercase tracking-widest block">Unit Value</span>
-                            <span className="text-slate-900 font-black text-lg">${p.price}</span>
+                            <span className="text-slate-900 font-black text-lg">${p.price.toFixed(2)}</span>
                           </div>
 
                           {isSoldOut ? (
