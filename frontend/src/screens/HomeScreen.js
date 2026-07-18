@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { 
   Shield, ArrowRight, Star, ShoppingCart, 
-  MapPin, Phone, Flame, Eye, Heart, 
-  Layers, Hammer, TrendingUp, Grid, 
-  Clock, UserCheck
+  MapPin, Phone, Eye, Heart, 
+  Grid, Clock, UserCheck, TrendingUp
 } from 'lucide-react';
 
 import Navbar from '../components/Navbar';
@@ -82,35 +81,30 @@ const ProductCard = ({ p, ribbon, onAddToCart }) => {
 };
 
 const HomeScreen = () => {
-  // Category mapping featuring sample product images instead of generic icons
+  const navigate = useNavigate();
+
+  // Updated categories to match your Shop layout precisely
   const categories = [
     { 
-      id: 'head', 
-      name: 'Cranial Protection', 
+      id: 'headwear', 
+      name: 'Headwear', 
       count: 14, 
       image: 'https://images.unsplash.com/photo-1590483736622-39da8caf3ef8?auto=format&fit=crop&q=80&w=200', 
       gradient: 'from-purple-100 to-purple-50' 
     },
     { 
-      id: 'body', 
-      name: 'Tactical Vests & Body', 
+      id: 'workwear', 
+      name: 'Workwear', 
       count: 28, 
       image: 'https://images.unsplash.com/photo-1578328819058-b69f3a3b0f6b?auto=format&fit=crop&q=80&w=200', 
       gradient: 'from-blue-100 to-blue-50' 
     },
     { 
       id: 'footwear', 
-      name: 'Reinforced Footwear', 
+      name: 'Footwear', 
       count: 19, 
       image: 'https://images.unsplash.com/photo-1608256246200-53e635b5b65f?auto=format&fit=crop&q=80&w=200', 
       gradient: 'from-amber-100 to-amber-50' 
-    },
-    { 
-      id: 'optics', 
-      name: 'Ballistic & Anti-Fog', 
-      count: 12, 
-      image: 'https://images.unsplash.com/photo-1551150431-993b1139ecc5?auto=format&fit=crop&q=80&w=200', 
-      gradient: 'from-emerald-100 to-emerald-50' 
     },
   ];
 
@@ -140,7 +134,6 @@ const HomeScreen = () => {
   return (
     <div className="bg-white min-h-screen font-sans antialiased text-slate-600 relative overflow-x-hidden">
       
-      {/* Injecting Tailwind Animation Styles directly into the layout */}
       <style>{`
         @keyframes float {
           0%, 100% { transform: translateY(0px); }
@@ -153,19 +146,15 @@ const HomeScreen = () => {
 
       <Navbar />
 
-      {/* Header / Hero Section with floating text overlay */}
+      {/* Header / Hero Section */}
       <section 
         className="relative min-h-[85vh] flex items-center pt-20 overflow-hidden bg-cover bg-center bg-no-repeat"
         style={{ backgroundImage: `url('https://images.unsplash.com/photo-1504307651254-35680f356dfd?auto=format&fit=crop&q=80&w=1600')` }}
       >
         <div className="max-w-[1200px] mx-auto px-6 w-full relative z-10 py-16">
           
-          {/* Main animated text cluster */}
           <div className="max-w-xl space-y-5 animate-float">
-            <div className="inline-flex items-center gap-1.5 bg-slate-950/70 border border-white/10 px-3 py-1 rounded-full shadow-lg">
-              <Flame size={12} className="text-purple-300 animate-pulse" />
-              <span className="text-[9px] font-bold uppercase tracking-[2px] text-white">Premium Industrial Resource</span>
-            </div>
+            {/* "Premium Industrial Resource" badge successfully removed from here */}
             
             <h1 className="text-4xl sm:text-5xl md:text-6xl font-black text-white uppercase tracking-tight leading-none drop-shadow-[0_4px_12px_rgba(0,0,0,0.95)]">
               Defend <br /> Your <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-purple-300 italic drop-shadow-[0_4px_12px_rgba(147,51,234,0.5)]">Workforce.</span>
@@ -175,10 +164,16 @@ const HomeScreen = () => {
               High-fidelity protective armor, visibility gear, and high-tier utility instruments tailored for engineers and complex industrial operations.
             </p>
             
-            <div className="pt-2">
-              <Link to="/shop" className="bg-purple-600 hover:bg-purple-700 text-white px-7 py-4 rounded-xl font-bold uppercase text-[10px] tracking-wider inline-flex items-center gap-2 transition-all shadow-xl shadow-slate-950/40 hover:shadow-purple-600/50 active:scale-[0.98]">
+            <div className="pt-2 flex flex-col sm:flex-row gap-4">
+              <Link to="/shop" className="bg-purple-600 hover:bg-purple-700 text-white px-7 py-4 rounded-xl font-bold uppercase text-[10px] tracking-wider inline-flex items-center justify-center gap-2 transition-all shadow-xl shadow-slate-950/40 hover:shadow-purple-600/50 active:scale-[0.98]">
                 Enter Marketplace <ArrowRight size={14} />
               </Link>
+              <button 
+                onClick={() => navigate('/contact')}
+                className="bg-white/10 hover:bg-white/25 border border-white/20 backdrop-blur-sm text-white px-7 py-4 rounded-xl font-bold uppercase text-[10px] tracking-wider transition-all active:scale-[0.98]"
+              >
+                Contact Support
+              </button>
             </div>
           </div>
 
@@ -197,7 +192,7 @@ const HomeScreen = () => {
         </div>
       </section>
 
-      {/* Categories (Upgraded with Sample Images and Explore links) */}
+      {/* Categories Section - Matches Shop Filter Grid Layout */}
       <section className="max-w-[1200px] mx-auto px-6 pt-16">
         <div className="mb-6">
           <div className="flex items-center gap-1.5 text-purple-600 mb-1">
@@ -207,14 +202,13 @@ const HomeScreen = () => {
           <h2 className="text-xl font-bold text-slate-900 uppercase tracking-tight">Shop By Category</h2>
         </div>
         
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {categories.map((cat) => (
             <Link 
               to={`/shop?category=${cat.id}`} 
               key={cat.id} 
               className="p-4 rounded-2xl border border-slate-100 bg-slate-50/50 hover:border-purple-200 transition-all duration-300 relative overflow-hidden group flex flex-col justify-between h-48"
             >
-              {/* Soft overlay tint */}
               <div className={`absolute inset-0 bg-gradient-to-br ${cat.gradient} opacity-20`} />
               
               <div className="relative z-10 flex items-start justify-between w-full">
@@ -223,13 +217,11 @@ const HomeScreen = () => {
                   <span className="text-[10px] text-slate-400 font-medium">{cat.count} Items</span>
                 </div>
                 
-                {/* Real Product Sample Image Preview */}
                 <div className="w-12 h-12 rounded-xl overflow-hidden border border-slate-200/60 shadow-sm shrink-0">
                   <img src={cat.image} alt={cat.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" />
                 </div>
               </div>
 
-              {/* Interactive explore link at the bottom of card */}
               <div className="relative z-10 flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-purple-600 group-hover:text-purple-700 transition-colors pt-4 border-t border-slate-100/60 w-full">
                 Explore Category 
                 <ArrowRight size={10} className="transform group-hover:translate-x-1 transition-transform" />
@@ -350,7 +342,7 @@ const HomeScreen = () => {
                 <h4 className="font-bold uppercase text-[10px] text-purple-600 mb-3 tracking-wider">System</h4>
                 <ul className="space-y-1.5 text-[10px] font-semibold uppercase text-slate-500">
                   <li><Link to="/shop" className="hover:text-purple-600">Marketplace</Link></li>
-                  <li><Link to="/about" className="hover:text-purple-600">Project Hub</Link></li>
+                  <li><Link to="/contact" className="hover:text-purple-600">Contact Hub</Link></li>
                 </ul>
               </div>
               <div>
