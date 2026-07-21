@@ -39,7 +39,7 @@ const Dashboard = () => {
                     <h2 className="text-4xl font-black text-slate-900">{stats.activeOrders}</h2>
                 </div>
 
-                {/* New Users Card */}
+                
                 <div className="bg-white p-8 rounded-[2rem] shadow-sm border border-gray-100">
                     <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">New Users</p>
                     <h2 className="text-4xl font-black text-slate-900">{stats.newUsers}</h2>
