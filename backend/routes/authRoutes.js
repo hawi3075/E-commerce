@@ -1,13 +1,12 @@
-import express from 'express';
-import { registerUser, loginUser } from '../controllers/authController.js';
+const express = require('express');
+const { registerUser, loginUser } = require('../controllers/userController'); // Ensure controller path is correct
 
 const router = express.Router();
 
-// Matches POST /api/auth/register OR POST /api/users/register
+// Matches POST /api/auth/register
 router.post('/register', registerUser);
+
+// Matches POST /api/auth/login
 router.post('/login', loginUser);
 
-// Fallback direct root route if frontend posts directly to /api/users
-router.post('/', registerUser);
-
-export default router;
+module.exports = router;

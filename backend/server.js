@@ -16,8 +16,12 @@ app.use(cors());
 app.use(express.json());
 
 // Routes
-// Ensure these files exist in your 'routes' folder
-app.use('/api/users', require('./routes/userRoutes'));
+// Register both authRoutes and userRoutes
+const authRoutes = require('./routes/authRoutes');
+const userRoutes = require('./routes/userRoutes');
+
+app.use('/api/auth', authRoutes); // Handles /api/auth/register & /api/auth/login
+app.use('/api/users', userRoutes); // Handles /api/users
 app.use('/api/products', require('./routes/productRoutes'));
 app.use('/api/orders', require('./routes/orderRoutes'));
 
