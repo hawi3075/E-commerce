@@ -24,8 +24,8 @@ const LoginScreen = () => {
     setLoading(true);
 
     try {
-      // Connect to auth backend route
-      const { data } = await axios.post('/api/auth/login', { email, password });
+      // Connect to Express backend running on port 5000 under /api/users/login
+      const { data } = await axios.post('http://localhost:5000/api/users/login', { email, password });
       
       // Update global AuthContext state & LocalStorage
       login(data);
