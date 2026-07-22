@@ -116,7 +116,7 @@ const LoginScreen = () => {
                   </div>
                 </div>
 
-                {/* Password Input */}
+                
                 <div className="space-y-1.5">
                   <div className="flex items-center justify-between px-0.5">
                     <label className="text-[9px] font-bold uppercase tracking-wider text-slate-400">Security Key</label>
