@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { 
   Mail, Lock, ArrowRight, AlertCircle, 
   Eye, EyeOff, CheckCircle2, Loader2, Shield 
 } from 'lucide-react';
 import axios from 'axios';
+import { AuthContext } from '../context/AuthContext';
 
 const LoginScreen = () => {
   const [email, setEmail] = useState('');
@@ -13,21 +14,31 @@ const LoginScreen = () => {
   const [error, setError] = useState('');
   const [isSuccess, setIsSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  const { login } = useContext(AuthContext);
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
     e.preventDefault();
     setError('');
-    loading(true);
+    setLoading(true);
 
     try {
+      // Connect to auth backend route
+      const { data } = await axios.post('/api/auth/login', { email, password });
       
-      const { data } = await axios.post('http://localhost:5000/api/users/login', { email, password });
-      
-      localStorage.setItem('userInfo', JSON.stringify(data));
+      // Update global AuthContext state & LocalStorage
+      login(data);
       setIsSuccess(true);
       
-      setTimeout(() => navigate('/shop'), 2000);
+      // Redirect based on user role after short success animation
+      setTimeout(() => {
+        if (data.isAdmin || data.role === 'admin') {
+          navigate('/admin');
+        } else {
+          navigate('/shop');
+        }
+      }, 1500);
     } catch (err) {
       setError(err.response?.data?.message || 'Authentication failed. Check your security credentials.');
     } finally {
@@ -37,7 +48,6 @@ const LoginScreen = () => {
 
   return (
     <div className="min-h-screen w-full relative flex items-center justify-center py-12 bg-slate-50 font-sans overflow-hidden antialiased text-slate-600">
-      
       
       <div className="absolute inset-0 z-0 opacity-40 mix-blend-multiply pointer-events-none">
         <div className="absolute top-[-20%] right-[-10%] w-[600px] h-[600px] bg-purple-200 rounded-full blur-[120px]" />
@@ -56,11 +66,9 @@ const LoginScreen = () => {
           </h2>
         </div>
 
-        
         <div className="bg-white border border-slate-100 p-8 md:p-10 shadow-xl rounded-[2.5rem] transition-all">
           
           {isSuccess ? (
-        
             <div className="py-10 flex flex-col items-center justify-center text-center animate-in fade-in zoom-in duration-500">
               <div className="w-16 h-16 bg-purple-50 border border-purple-100 rounded-full flex items-center justify-center mb-5">
                 <CheckCircle2 size={36} className="text-purple-600" />
@@ -74,7 +82,6 @@ const LoginScreen = () => {
               </div>
             </div>
           ) : (
-            /* Main Login Controls */
             <>
               <div className="mb-8">
                 <h1 className="text-3xl font-black text-slate-900 uppercase tracking-tight italic">
@@ -93,7 +100,6 @@ const LoginScreen = () => {
               )}
 
               <form className="space-y-5" onSubmit={handleLogin}>
-                
                 
                 <div className="space-y-1.5">
                   <label className="text-[9px] font-bold uppercase tracking-wider text-slate-400 ml-0.5">Email Address</label>
@@ -138,7 +144,6 @@ const LoginScreen = () => {
                   </div>
                 </div>
 
-                
                 <button 
                   type="submit" 
                   disabled={loading} 
@@ -155,7 +160,6 @@ const LoginScreen = () => {
                 </button>
               </form>
 
-              
               <div className="mt-8 text-center border-t border-slate-100 pt-6">
                 <p className="text-[9px] text-slate-400 font-bold uppercase tracking-wider">New operative?</p>
                 <Link 

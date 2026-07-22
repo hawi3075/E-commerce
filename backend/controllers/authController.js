@@ -1,43 +1,63 @@
-const User = require('../models/userModel');
-const jwt = require('jsonwebtoken');
+import User from '../models/userModel.js';
+import generateToken from '../utils/generateToken.js'; // Optional JWT generator
 
-const generateToken = (id) => {
-    return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: '30d' });
+// @desc    Register a new user
+// @route   POST /api/auth/register (or /api/users)
+// @access  Public
+export const registerUser = async (req, res) => {
+  try {
+    const { name, email, password } = req.body;
+
+    // Check if user exists
+    const userExists = await User.findOne({ email });
+    if (userExists) {
+      return res.status(400).json({ message: 'User already exists' });
+    }
+
+    // Create new user
+    const user = await User.create({
+      name,
+      email,
+      password, // Password hashing happens via pre-save hook in userModel
+    });
+
+    if (user) {
+      res.status(201).json({
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        isAdmin: user.isAdmin || false,
+        token: generateToken ? generateToken(user._id) : null,
+      });
+    } else {
+      res.status(400).json({ message: 'Invalid user data received' });
+    }
+  } catch (error) {
+    res.status(500).json({ message: error.message || 'Server error during registration' });
+  }
 };
 
-exports.registerUser = async (req, res) => {
-    try {
-        const { name, email, phone, password } = req.body;
-        const userExists = await User.findOne({ email });
-        if (userExists) return res.status(400).json({ message: 'User already exists' });
+// @desc    Auth user & get token
+// @route   POST /api/auth/login
+// @access  Public
+export const loginUser = async (req, res) => {
+  try {
+    const { email, password } = req.body;
 
-        const user = await User.create({ name, email, phone, password });
-        res.status(201).json({
-            _id: user._id,
-            name: user.name,
-            role: user.role,
-            token: generateToken(user._id)
-        });
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-    }
-};
+    const user = await User.findOne({ email });
 
-exports.loginUser = async (req, res) => {
-    try {
-        const { email, password } = req.body;
-        const user = await User.findOne({ email });
-        if (user && (await user.matchPassword(password))) {
-            res.json({
-                _id: user._id,
-                name: user.name,
-                role: user.role,
-                token: generateToken(user._id)
-            });
-        } else {
-            res.status(401).json({ message: 'Invalid email or password' });
-        }
-    } catch (error) {
-        res.status(500).json({ message: error.message });
+    if (user && (await user.matchPassword(password))) {
+      res.json({
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        isAdmin: user.isAdmin || false,
+        token: generateToken ? generateToken(user._id) : null,
+      });
+    } else {
+      res.status(401).json({ message: 'Invalid email or password' });
     }
+  } catch (error) {
+    res.status(500).json({ message: error.message || 'Server error during login' });
+  }
 };

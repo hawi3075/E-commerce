@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { 
   User, Mail, Lock, ArrowRight, AlertCircle, 
   Eye, EyeOff, CheckCircle2, Loader2, Shield 
 } from 'lucide-react';
 import axios from 'axios';
+import { AuthContext } from '../context/AuthContext';
 
 const SignupScreen = () => {
   const [name, setName] = useState('');
@@ -14,20 +15,31 @@ const SignupScreen = () => {
   const [error, setError] = useState('');
   const [isSuccess, setIsSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  const { login } = useContext(AuthContext);
   const navigate = useNavigate();
 
   const handleSignup = async (e) => {
     e.preventDefault();
     setError('');
-    setLoading(true); // Fixed: Changed 'loading(true)' to 'setLoading(true)'
+    setLoading(true);
 
     try {
-      const { data } = await axios.post('http://localhost:5000/api/users', { name, email, password });
+      // Connect to register API endpoint
+      const { data } = await axios.post('/api/auth/register', { name, email, password });
       
-      localStorage.setItem('userInfo', JSON.stringify(data));
+      // Update global AuthContext & LocalStorage
+      login(data);
       setIsSuccess(true);
       
-      setTimeout(() => navigate('/shop'), 2000);
+      // Redirect based on user role after animation
+      setTimeout(() => {
+        if (data.isAdmin || data.role === 'admin') {
+          navigate('/admin');
+        } else {
+          navigate('/shop');
+        }
+      }, 1500);
     } catch (err) {
       setError(err.response?.data?.message || 'Registration failed. Check your connection.');
     } finally {
@@ -70,7 +82,7 @@ const SignupScreen = () => {
               
               <div className="flex items-center gap-2 mt-8 bg-purple-50 border border-purple-100/60 px-4 py-2 rounded-xl">
                 <Loader2 className="animate-spin text-purple-600" size={14} />
-                <p className="text-[9px] text-purple-600 font-black uppercase tracking-wider">Initializing Shop Interface...</p>
+                <p className="text-[9px] text-purple-600 font-black uppercase tracking-wider">Initializing Interface...</p>
               </div>
             </div>
           ) : (
@@ -149,7 +161,6 @@ const SignupScreen = () => {
                   </div>
                 </div>
 
-                
                 <button 
                   type="submit" 
                   disabled={loading} 
