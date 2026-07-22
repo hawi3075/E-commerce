@@ -25,14 +25,18 @@ const SignupScreen = () => {
     setLoading(true);
 
     try {
-      // Connect to register API endpoint
-      const { data } = await axios.post('/api/auth/register', { name, email, password });
+      // Points directly to Express running on port 5000 under /api/users
+      const { data } = await axios.post('http://localhost:5000/api/users', { 
+        name, 
+        email, 
+        password 
+      });
       
-      // Update global AuthContext & LocalStorage
+      // Save auth token / state
       login(data);
       setIsSuccess(true);
       
-      // Redirect based on user role after animation
+      // Redirect based on role
       setTimeout(() => {
         if (data.isAdmin || data.role === 'admin') {
           navigate('/admin');
@@ -68,11 +72,10 @@ const SignupScreen = () => {
           </h2>
         </div>
 
-        {/* Form Container Card - Clean Light Mode UI */}
+        {/* Form Container Card */}
         <div className="bg-white border border-slate-100 p-8 md:p-10 shadow-xl rounded-[2.5rem] transition-all">
           
           {isSuccess ? (
-            /* Success Deployment Screen */
             <div className="py-10 flex flex-col items-center justify-center text-center animate-in fade-in zoom-in duration-500">
               <div className="w-16 h-16 bg-purple-50 border border-purple-100 rounded-full flex items-center justify-center mb-5">
                 <CheckCircle2 size={36} className="text-purple-600" />
@@ -86,7 +89,6 @@ const SignupScreen = () => {
               </div>
             </div>
           ) : (
-            /* Main Input Form Structure */
             <>
               <div className="mb-8">
                 <h1 className="text-3xl font-black text-slate-900 uppercase tracking-tight italic">
@@ -122,7 +124,7 @@ const SignupScreen = () => {
                   </div>
                 </div>
 
-                {/* Email Address Field */}
+                {/* Email Field */}
                 <div className="space-y-1.5">
                   <label className="text-[9px] font-bold uppercase tracking-wider text-slate-400 ml-0.5">Email Address</label>
                   <div className="relative group">
@@ -138,7 +140,7 @@ const SignupScreen = () => {
                   </div>
                 </div>
 
-                {/* Security Key (Password) Field */}
+                {/* Password Field */}
                 <div className="space-y-1.5">
                   <label className="text-[9px] font-bold uppercase tracking-wider text-slate-400 ml-0.5">Security Key (Password)</label>
                   <div className="relative group">

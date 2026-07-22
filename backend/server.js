@@ -16,12 +16,8 @@ app.use(cors());
 app.use(express.json());
 
 // Routes
-// Register both authRoutes and userRoutes
-const authRoutes = require('./routes/authRoutes');
-const userRoutes = require('./routes/userRoutes');
-
-app.use('/api/auth', authRoutes); // Handles /api/auth/register & /api/auth/login
-app.use('/api/users', userRoutes); // Handles /api/users
+app.use('/api/auth', require('./routes/authRoutes')); // <--- Mount authRoutes here
+app.use('/api/users', require('./routes/userRoutes'));
 app.use('/api/products', require('./routes/productRoutes'));
 app.use('/api/orders', require('./routes/orderRoutes'));
 
