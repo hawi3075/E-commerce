@@ -31,14 +31,22 @@ const LoginScreen = () => {
       login(data);
       setIsSuccess(true);
       
+      // Check for Admin status across standard variations
+      const isAdminUser = 
+        data.isAdmin === true || 
+        data.user?.isAdmin === true || 
+        data.role === 'admin' || 
+        data.user?.role === 'admin';
+
       // Redirect based on user role after short success animation
       setTimeout(() => {
-        if (data.isAdmin || data.role === 'admin') {
-          navigate('/admin');
+        if (isAdminUser) {
+          navigate('/admin'); // Redirects admins to admin panel
         } else {
-          navigate('/shop');
+          navigate('/shop');  // Redirects regular buyers to shop
         }
-      }, 1500);
+      }, 1200);
+
     } catch (err) {
       setError(err.response?.data?.message || 'Authentication failed. Check your security credentials.');
     } finally {
@@ -49,6 +57,7 @@ const LoginScreen = () => {
   return (
     <div className="min-h-screen w-full relative flex items-center justify-center py-12 bg-slate-50 font-sans overflow-hidden antialiased text-slate-600">
       
+      {/* Background Glow Effect */}
       <div className="absolute inset-0 z-0 opacity-40 mix-blend-multiply pointer-events-none">
         <div className="absolute top-[-20%] right-[-10%] w-[600px] h-[600px] bg-purple-200 rounded-full blur-[120px]" />
         <div className="absolute bottom-[-20%] left-[-10%] w-[500px] h-[500px] bg-blue-100 rounded-full blur-[100px]" />
@@ -101,6 +110,7 @@ const LoginScreen = () => {
 
               <form className="space-y-5" onSubmit={handleLogin}>
                 
+                {/* Email Input */}
                 <div className="space-y-1.5">
                   <label className="text-[9px] font-bold uppercase tracking-wider text-slate-400 ml-0.5">Email Address</label>
                   <div className="relative group">
@@ -116,7 +126,7 @@ const LoginScreen = () => {
                   </div>
                 </div>
 
-                
+                {/* Password Input */}
                 <div className="space-y-1.5">
                   <div className="flex items-center justify-between px-0.5">
                     <label className="text-[9px] font-bold uppercase tracking-wider text-slate-400">Security Key</label>
@@ -144,6 +154,7 @@ const LoginScreen = () => {
                   </div>
                 </div>
 
+                {/* Submit Button */}
                 <button 
                   type="submit" 
                   disabled={loading} 
