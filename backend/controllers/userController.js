@@ -1,7 +1,8 @@
 const User = require('../models/userModel');
-// DELETE THIS LINE: const supabase = require('./supabaseClient');
 
 // @desc    Register a new user
+// @route   POST /api/auth/register
+// @access  Public
 const registerUser = async (req, res) => {
   const { name, email, password } = req.body;
   const userExists = await User.findOne({ email });
@@ -20,7 +21,9 @@ const registerUser = async (req, res) => {
 };
 
 // @desc    Auth user & get token
-const authUser = async (req, res) => {
+// @route   POST /api/auth/login
+// @access  Public
+const loginUser = async (req, res) => {
   const { email, password } = req.body;
   const user = await User.findOne({ email });
 
@@ -31,13 +34,17 @@ const authUser = async (req, res) => {
   }
 };
 
-// @desc    Get all users (for the admin route)
+// @desc    Get all users (for admin route)
+// @route   GET /api/users
+// @access  Private/Admin
 const getUsers = async (req, res) => {
   const users = await User.find({});
   res.json(users);
 };
 
 // @desc    Delete user
+// @route   DELETE /api/users/:id
+// @access  Private/Admin
 const deleteUser = async (req, res) => {
   const user = await User.findById(req.params.id);
   if (user) {
@@ -48,5 +55,9 @@ const deleteUser = async (req, res) => {
   }
 };
 
-// CRITICAL: This export must contain EVERY function used in your routes
-module.exports = { registerUser, authUser, getUsers, deleteUser };
+module.exports = {
+  registerUser,
+  loginUser,
+  getUsers,
+  deleteUser,
+};
