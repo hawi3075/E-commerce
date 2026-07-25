@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import axios from 'axios';
 import { 
   Shield, ArrowRight, Star, ShoppingCart, 
   MapPin, Phone, Eye, Heart, 
-  Grid, Clock, UserCheck, TrendingUp
+  Grid, Clock, UserCheck, TrendingUp, Loader2
 } from 'lucide-react';
 
 import Navbar from '../components/Navbar';
@@ -12,12 +13,19 @@ import Navbar from '../components/Navbar';
 const ProductCard = ({ p, ribbon, onAddToCart }) => {
   const [isLiked, setIsLiked] = useState(false);
 
+  // Normalize image and ID fields between backend data and static mock data
+  const imageUrl = p.image || 'https://via.placeholder.com/500';
+  const productId = p._id || p.id;
+  const productName = p.product_name || p.name;
+  const productPrice = p.price ? Number(p.price) : 0;
+  const productStock = p.countInStock !== undefined ? p.countInStock : p.stock;
+
   return (
     <div className="bg-white rounded-3xl p-4 border border-slate-100 hover:border-purple-200 shadow-sm hover:shadow-md transition-all duration-300 group relative flex flex-col justify-between">
       <div className="relative h-48 bg-slate-50 rounded-2xl mb-4 overflow-hidden flex items-center justify-center border border-slate-100">
         <img 
-          src={p.image} 
-          alt={p.name} 
+          src={imageUrl} 
+          alt={productName} 
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" 
           loading="lazy"
         />
@@ -28,7 +36,7 @@ const ProductCard = ({ p, ribbon, onAddToCart }) => {
           </span>
         )}
         <span className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm text-slate-700 border border-slate-100 text-[9px] font-bold px-2 py-0.5 rounded-md uppercase z-10">
-          {p.stock ? `${p.stock} Units` : 'In Stock'}
+          {productStock !== undefined ? `${productStock} Units` : 'In Stock'}
         </span>
 
         <div className="absolute inset-y-0 right-3 flex flex-col justify-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10">
@@ -40,8 +48,8 @@ const ProductCard = ({ p, ribbon, onAddToCart }) => {
             <Heart size={14} className={isLiked ? "fill-purple-600 text-purple-600" : ""} />
           </button>
           <Link 
-            to={`/product/${p.id}`} 
-            aria-label={`View quick details for ${p.name}`}
+            to={`/product/${productId}`} 
+            aria-label={`View quick details for ${productName}`}
             className="p-2 bg-white border border-slate-100 rounded-lg text-slate-400 hover:text-purple-600 shadow-sm transition-colors"
           >
             <Eye size={14} />
@@ -53,23 +61,24 @@ const ProductCard = ({ p, ribbon, onAddToCart }) => {
         <div>
           <div className="flex items-center gap-0.5 mb-1">
             {[...Array(5)].map((_, i) => (
-              <Star key={i} size={10} className={`${i < Math.round(p.rating) ? 'fill-amber-400 text-amber-400' : 'text-slate-200'}`} />
+              <Star key={i} size={10} className={`${i < Math.round(p.rating || 5) ? 'fill-amber-400 text-amber-400' : 'text-slate-200'}`} />
             ))}
             {p.sold && <span className="text-[10px] text-slate-400 font-medium ml-1">({p.sold} Sold)</span>}
           </div>
-          <h4 className="font-bold text-slate-800 text-xs uppercase tracking-wide line-clamp-2 mb-0.5 min-h-[2rem]">{p.name}</h4>
+          <h4 className="font-bold text-slate-800 text-xs uppercase tracking-wide line-clamp-2 mb-0.5 min-h-[2rem]">{productName}</h4>
           {p.efficiency && <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">{p.efficiency}</p>}
           {p.release && <p className="text-[9px] font-bold text-purple-600 uppercase tracking-wider">{p.release}</p>}
+          {p.category && <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">{p.category}</p>}
         </div>
 
         <div className="pt-2 border-t border-slate-100 flex items-center justify-between gap-2">
           <div>
             <span className="text-[9px] font-semibold text-slate-400 uppercase tracking-wider block">Asset Value</span>
-            <p className="text-slate-900 font-black text-base">${p.price.toFixed(2)}</p>
+            <p className="text-slate-900 font-black text-base">${productPrice.toFixed(2)}</p>
           </div>
           <button 
             onClick={() => onAddToCart(p)}
-            aria-label={`Add ${p.name} to cart`}
+            aria-label={`Add ${productName} to cart`}
             className="bg-purple-600 hover:bg-purple-700 text-white p-2.5 rounded-xl transition-all shadow-md shadow-purple-600/10 flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
           >
             <ShoppingCart size={14} />
@@ -83,24 +92,45 @@ const ProductCard = ({ p, ribbon, onAddToCart }) => {
 const HomeScreen = () => {
   const navigate = useNavigate();
 
-  // Updated categories to match your Shop layout precisely
+  // Dynamic Backend Products State
+  const [apiProducts, setApiProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  // Fetch live products uploaded to the backend
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const { data } = await axios.get('/api/products');
+        if (Array.isArray(data)) {
+          setApiProducts(data);
+        }
+      } catch (error) {
+        console.error('Error fetching live backend products:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProducts();
+  }, []);
+
+  // Categories definition
   const categories = [
     { 
-      id: 'headwear', 
+      id: 'Head Protection', 
       name: 'Headwear', 
       count: 14, 
       image: 'https://images.unsplash.com/photo-1590483736622-39da8caf3ef8?auto=format&fit=crop&q=80&w=200', 
       gradient: 'from-purple-100 to-purple-50' 
     },
     { 
-      id: 'workwear', 
+      id: 'High-Visibility', 
       name: 'Workwear', 
       count: 28, 
       image: 'https://images.unsplash.com/photo-1578328819058-b69f3a3b0f6b?auto=format&fit=crop&q=80&w=200', 
       gradient: 'from-blue-100 to-blue-50' 
     },
     { 
-      id: 'footwear', 
+      id: 'Safety Shoes', 
       name: 'Footwear', 
       count: 19, 
       image: 'https://images.unsplash.com/photo-1608256246200-53e635b5b65f?auto=format&fit=crop&q=80&w=200', 
@@ -108,27 +138,34 @@ const HomeScreen = () => {
     },
   ];
 
-  const bestSellers = [
-    { id: 1, name: 'Vanguard Industrial Hard Hat', price: 25.00, rating: 5.0, sold: 1240, stock: 18, image: 'https://images.unsplash.com/photo-1590483736622-39da8caf3ef8?auto=format&fit=crop&q=80&w=500', efficiency: 'High Performance' },
-    { id: 2, name: 'Aegis High-Vis Safety Vest', price: 12.99, rating: 4.9, sold: 890, stock: 46, image: 'https://images.unsplash.com/photo-1578328819058-b69f3a3b0f6b?auto=format&fit=crop&q=80&w=500', efficiency: 'Max Visibility' },
-    { id: 3, name: 'Titan Steel Toe Work Boots', price: 85.00, rating: 4.8, sold: 745, stock: 12, image: 'https://images.unsplash.com/photo-1608256246200-53e635b5b65f?auto=format&fit=crop&q=80&w=500', efficiency: 'Heavy Duty' },
-    { id: 4, name: 'Anti-Fog Ballistic Goggles', price: 15.00, rating: 4.7, sold: 610, stock: 51, image: 'https://images.unsplash.com/photo-1551150431-993b1139ecc5?auto=format&fit=crop&q=80&w=500', efficiency: 'Clear Telemetry' },
+  // Static Mock Items
+  const staticBestSellers = [
+    { id: '1', name: 'Vanguard Industrial Hard Hat', price: 25.00, rating: 5.0, sold: 1240, stock: 18, image: 'https://images.unsplash.com/photo-1590483736622-39da8caf3ef8?auto=format&fit=crop&q=80&w=500', efficiency: 'High Performance' },
+    { id: '2', name: 'Aegis High-Vis Safety Vest', price: 12.99, rating: 4.9, sold: 890, stock: 46, image: 'https://images.unsplash.com/photo-1578328819058-b69f3a3b0f6b?auto=format&fit=crop&q=80&w=500', efficiency: 'Max Visibility' },
+    { id: '3', name: 'Titan Steel Toe Work Boots', price: 85.00, rating: 4.8, sold: 745, stock: 12, image: 'https://images.unsplash.com/photo-1608256246200-53e635b5b65f?auto=format&fit=crop&q=80&w=500', efficiency: 'Heavy Duty' },
+    { id: '4', name: 'Anti-Fog Ballistic Goggles', price: 15.00, rating: 4.7, sold: 610, stock: 51, image: 'https://images.unsplash.com/photo-1551150431-993b1139ecc5?auto=format&fit=crop&q=80&w=500', efficiency: 'Clear Telemetry' },
   ];
 
-  const newArrivals = [
-    { id: 5, name: 'Mantis Thermal Shield Gloves', price: 19.50, rating: 5.0, sold: 34, stock: 8, image: 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&q=80&w=500', release: '2026 Batch A' }, 
-    { id: 6, name: 'Pro Arc Welding Face Shield', price: 42.00, rating: 4.9, sold: 12, stock: 15, image: 'https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?auto=format&fit=crop&q=80&w=500', release: 'Next-Gen Core' },
-    { id: 7, name: 'Apex Multi-Pocket Cargo Rig', price: 49.99, rating: 4.6, sold: 18, stock: 22, image: 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&q=80&w=500', release: '2026 Batch B' },
-    { id: 8, name: 'Kevlar Reinforced Sleeves', price: 29.00, rating: 4.8, sold: 25, stock: 30, image: 'https://images.unsplash.com/photo-158109335397-9583fe92d232?auto=format&fit=crop&q=80&w=500', release: 'Ultra Shield' }
+  const staticNewArrivals = [
+    { id: '5', name: 'Mantis Thermal Shield Gloves', price: 19.50, rating: 5.0, sold: 34, stock: 8, image: 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&q=80&w=500', release: '2026 Batch A' }, 
+    { id: '6', name: 'Pro Arc Welding Face Shield', price: 42.00, rating: 4.9, sold: 12, stock: 15, image: 'https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?auto=format&fit=crop&q=80&w=500', release: 'Next-Gen Core' },
+    { id: '7', name: 'Apex Multi-Pocket Cargo Rig', price: 49.99, rating: 4.6, sold: 18, stock: 22, image: 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&q=80&w=500', release: '2026 Batch B' },
+    { id: '8', name: 'Kevlar Reinforced Sleeves', price: 29.00, rating: 4.8, sold: 25, stock: 30, image: 'https://images.unsplash.com/photo-158109335397-9583fe92d232?auto=format&fit=crop&q=80&w=500', release: 'Ultra Shield' }
   ];
 
-  const forYouItems = [
-    { id: 9, name: 'Universal Heavy Duty Gear Package', price: 120.00, rating: 5.0, match: '98% Match', image: 'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?auto=format&fit=crop&q=80&w=500' },
-    { id: 10, name: 'Premium Ergo Fall-Arrest Harness', price: 145.00, rating: 4.9, match: '95% Match', image: 'https://images.unsplash.com/photo-1606166325683-e6deb697d30a?auto=format&fit=crop&q=80&w=500' },
+  const staticForYouItems = [
+    { id: '9', name: 'Universal Heavy Duty Gear Package', price: 120.00, rating: 5.0, match: '98% Match', image: 'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?auto=format&fit=crop&q=80&w=500' },
+    { id: '10', name: 'Premium Ergo Fall-Arrest Harness', price: 145.00, rating: 4.9, match: '95% Match', image: 'https://images.unsplash.com/photo-1606166325683-e6deb697d30a?auto=format&fit=crop&q=80&w=500' },
   ];
+
+  // Dynamically merge live fetched items with static items
+  const bestSellers = apiProducts.length > 0 ? apiProducts.slice(0, 4) : staticBestSellers;
+  const newArrivals = apiProducts.length > 4 ? apiProducts.slice(4, 8) : staticNewArrivals;
+  const forYouItems = staticForYouItems;
 
   const handleAddToCart = (product) => {
-    console.log(`Dispatched ${product.name} to checkout session tracking array.`);
+    const productName = product.product_name || product.name;
+    console.log(`Dispatched ${productName} to checkout session tracking array.`);
   };
 
   return (
@@ -154,8 +191,6 @@ const HomeScreen = () => {
         <div className="max-w-[1200px] mx-auto px-6 w-full relative z-10 py-16">
           
           <div className="max-w-xl space-y-5 animate-float">
-            {/* "Premium Industrial Resource" badge successfully removed from here */}
-            
             <h1 className="text-4xl sm:text-5xl md:text-6xl font-black text-white uppercase tracking-tight leading-none drop-shadow-[0_4px_12px_rgba(0,0,0,0.95)]">
               Defend <br /> Your <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-purple-300 italic drop-shadow-[0_4px_12px_rgba(147,51,234,0.5)]">Workforce.</span>
             </h1>
@@ -205,7 +240,7 @@ const HomeScreen = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {categories.map((cat) => (
             <Link 
-              to={`/shop?category=${cat.id}`} 
+              to={`/shop?category=${encodeURIComponent(cat.id)}`} 
               key={cat.id} 
               className="p-4 rounded-2xl border border-slate-100 bg-slate-50/50 hover:border-purple-200 transition-all duration-300 relative overflow-hidden group flex flex-col justify-between h-48"
             >
@@ -247,9 +282,16 @@ const HomeScreen = () => {
               View All <ArrowRight size={10} />
             </Link>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {bestSellers.map(p => <ProductCard key={p.id} p={p} ribbon="Top Value" onAddToCart={handleAddToCart} />)}
-          </div>
+          
+          {loading ? (
+            <div className="flex justify-center py-10">
+              <Loader2 className="animate-spin text-purple-600" size={24} />
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {bestSellers.map(p => <ProductCard key={p._id || p.id} p={p} ribbon="Top Value" onAddToCart={handleAddToCart} />)}
+            </div>
+          )}
         </section>
 
         {/* Informative Light Banner */}
@@ -278,12 +320,19 @@ const HomeScreen = () => {
               View Latest <ArrowRight size={10} />
             </Link>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {newArrivals.map(p => <ProductCard key={p.id} p={p} ribbon="2026 Spec" onAddToCart={handleAddToCart} />)}
-          </div>
+
+          {loading ? (
+            <div className="flex justify-center py-10">
+              <Loader2 className="animate-spin text-purple-600" size={24} />
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {newArrivals.map(p => <ProductCard key={p._id || p.id} p={p} ribbon="2026 Spec" onAddToCart={handleAddToCart} />)}
+            </div>
+          )}
         </section>
 
-    
+        {/* Suggested For You */}
         <section className="bg-slate-50 border border-slate-100 rounded-3xl p-6 md:p-8">
           <div className="mb-6 pb-3 border-b border-slate-100">
             <div className="flex items-center gap-1.5 text-purple-600 mb-1">
