@@ -1,19 +1,21 @@
 const express = require('express');
 const router = express.Router();
-const { 
-  registerUser, 
-  loginUser, // Fixed: Changed authUser to loginUser
-  getUsers, 
-  deleteUser 
+const {
+  registerUser,
+  loginUser,
+  getUsers,
+  deleteUser,
 } = require('../controllers/userController');
-const { protect, admin } = require('../middleware/authMiddleware');
+
+// Destructure both middleware functions cleanly
+const { protect, isAdmin } = require('../middleware/authMiddleware');
 
 // Public routes
-router.post('/', registerUser);
-router.post('/login', loginUser); // Fixed: using loginUser here
+router.post('/register', registerUser);
+router.post('/login', loginUser);
 
-// Admin routes
-router.get('/', protect, admin, getUsers);
-router.delete('/:id', protect, admin, deleteUser);
+// Private Admin routes
+router.route('/').get(protect, isAdmin, getUsers);
+router.route('/:id').delete(protect, isAdmin, deleteUser);
 
 module.exports = router;
