@@ -1,4 +1,4 @@
-const Product = require('../models/productModel'); // Make sure this path points to your Product model
+const Product = require('../models/productModel');
 
 // @desc    Get all products
 // @route   GET /api/products
@@ -40,6 +40,7 @@ const createProduct = async (req, res) => {
       price,
       product_code,
       category,
+      product_category,
       size,
       countInStock,
       color,
@@ -53,7 +54,7 @@ const createProduct = async (req, res) => {
       product_type,
       price,
       product_code,
-      category,
+      product_category: product_category || category,
       size,
       countInStock,
       color,
@@ -64,7 +65,7 @@ const createProduct = async (req, res) => {
     const createdProduct = await product.save();
     res.status(201).json(createdProduct);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(400).json({ message: error.message });
   }
 };
 
@@ -80,7 +81,7 @@ const updateProduct = async (req, res) => {
       product.product_type = req.body.product_type || product.product_type;
       product.price = req.body.price ?? product.price;
       product.product_code = req.body.product_code || product.product_code;
-      product.category = req.body.category || product.category;
+      product.product_category = req.body.product_category || req.body.category || product.product_category;
       product.size = req.body.size || product.size;
       product.countInStock = req.body.countInStock ?? product.countInStock;
       product.color = req.body.color || product.color;
@@ -93,7 +94,7 @@ const updateProduct = async (req, res) => {
       res.status(404).json({ message: 'Product not found' });
     }
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(400).json({ message: error.message });
   }
 };
 
