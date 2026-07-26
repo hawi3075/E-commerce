@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { 
   Upload, Link as LinkIcon, Plus, X, Image as ImageIcon, 
-  Tag, Hash, DollarSign, Box, Palette, Layers, CheckCircle, Loader2, Shield 
+  Tag, Hash, DollarSign, Box, Palette, Layers, Loader2, Shield 
 } from 'lucide-react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
@@ -54,12 +54,24 @@ const UploadProduct = () => {
     setLoading(true);
 
     try {
-      const userInfo = JSON.parse(localStorage.getItem('userInfo')) || {};
+      // 1. Retrieve user details or direct token from LocalStorage
+      const rawUserInfo = localStorage.getItem('userInfo');
+      const userInfo = rawUserInfo ? JSON.parse(rawUserInfo) : {};
+      
+      // Fallback: Check if token is stored in 'userInfo.token' OR directly as 'token'
+      const token = userInfo.token || localStorage.getItem('token');
 
+      if (!token) {
+        alert("Session expired or token missing. Please log in again.");
+        setLoading(false);
+        return;
+      }
+
+      // 2. Set headers with guaranteed Authorization bearer token
       const config = {
         headers: {
           'Content-Type': 'application/json',
-          ...(userInfo.token && { Authorization: `Bearer ${userInfo.token}` }),
+          Authorization: `Bearer ${token}`,
         },
       };
 
@@ -76,15 +88,15 @@ const UploadProduct = () => {
         image: activeImage,
       };
 
-      // POST to backend
+      // 3. POST request to backend
       const { data } = await axios.post('/api/products', productData, config);
 
       alert(`SUCCESS: ${data.product_name || name} added to system!`);
       navigate('/shop');
 
     } catch (error) {
-      console.error(error);
-      alert(error.response?.data?.message || "Failed to add product. Please check server status.");
+      console.error('Upload Error Details:', error.response?.data || error);
+      alert(error.response?.data?.message || "Failed to add product. Please check server status or admin privileges.");
     } finally {
       setLoading(false);
     }
@@ -166,7 +178,7 @@ const UploadProduct = () => {
                     </div>
                   ) : (
                     <div
-                      onClick={() => fileInputRef.current.click()}
+                      onClick={() => fileInputRef.current?.click()}
                       className="border-2 border-dashed border-slate-200 rounded-2xl p-10 flex flex-col items-center justify-center hover:border-purple-500 hover:bg-purple-50/30 transition-all cursor-pointer bg-slate-50/50 group"
                     >
                       <div className="p-4 bg-purple-50 text-purple-600 rounded-2xl mb-3 group-hover:scale-110 transition-transform">
@@ -246,7 +258,7 @@ const UploadProduct = () => {
                 />
               </div>
 
-              {/* Category Dropdown (Strictly 4 requested) */}
+              {/* Category Dropdown */}
               <div className="space-y-1.5">
                 <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.15em] flex items-center gap-1">
                   <Layers size={12} className="text-purple-600" /> Category
