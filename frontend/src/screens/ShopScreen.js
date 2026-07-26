@@ -1,10 +1,12 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { 
   ChevronDown, Grid, ShoppingCart, Star, 
-  SlidersHorizontal, Eye, Heart 
+  SlidersHorizontal, Eye, Heart, Loader2 
 } from 'lucide-react';
+
+import Navbar from '../components/Navbar';
 
 // Beautiful Mock Database fallback in case your API/Database is empty
 const MOCK_PRODUCTS = [
@@ -63,15 +65,38 @@ const ShopScreen = () => {
   const [selectedCategory, setSelectedCategory] = useState('All Products');
   const [sortBy, setSortBy] = useState('newest');
   const [isLoading, setIsLoading] = useState(true);
+  
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
 
-  // Defined static categories list matching your sidebar
+  // Categories list matching side menu
   const categoriesList = [
     'All Products', 
     'Headwear', 
     'Workwear', 
     'Footwear'
   ];
+
+  // Helper function to map external category parameters to internal categories
+  const normalizeCategory = (catParam) => {
+    if (!catParam) return 'All Products';
+    const lower = catParam.toLowerCase();
+    if (lower.includes('head') || lower.includes('helmet')) return 'Headwear';
+    if (lower.includes('vis') || lower.includes('work') || lower.includes('high')) return 'Workwear';
+    if (lower.includes('shoe') || lower.includes('foot') || lower.includes('boot')) return 'Footwear';
+    
+    // Check direct match
+    const found = categoriesList.find(c => c.toLowerCase() === lower);
+    return found || 'All Products';
+  };
+
+  // Sync category state whenever search parameters in URL change
+  useEffect(() => {
+    const queryCategory = searchParams.get('category');
+    if (queryCategory) {
+      setSelectedCategory(normalizeCategory(queryCategory));
+    }
+  }, [searchParams]);
 
   // Fetch API Products with Mock Fallback
   useEffect(() => {
@@ -80,7 +105,6 @@ const ShopScreen = () => {
         setIsLoading(true);
         const { data } = await axios.get('/api/products');
         
-        // If API returns successfully but has no products, fallback to Mock Data
         if (data && data.length > 0) {
           setProducts(data);
         } else {
@@ -88,7 +112,7 @@ const ShopScreen = () => {
         }
       } catch (error) {
         console.warn("API offline or failed. Sourcing fallback mock database.", error);
-        setProducts(MOCK_PRODUCTS); // Set mock fallback on network failure
+        setProducts(MOCK_PRODUCTS);
       } finally {
         setIsLoading(false);
       }
@@ -96,24 +120,26 @@ const ShopScreen = () => {
     fetchProducts();
   }, []);
 
-  // Filter Logic
+  // Category Filtering Logic
   const filteredProducts = useMemo(() => {
     if (selectedCategory === 'All Products') {
       return products;
     }
-    return products.filter(
-      (p) => p.category?.toLowerCase() === selectedCategory.toLowerCase()
-    );
+    return products.filter((p) => {
+      const pCat = (p.category || '').toLowerCase();
+      const targetCat = selectedCategory.toLowerCase();
+      return pCat === targetCat || normalizeCategory(pCat) === selectedCategory;
+    });
   }, [selectedCategory, products]);
 
   // Sorting Logic
   const sortedProducts = useMemo(() => {
     const list = [...filteredProducts];
     if (sortBy === 'low-to-high') {
-      return list.sort((a, b) => a.price - b.price);
+      return list.sort((a, b) => (Number(a.price) || 0) - (Number(b.price) || 0));
     }
     if (sortBy === 'high-to-low') {
-      return list.sort((a, b) => b.price - a.price);
+      return list.sort((a, b) => (Number(b.price) || 0) - (Number(a.price) || 0));
     }
     return list; 
   }, [filteredProducts, sortBy]);
@@ -125,6 +151,8 @@ const ShopScreen = () => {
   return (
     <div className="bg-slate-50/50 min-h-screen font-sans antialiased text-slate-700">
       
+      <Navbar />
+
       {/* Hero Header */}
       <header className="bg-white border-b border-slate-100 pt-28 pb-12">
         <div className="max-w-[1280px] mx-auto px-6 space-y-2">
@@ -151,7 +179,10 @@ const ShopScreen = () => {
                 // Calculate dynamic quantity counts
                 const count = cat === 'All Products' 
                   ? products.length 
-                  : products.filter(p => p.category?.toLowerCase() === cat.toLowerCase()).length;
+                  : products.filter(p => {
+                      const pCat = (p.category || '').toLowerCase();
+                      return pCat === cat.toLowerCase() || normalizeCategory(pCat) === cat;
+                    }).length;
 
                 return (
                   <button
@@ -159,7 +190,7 @@ const ShopScreen = () => {
                     onClick={() => setSelectedCategory(cat)}
                     className={`w-full flex items-center justify-between px-4 py-3 rounded-xl text-left text-xs font-bold uppercase tracking-wide transition-all ${
                       isSelected 
-                        ? 'bg-purple-50 text-purple-700 border border-purple-100/80' 
+                        ? 'bg-purple-50 text-purple-700 border border-purple-100/80 shadow-sm' 
                         : 'bg-white hover:bg-slate-100/50 text-slate-500 border border-transparent'
                     }`}
                   >
@@ -167,7 +198,7 @@ const ShopScreen = () => {
                       <Grid size={12} className={isSelected ? "text-purple-600" : "text-slate-400"} />
                       <span>{cat}</span>
                     </div>
-                    <span className={`text-[10px] px-2 py-0.5 rounded-full ${isSelected ? 'bg-purple-100 text-purple-700' : 'bg-slate-100 text-slate-400'}`}>
+                    <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${isSelected ? 'bg-purple-100 text-purple-700' : 'bg-slate-100 text-slate-400'}`}>
                       {count}
                     </span>
                   </button>
@@ -201,8 +232,9 @@ const ShopScreen = () => {
 
             {/* Content States */}
             {isLoading ? (
-              <div className="text-center py-24 bg-white rounded-3xl border border-dashed border-slate-200">
-                <p className="text-slate-400 font-bold uppercase tracking-widest animate-pulse text-xs">Scanning Inventory...</p>
+              <div className="text-center py-24 bg-white rounded-3xl border border-dashed border-slate-200 flex flex-col items-center justify-center gap-3">
+                <Loader2 className="animate-spin text-purple-600" size={28} />
+                <p className="text-slate-400 font-bold uppercase tracking-widest text-xs">Scanning Inventory...</p>
               </div>
             ) : sortedProducts.length === 0 ? (
               <div className="text-center py-24 bg-white rounded-3xl border border-dashed border-slate-200 space-y-2">
@@ -213,39 +245,44 @@ const ShopScreen = () => {
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {sortedProducts.map((p) => {
-                  const isSoldOut = p.stock === 0;
+                  const productId = p._id || p.id;
+                  const productName = p.product_name || p.name;
+                  const productPrice = Number(p.price) || 0;
+                  const productStock = p.countInStock !== undefined ? p.countInStock : p.stock;
+                  const isSoldOut = productStock === 0;
+                  const imageUrl = p.image || 'https://via.placeholder.com/500';
 
                   return (
                     <div 
-                      key={p._id}
+                      key={productId}
                       className="bg-white rounded-3xl border border-slate-100 hover:border-purple-200 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col justify-between overflow-hidden group"
                     >
                       {/* Image Block */}
                       <div className="relative h-56 bg-slate-50 flex items-center justify-center overflow-hidden border-b border-slate-100/80">
                         <img 
-                          src={p.image} 
-                          alt={p.product_name} 
+                          src={imageUrl} 
+                          alt={productName} 
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
                           loading="lazy"
                         />
 
                         {isSoldOut ? (
-                          <span className="absolute top-4 right-4 bg-red-50 text-red-600 border border-red-100 text-[10px] font-extrabold px-2.5 py-1 rounded-lg uppercase tracking-wide">
+                          <span className="absolute top-4 right-4 bg-red-50 text-red-600 border border-red-100 text-[10px] font-extrabold px-2.5 py-1 rounded-lg uppercase tracking-wide z-10">
                             Sold out
                           </span>
                         ) : (
-                          <span className="absolute top-4 right-4 bg-emerald-50 text-emerald-600 border border-emerald-100 text-[10px] font-extrabold px-2.5 py-1 rounded-lg uppercase tracking-wide">
-                            {p.stock} In Stock
+                          <span className="absolute top-4 right-4 bg-emerald-50 text-emerald-600 border border-emerald-100 text-[10px] font-extrabold px-2.5 py-1 rounded-lg uppercase tracking-wide z-10">
+                            {productStock !== undefined ? `${productStock} In Stock` : 'In Stock'}
                           </span>
                         )}
 
                         {/* Interactive overlays */}
-                        <div className="absolute inset-0 bg-slate-900/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-2">
+                        <div className="absolute inset-0 bg-slate-900/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-2 z-10">
                           <button className="p-3 bg-white rounded-xl shadow-lg text-slate-600 hover:text-purple-600 hover:scale-110 transition-all">
                             <Heart size={16} />
                           </button>
                           <button 
-                            onClick={() => handleBuyNow(p._id)} 
+                            onClick={() => handleBuyNow(productId)} 
                             className="p-3 bg-white rounded-xl shadow-lg text-slate-600 hover:text-purple-600 hover:scale-110 transition-all"
                           >
                             <Eye size={16} />
@@ -270,7 +307,7 @@ const ShopScreen = () => {
                           </div>
 
                           <h3 className="font-extrabold text-slate-800 text-sm uppercase tracking-wide line-clamp-2 min-h-[2.5rem] leading-snug group-hover:text-purple-600 transition-colors">
-                            {p.product_name}
+                            {productName}
                           </h3>
                         </div>
 
@@ -278,7 +315,7 @@ const ShopScreen = () => {
                         <div className="pt-4 border-t border-slate-100 flex items-center justify-between">
                           <div>
                             <span className="text-[9px] font-semibold text-slate-400 uppercase tracking-widest block">Unit Value</span>
-                            <span className="text-slate-900 font-black text-lg">${p.price.toFixed(2)}</span>
+                            <span className="text-slate-900 font-black text-lg">${productPrice.toFixed(2)}</span>
                           </div>
 
                           {isSoldOut ? (
@@ -290,7 +327,7 @@ const ShopScreen = () => {
                             </button>
                           ) : (
                             <button 
-                              onClick={() => handleBuyNow(p._id)}
+                              onClick={() => handleBuyNow(productId)}
                               className="bg-purple-600 hover:bg-purple-700 text-white px-5 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 transition-all shadow-md shadow-purple-600/10 hover:shadow-purple-600/25 active:scale-95"
                             >
                               <ShoppingCart size={13} />
