@@ -24,10 +24,16 @@ const LoginScreen = () => {
     setLoading(true);
 
     try {
-      const { data } = await axios.post('http://localhost:5000/api/users/login', { email, password });
+      // 1. FIXED: Point to /api/auth/login instead of /api/users/login
+      // (Or relative path '/api/auth/login' if you configured proxy in package.json)
+      const { data } = await axios.post('/api/auth/login', { email, password });
       
-      // Save user payload to context and local storage
-      login(data);
+      // 2. GUARANTEE LocalStorage gets updated
+      localStorage.setItem('userInfo', JSON.stringify(data));
+
+      // Save user payload to context if auth context is used
+      if (login) login(data);
+      
       setIsSuccess(true);
 
       // Check admin status
@@ -35,14 +41,18 @@ const LoginScreen = () => {
 
       setTimeout(() => {
         if (isAdminUser) {
-          navigate('/admin');
+          navigate('/admin/upload');
         } else {
           navigate('/shop');
         }
       }, 1000);
 
     } catch (err) {
-      setError(err.response?.data?.message || 'Authentication failed. Check your security credentials.');
+      console.error('Login Error:', err);
+      setError(
+        err.response?.data?.message || 
+        'Authentication failed. Check your security credentials or server status.'
+      );
     } finally {
       setLoading(false);
     }

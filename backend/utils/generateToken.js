@@ -1,8 +1,14 @@
-const jwt = require("jsonwebtoken");
+const jwt = require('jsonwebtoken');
 
 const generateToken = (id) => {
-  return jwt.sign({ id }, process.env.JWT_SECRET, {
-    expiresIn: "30d",
+  // Uses .env if available, otherwise falls back to a hardcoded secret
+  const secret =
+    process.env.JWT_SECRET ||
+    process.env.NEXTAUTH_SECRET ||
+    'luu_safety_secret_key_999';
+
+  return jwt.sign({ id }, secret, {
+    expiresIn: '30d',
   });
 };
 
