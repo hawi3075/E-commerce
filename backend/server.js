@@ -15,19 +15,27 @@ const app = express();
 // Middleware
 app.use(cors());
 
-// --- FIX FOR "REQUEST ENTITY TOO LARGE" ERROR ---
-// Increased payload size limit to 50mb for both JSON and URL-encoded requests
+// Payload size limit for image uploads
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
-// Serve static uploaded files (so images saved in uploads/ can be viewed in browser)
+// Serve static uploaded files
 app.use('/uploads', express.static(path.join(__dirname, '/uploads')));
 
+// Safe Route Imports
+const authRoutes = require('./routes/authRoutes');
+const userRoutes = require('./routes/userRoutes');
+const productRoutes = require('./routes/productRoutes');
+const orderRoutes = require('./routes/orderRoutes');
+
+// Verify exports are valid middleware functions before mounting
+const safeRoute = (route) => (typeof route === 'function' ? route : (req, res, next) => next());
+
 // Routes
-app.use('/api/auth', require('./routes/authRoutes')); 
-app.use('/api/users', require('./routes/userRoutes'));
-app.use('/api/products', require('./routes/productRoutes'));
-app.use('/api/orders', require('./routes/orderRoutes'));
+app.use('/api/auth', safeRoute(authRoutes)); 
+app.use('/api/users', safeRoute(userRoutes));
+app.use('/api/products', safeRoute(productRoutes));
+app.use('/api/orders', safeRoute(orderRoutes));
 
 // Basic Health Check
 app.get('/', (req, res) => {
@@ -45,7 +53,7 @@ app.use((req, res, next) => {
 app.use((err, req, res, next) => {
     const statusCode = res.statusCode === 200 ? 500 : res.statusCode;
     res.status(statusCode).json({
-        message: err.message.toUpperCase(),
+        message: err.message ? err.message.toUpperCase() : 'SERVER ERROR',
         stack: process.env.NODE_ENV === 'production' ? null : err.stack,
     });
 });

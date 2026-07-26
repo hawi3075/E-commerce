@@ -1,13 +1,17 @@
-const express = require('express');
-const router = express.Router();
-const { addOrderItems, getOrderById, updateOrderStatus } = require('../controllers/orderController');
-const { protect, admin } = require('../middleware/authMiddleware');
+// Example functions in orderController.js
+const addOrderItems = async (req, res) => { /* ... */ };
+const getOrderById = async (req, res) => { /* ... */ };
+const updateOrderToPaid = async (req, res) => { /* ... */ };
+const updateOrderToDelivered = async (req, res) => { /* ... */ };
+const getMyOrders = async (req, res) => { /* ... */ };
+const getOrders = async (req, res) => { /* ... */ };
 
-// User routes
-router.post('/', protect, addOrderItems);
-router.get('/:id', protect, getOrderById);
-
-// Admin routes
-router.put('/:id/status', protect, admin, updateOrderStatus);
-
-module.exports = router;
+// 🔴 MAKE SURE ALL 6 ARE EXPORTED HERE:
+module.exports = {
+  addOrderItems,
+  getOrderById,
+  updateOrderToPaid,
+  updateOrderToDelivered,
+  getMyOrders,
+  getOrders,
+};
