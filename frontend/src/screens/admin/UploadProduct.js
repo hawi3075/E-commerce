@@ -18,7 +18,7 @@ const UploadProduct = () => {
   const [productType, setProductType] = useState('');
   const [price, setPrice] = useState('');
   const [productCode, setProductCode] = useState('');
-  const [category, setCategory] = useState('Safety Shoes');
+  const [category, setCategory] = useState('Shoes'); // Default matching schema enum
   const [size, setSize] = useState('');
   const [amount, setAmount] = useState('1');
   const [color, setColor] = useState('');
@@ -54,11 +54,9 @@ const UploadProduct = () => {
     setLoading(true);
 
     try {
-      // 1. Retrieve user details or direct token from LocalStorage
       const rawUserInfo = localStorage.getItem('userInfo');
       const userInfo = rawUserInfo ? JSON.parse(rawUserInfo) : {};
       
-      // Fallback: Check if token is stored in 'userInfo.token' OR directly as 'token'
       const token = userInfo.token || localStorage.getItem('token');
 
       if (!token) {
@@ -67,7 +65,6 @@ const UploadProduct = () => {
         return;
       }
 
-      // 2. Set headers with guaranteed Authorization bearer token
       const config = {
         headers: {
           'Content-Type': 'application/json',
@@ -80,7 +77,7 @@ const UploadProduct = () => {
         product_type: productType,
         price: Number(price),
         product_code: productCode,
-        category: category,
+        product_category: category, // Matched key to model schema
         size: size,
         countInStock: Number(amount),
         color: color,
@@ -88,7 +85,6 @@ const UploadProduct = () => {
         image: activeImage,
       };
 
-      // 3. POST request to backend
       const { data } = await axios.post('/api/products', productData, config);
 
       alert(`SUCCESS: ${data.product_name || name} added to system!`);
@@ -132,7 +128,6 @@ const UploadProduct = () => {
                   <ImageIcon size={14} className="text-purple-600" /> Product Image
                 </label>
                 
-                {/* Image Mode Selector */}
                 <div className="flex items-center bg-slate-100 p-1 rounded-xl gap-1">
                   <button
                     type="button"
@@ -155,7 +150,6 @@ const UploadProduct = () => {
                 </div>
               </div>
 
-              {/* Upload Input Area */}
               {imageMode === 'file' ? (
                 <div>
                   <input
@@ -258,7 +252,7 @@ const UploadProduct = () => {
                 />
               </div>
 
-              {/* Category Dropdown */}
+              {/* Category Dropdown (Matched to schema enum) */}
               <div className="space-y-1.5">
                 <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.15em] flex items-center gap-1">
                   <Layers size={12} className="text-purple-600" /> Category
@@ -268,10 +262,12 @@ const UploadProduct = () => {
                   onChange={(e) => setCategory(e.target.value)}
                   className="w-full bg-slate-50 border border-slate-100 rounded-xl p-3.5 text-xs font-semibold text-slate-800 outline-none focus:border-purple-200 focus:bg-white transition-all cursor-pointer"
                 >
-                  <option value="Safety Shoes">Safety Shoes</option>
-                  <option value="Head Protection">Head Protection</option>
-                  <option value="High-Visibility">High-Visibility</option>
-                  <option value="Hand Protection">Hand Protection</option>
+                  <option value="Shoes">Shoes</option>
+                  <option value="Jackets">Jackets</option>
+                  <option value="Uniforms">Uniforms</option>
+                  <option value="Gloves">Gloves</option>
+                  <option value="Helmets">Helmets</option>
+                  <option value="Work Clothes">Work Clothes</option>
                 </select>
               </div>
 
@@ -291,7 +287,7 @@ const UploadProduct = () => {
                 />
               </div>
 
-              {/* Amount / Stock Quantity */}
+              {/* Quantity Stock */}
               <div className="space-y-1.5">
                 <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.15em] flex items-center gap-1">
                   <Box size={12} className="text-purple-600" /> Quantity Stock
@@ -338,7 +334,7 @@ const UploadProduct = () => {
 
             </div>
 
-            {/* Detailed Note / Material Description */}
+            {/* Detailed Note */}
             <div className="space-y-1.5">
               <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.15em] block">
                 Detail Notes & Material Explanation
