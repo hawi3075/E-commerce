@@ -1,29 +1,37 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import axios from 'axios';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { 
   ChevronDown, Grid, ShoppingCart, Star, 
-  SlidersHorizontal, Eye, Heart, Loader2 
+  SlidersHorizontal, Eye, Heart, Loader2, RotateCcw, Briefcase, User, Layers
 } from 'lucide-react';
 
 import Navbar from '../components/Navbar';
 
-// Beautiful Mock Database fallback in case your API/Database is empty
+// Extended Mock Database with new fields (Gender, Work Sector, Material)
 const MOCK_PRODUCTS = [
   { 
     _id: 'p1', 
-    product_name: 'Vanguard Helmet X', 
+    product_name: 'Vanguard Hard Hat Helmet', 
     price: 89.99, 
     stock: 18, 
-    category: 'Headwear', 
+    category: 'Headwear',
+    gender: 'Unisex',
+    rawProduct: 'Steel/Polymer',
+    workCategory: 'Construction',
+    rating: 5,
     image: 'https://images.unsplash.com/photo-1590483736622-39da8caf3ef8?auto=format&fit=crop&q=80&w=500' 
   },
   { 
     _id: 'p2', 
     product_name: 'Aegis High-Vis Safety Vest', 
     price: 24.99, 
-    stock: 0, // Sold out sample
-    category: 'Workwear', 
+    stock: 0, 
+    category: 'Workwear',
+    gender: 'Unisex',
+    rawProduct: 'Cotton/Polyester',
+    workCategory: 'Farmer',
+    rating: 4,
     image: 'https://images.unsplash.com/photo-1578328819058-b69f3a3b0f6b?auto=format&fit=crop&q=80&w=500' 
   },
   { 
@@ -31,7 +39,11 @@ const MOCK_PRODUCTS = [
     product_name: 'Titan Steel Toe Work Boots', 
     price: 145.00, 
     stock: 12, 
-    category: 'Footwear', 
+    category: 'Footwear',
+    gender: 'Male',
+    rawProduct: 'Leather',
+    workCategory: 'Construction',
+    rating: 5,
     image: 'https://images.unsplash.com/photo-1608256246200-53e635b5b65f?auto=format&fit=crop&q=80&w=500' 
   },
   { 
@@ -39,7 +51,11 @@ const MOCK_PRODUCTS = [
     product_name: 'Anti-Fog Ballistic Goggles', 
     price: 18.50, 
     stock: 72, 
-    category: 'Headwear', 
+    category: 'Headwear',
+    gender: 'Unisex',
+    rawProduct: 'Steel/Polymer',
+    workCategory: 'Welding',
+    rating: 4,
     image: 'https://images.unsplash.com/photo-1551150431-993b1139ecc5?auto=format&fit=crop&q=80&w=500' 
   },
   { 
@@ -47,7 +63,11 @@ const MOCK_PRODUCTS = [
     product_name: 'Mantis Thermal Gloves', 
     price: 19.50, 
     stock: 8, 
-    category: 'Workwear', 
+    category: 'Workwear',
+    gender: 'Female',
+    rawProduct: 'Kevlar',
+    workCategory: 'Electrical',
+    rating: 5,
     image: 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&q=80&w=500' 
   },
   { 
@@ -55,42 +75,48 @@ const MOCK_PRODUCTS = [
     product_name: 'Elite Shield Welding Mask', 
     price: 112.00, 
     stock: 15, 
-    category: 'Headwear', 
+    category: 'Headwear',
+    gender: 'Unisex',
+    rawProduct: 'Steel/Polymer',
+    workCategory: 'Welding',
+    rating: 5,
     image: 'https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?auto=format&fit=crop&q=80&w=500' 
   }
 ];
 
 const ShopScreen = () => {
   const [products, setProducts] = useState([]);
-  const [selectedCategory, setSelectedCategory] = useState('All Products');
+  
+  // Filter States
+  const [selectedCategory, setSelectedCategory] = useState('All');
+  const [selectedGender, setSelectedGender] = useState('All');
+  const [selectedWorkCategory, setSelectedWorkCategory] = useState('All');
+  const [selectedRawProduct, setSelectedRawProduct] = useState('All');
+  
   const [sortBy, setSortBy] = useState('newest');
   const [isLoading, setIsLoading] = useState(true);
-  
+  const [likedItems, setLikedItems] = useState({});
+
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
-  // Categories list matching side menu
-  const categoriesList = [
-    'All Products', 
-    'Headwear', 
-    'Workwear', 
-    'Footwear'
-  ];
+  // Filter Lists
+  const categoriesList = ['All', 'Headwear', 'Workwear', 'Footwear'];
+  const genderList = ['All', 'Unisex', 'Male', 'Female'];
+  const workCategoriesList = ['All', 'Farmer', 'Construction', 'Mining', 'Welding', 'Electrical'];
+  const rawProductsList = ['All', 'Cotton/Polyester', 'Steel/Polymer', 'Leather', 'Kevlar', 'Rubber'];
 
-  // Helper function to map external category parameters to internal categories
   const normalizeCategory = (catParam) => {
-    if (!catParam) return 'All Products';
+    if (!catParam) return 'All';
     const lower = catParam.toLowerCase();
     if (lower.includes('head') || lower.includes('helmet')) return 'Headwear';
     if (lower.includes('vis') || lower.includes('work') || lower.includes('high')) return 'Workwear';
     if (lower.includes('shoe') || lower.includes('foot') || lower.includes('boot')) return 'Footwear';
     
-    // Check direct match
     const found = categoriesList.find(c => c.toLowerCase() === lower);
-    return found || 'All Products';
+    return found || 'All';
   };
 
-  // Sync category state whenever search parameters in URL change
   useEffect(() => {
     const queryCategory = searchParams.get('category');
     if (queryCategory) {
@@ -98,7 +124,6 @@ const ShopScreen = () => {
     }
   }, [searchParams]);
 
-  // Fetch API Products with Mock Fallback
   useEffect(() => {
     const fetchProducts = async () => {
       try {
@@ -120,17 +145,30 @@ const ShopScreen = () => {
     fetchProducts();
   }, []);
 
-  // Category Filtering Logic
+  // Multi-Filter Matching Logic
   const filteredProducts = useMemo(() => {
-    if (selectedCategory === 'All Products') {
-      return products;
-    }
     return products.filter((p) => {
+      // Category Filter
       const pCat = (p.category || '').toLowerCase();
-      const targetCat = selectedCategory.toLowerCase();
-      return pCat === targetCat || normalizeCategory(pCat) === selectedCategory;
+      const matchCat = selectedCategory === 'All' || 
+                       pCat === selectedCategory.toLowerCase() || 
+                       normalizeCategory(pCat) === selectedCategory;
+
+      // Gender Filter
+      const pGender = (p.gender || 'unisex').toLowerCase();
+      const matchGender = selectedGender === 'All' || pGender === selectedGender.toLowerCase();
+
+      // Work Field Category Filter
+      const pWork = (p.workCategory || '').toLowerCase();
+      const matchWork = selectedWorkCategory === 'All' || pWork === selectedWorkCategory.toLowerCase();
+
+      // Raw Material Product Filter
+      const pRaw = (p.rawProduct || '').toLowerCase();
+      const matchRaw = selectedRawProduct === 'All' || pRaw.includes(selectedRawProduct.toLowerCase());
+
+      return matchCat && matchGender && matchWork && matchRaw;
     });
-  }, [selectedCategory, products]);
+  }, [selectedCategory, selectedGender, selectedWorkCategory, selectedRawProduct, products]);
 
   // Sorting Logic
   const sortedProducts = useMemo(() => {
@@ -144,20 +182,35 @@ const ShopScreen = () => {
     return list; 
   }, [filteredProducts, sortBy]);
 
-  const handleBuyNow = (productId) => {
-    navigate(`/product/${productId}`);
+  const toggleLike = (id) => {
+    setLikedItems(prev => ({ ...prev, [id]: !prev[id] }));
+  };
+
+  const resetFilters = () => {
+    setSelectedCategory('All');
+    setSelectedGender('All');
+    setSelectedWorkCategory('All');
+    setSelectedRawProduct('All');
+    setSortBy('newest');
   };
 
   return (
-    <div className="bg-slate-50/50 min-h-screen font-sans antialiased text-slate-700">
+    <div className="bg-slate-100 min-h-screen font-sans antialiased text-slate-700">
       
       <Navbar />
 
-      {/* Hero Header */}
-      <header className="bg-white border-b border-slate-100 pt-28 pb-12">
-        <div className="max-w-[1280px] mx-auto px-6 space-y-2">
-          <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">Shop Collection</h1>
-          <p className="text-sm text-slate-400 font-medium">Find exactly what you are looking for.</p>
+      {/* Hero Header (Maximized font size matching home screen) */}
+      <header className="bg-slate-900 border-b border-slate-800 pt-28 pb-12 text-white">
+        <div className="max-w-[1280px] mx-auto px-6 space-y-3">
+          <span className="text-purple-400 text-xs font-bold uppercase tracking-widest bg-purple-900/40 px-3 py-1 rounded-full border border-purple-700/50">
+            Certified Gear Marketplace
+          </span>
+          <h1 className="text-3xl sm:text-5xl font-black uppercase tracking-tight leading-tight">
+            Shop <span className="text-purple-400 italic">Inventory</span>
+          </h1>
+          <p className="text-sm sm:text-base font-medium text-slate-300 max-w-xl leading-relaxed">
+            Filter protective equipment by job field, material specifications, and gender targets tailored for enterprise deployment.
+          </p>
         </div>
       </header>
 
@@ -165,45 +218,102 @@ const ShopScreen = () => {
       <main className="max-w-[1280px] mx-auto px-6 py-10">
         <div className="flex flex-col lg:flex-row gap-8 items-start">
           
-          {/* ================= SIDEBAR (LEFT COLUMN) ================= */}
-          <aside className="w-full lg:w-64 shrink-0 space-y-6 lg:sticky lg:top-24">
-            <div className="flex items-center gap-2 pb-3 border-b border-slate-200/60">
-              <SlidersHorizontal size={14} className="text-slate-800" />
-              <h2 className="text-xs font-bold uppercase tracking-wider text-slate-800">Categories</h2>
+          {/* ================= SIDEBAR FILTERS (LEFT COLUMN) ================= */}
+          <aside className="w-full lg:w-72 shrink-0 space-y-6 lg:sticky lg:top-24 bg-white p-6 rounded-3xl border border-slate-200/80 shadow-sm">
+            <div className="flex items-center justify-between pb-4 border-b border-slate-100">
+              <div className="flex items-center gap-2">
+                <SlidersHorizontal size={18} className="text-purple-600" />
+                <h2 className="text-base font-black uppercase tracking-wide text-slate-900">Filter Engine</h2>
+              </div>
+              <button 
+                onClick={resetFilters} 
+                className="text-[11px] font-extrabold uppercase text-purple-600 hover:text-purple-800 flex items-center gap-1 transition-colors"
+                title="Reset all filters"
+              >
+                <RotateCcw size={12} /> Reset
+              </button>
             </div>
             
-            <div className="flex flex-col gap-1.5">
-              {categoriesList.map((cat) => {
-                const isSelected = selectedCategory === cat;
-                
-                // Calculate dynamic quantity counts
-                const count = cat === 'All Products' 
-                  ? products.length 
-                  : products.filter(p => {
-                      const pCat = (p.category || '').toLowerCase();
-                      return pCat === cat.toLowerCase() || normalizeCategory(pCat) === cat;
-                    }).length;
-
-                return (
+            {/* 1. CATEGORY FILTER */}
+            <div className="space-y-2">
+              <label className="text-xs font-extrabold uppercase text-slate-900 flex items-center gap-1.5">
+                <Grid size={13} className="text-purple-600" /> Product Category
+              </label>
+              <div className="flex flex-wrap gap-1.5 pt-1">
+                {categoriesList.map((cat) => (
                   <button
                     key={cat}
                     onClick={() => setSelectedCategory(cat)}
-                    className={`w-full flex items-center justify-between px-4 py-3 rounded-xl text-left text-xs font-bold uppercase tracking-wide transition-all ${
-                      isSelected 
-                        ? 'bg-purple-50 text-purple-700 border border-purple-100/80 shadow-sm' 
-                        : 'bg-white hover:bg-slate-100/50 text-slate-500 border border-transparent'
+                    className={`px-3 py-2 rounded-xl text-xs font-extrabold uppercase tracking-wide transition-all ${
+                      selectedCategory === cat 
+                        ? 'bg-purple-600 text-white shadow-md shadow-purple-600/20' 
+                        : 'bg-slate-100 text-slate-600 hover:bg-slate-200/70'
                     }`}
                   >
-                    <div className="flex items-center gap-2">
-                      <Grid size={12} className={isSelected ? "text-purple-600" : "text-slate-400"} />
-                      <span>{cat}</span>
-                    </div>
-                    <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${isSelected ? 'bg-purple-100 text-purple-700' : 'bg-slate-100 text-slate-400'}`}>
-                      {count}
-                    </span>
+                    {cat}
                   </button>
-                );
-              })}
+                ))}
+              </div>
+            </div>
+
+            {/* 2. WORK CATEGORY / FIELD FILTER */}
+            <div className="space-y-2 pt-3 border-t border-slate-100">
+              <label className="text-xs font-extrabold uppercase text-slate-900 flex items-center gap-1.5">
+                <Briefcase size={13} className="text-purple-600" /> Work Field / Sector
+              </label>
+              <div className="relative">
+                <select 
+                  value={selectedWorkCategory}
+                  onChange={(e) => setSelectedWorkCategory(e.target.value)}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-bold text-slate-800 uppercase appearance-none focus:outline-none focus:border-purple-500 cursor-pointer"
+                >
+                  {workCategoriesList.map(w => (
+                    <option key={w} value={w}>{w === 'All' ? 'All Work Sectors' : w}</option>
+                  ))}
+                </select>
+                <ChevronDown size={14} className="absolute right-3 top-3 text-slate-400 pointer-events-none" />
+              </div>
+            </div>
+
+            {/* 3. GENDER TARGET */}
+            <div className="space-y-2 pt-3 border-t border-slate-100">
+              <label className="text-xs font-extrabold uppercase text-slate-900 flex items-center gap-1.5">
+                <User size={13} className="text-purple-600" /> Target Gender
+              </label>
+              <div className="grid grid-cols-2 gap-1.5">
+                {genderList.map((g) => (
+                  <button
+                    key={g}
+                    onClick={() => setSelectedGender(g)}
+                    className={`px-2.5 py-2 rounded-xl text-xs font-extrabold uppercase tracking-wide transition-all ${
+                      selectedGender === g 
+                        ? 'bg-purple-600 text-white shadow-md shadow-purple-600/20' 
+                        : 'bg-slate-100 text-slate-600 hover:bg-slate-200/70'
+                    }`}
+                  >
+                    {g}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* 4. RAW PRODUCT / MATERIAL */}
+            <div className="space-y-2 pt-3 border-t border-slate-100">
+              <label className="text-xs font-extrabold uppercase text-slate-900 flex items-center gap-1.5">
+                <Layers size={13} className="text-purple-600" /> Raw Material
+              </label>
+              <div className="relative">
+                <select 
+                  value={selectedRawProduct}
+                  onChange={(e) => setSelectedRawProduct(e.target.value)}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-bold text-slate-800 uppercase appearance-none focus:outline-none focus:border-purple-500 cursor-pointer"
+                >
+                  {rawProductsList.map(mat => (
+                    <option key={mat} value={mat}>{mat === 'All' ? 'All Materials' : mat}</option>
+                  ))}
+                </select>
+                <ChevronDown size={14} className="absolute right-3 top-3 text-slate-400 pointer-events-none" />
+              </div>
             </div>
           </aside>
 
@@ -211,16 +321,16 @@ const ShopScreen = () => {
           <section className="flex-1 w-full space-y-6">
             
             {/* Toolbar Summary & Sorting */}
-            <div className="flex items-center justify-between bg-white border border-slate-100 p-4 rounded-2xl shadow-sm">
-              <p className="text-xs text-slate-400 font-semibold uppercase tracking-wider">
-                Showing <span className="text-slate-800 font-extrabold">{sortedProducts.length}</span> Products
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white border border-slate-200/80 p-4 rounded-3xl shadow-sm">
+              <p className="text-xs text-slate-500 font-extrabold uppercase tracking-wider">
+                Showing <span className="text-purple-600 font-black text-sm">{sortedProducts.length}</span> Safety Assets
               </p>
               
-              <div className="relative flex items-center gap-2 bg-slate-50 border border-slate-200/70 hover:border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-slate-800 transition-colors cursor-pointer">
+              <div className="relative flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold text-slate-800 cursor-pointer">
                 <select 
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value)}
-                  className="bg-transparent pr-6 appearance-none cursor-pointer focus:outline-none focus:ring-0 text-xs font-extrabold uppercase tracking-wider"
+                  className="bg-transparent pr-6 appearance-none cursor-pointer focus:outline-none text-xs font-extrabold uppercase tracking-wider text-slate-800"
                 >
                   <option value="newest">Newest First</option>
                   <option value="low-to-high">Price: Low to High</option>
@@ -233,17 +343,23 @@ const ShopScreen = () => {
             {/* Content States */}
             {isLoading ? (
               <div className="text-center py-24 bg-white rounded-3xl border border-dashed border-slate-200 flex flex-col items-center justify-center gap-3">
-                <Loader2 className="animate-spin text-purple-600" size={28} />
-                <p className="text-slate-400 font-bold uppercase tracking-widest text-xs">Scanning Inventory...</p>
+                <Loader2 className="animate-spin text-purple-600" size={32} />
+                <p className="text-slate-400 font-extrabold uppercase tracking-widest text-xs">Scanning Inventory...</p>
               </div>
             ) : sortedProducts.length === 0 ? (
-              <div className="text-center py-24 bg-white rounded-3xl border border-dashed border-slate-200 space-y-2">
-                <Grid size={32} className="text-slate-200 mx-auto" />
-                <p className="text-slate-800 font-bold uppercase tracking-wide text-sm">No items configured</p>
-                <p className="text-slate-400 text-xs">We couldn't find any products in this specific category selection.</p>
+              <div className="text-center py-20 bg-white rounded-3xl border border-dashed border-slate-200 space-y-3 p-6">
+                <Grid size={40} className="text-slate-300 mx-auto" />
+                <p className="text-slate-900 font-black uppercase tracking-wide text-base">No Matching Safety Gear Found</p>
+                <p className="text-slate-400 text-xs font-medium max-w-md mx-auto">Try clearing your filters or selecting a different work field or category combination.</p>
+                <button 
+                  onClick={resetFilters} 
+                  className="bg-purple-600 text-white px-5 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider inline-flex items-center gap-1.5 mt-2"
+                >
+                  <RotateCcw size={12} /> Clear All Filters
+                </button>
               </div>
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
                 {sortedProducts.map((p) => {
                   const productId = p._id || p.id;
                   const productName = p.product_name || p.name;
@@ -251,89 +367,99 @@ const ShopScreen = () => {
                   const productStock = p.countInStock !== undefined ? p.countInStock : p.stock;
                   const isSoldOut = productStock === 0;
                   const imageUrl = p.image || 'https://via.placeholder.com/500';
+                  const isLiked = !!likedItems[productId];
 
                   return (
                     <div 
                       key={productId}
-                      className="bg-white rounded-3xl border border-slate-100 hover:border-purple-200 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col justify-between overflow-hidden group"
+                      className="bg-white rounded-3xl p-4 border border-slate-200/80 hover:border-purple-300 shadow-sm hover:shadow-md transition-all duration-300 group relative flex flex-col justify-between"
                     >
-                      {/* Image Block */}
-                      <div className="relative h-56 bg-slate-50 flex items-center justify-center overflow-hidden border-b border-slate-100/80">
+                      {/* Product Image Box */}
+                      <div className="relative h-48 bg-slate-50 rounded-2xl mb-4 overflow-hidden flex items-center justify-center border border-slate-100">
                         <img 
                           src={imageUrl} 
                           alt={productName} 
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" 
                           loading="lazy"
                         />
-
+                        
                         {isSoldOut ? (
-                          <span className="absolute top-4 right-4 bg-red-50 text-red-600 border border-red-100 text-[10px] font-extrabold px-2.5 py-1 rounded-lg uppercase tracking-wide z-10">
-                            Sold out
+                          <span className="absolute top-3 right-3 bg-red-100 text-red-600 border border-red-200 text-[9px] font-black px-2 py-0.5 rounded-md uppercase tracking-wider z-10">
+                            Sold Out
                           </span>
                         ) : (
-                          <span className="absolute top-4 right-4 bg-emerald-50 text-emerald-600 border border-emerald-100 text-[10px] font-extrabold px-2.5 py-1 rounded-lg uppercase tracking-wide z-10">
-                            {productStock !== undefined ? `${productStock} In Stock` : 'In Stock'}
+                          <span className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm text-slate-700 border border-slate-100 text-[9px] font-bold px-2 py-0.5 rounded-md uppercase z-10">
+                            {productStock !== undefined ? `${productStock} Units` : 'In Stock'}
                           </span>
                         )}
 
-                        {/* Interactive overlays */}
-                        <div className="absolute inset-0 bg-slate-900/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-2 z-10">
-                          <button className="p-3 bg-white rounded-xl shadow-lg text-slate-600 hover:text-purple-600 hover:scale-110 transition-all">
-                            <Heart size={16} />
-                          </button>
-                          <button 
-                            onClick={() => handleBuyNow(productId)} 
-                            className="p-3 bg-white rounded-xl shadow-lg text-slate-600 hover:text-purple-600 hover:scale-110 transition-all"
-                          >
-                            <Eye size={16} />
-                          </button>
-                        </div>
+                        {/* Badges for Field / Gender */}
+                        <span className="absolute top-3 left-3 bg-purple-600 text-white text-[9px] font-extrabold px-2 py-0.5 rounded-md uppercase tracking-widest z-10 shadow-sm">
+                          {p.workCategory || p.category || 'Gear'}
+                        </span>
                       </div>
 
-                      {/* Detail Section */}
-                      <div className="p-5 space-y-4 flex-grow flex flex-col justify-between">
+                      {/* Details & Actions Under Image (matching home screen style) */}
+                      <div className="space-y-3 flex-1 flex flex-col justify-between">
                         <div>
-                          <div className="flex items-center gap-1 mb-1.5">
-                            <div className="flex items-center">
-                              {[...Array(5)].map((_, i) => (
-                                <Star 
-                                  key={i} 
-                                  size={11} 
-                                  className="fill-amber-400 text-amber-400" 
-                                />
-                              ))}
-                            </div>
-                            <span className="text-[10px] font-bold text-slate-400 ml-1">5.0</span>
+                          <div className="flex items-center gap-1 mb-1">
+                            {[...Array(5)].map((_, i) => (
+                              <Star 
+                                key={i} 
+                                size={11} 
+                                className={`${i < Math.round(p.rating || 5) ? 'fill-amber-400 text-amber-400' : 'text-slate-200'}`} 
+                              />
+                            ))}
                           </div>
-
-                          <h3 className="font-extrabold text-slate-800 text-sm uppercase tracking-wide line-clamp-2 min-h-[2.5rem] leading-snug group-hover:text-purple-600 transition-colors">
+                          <h3 className="font-extrabold text-slate-800 text-xs uppercase tracking-wide line-clamp-2 mb-1 min-h-[2.25rem]">
                             {productName}
                           </h3>
                         </div>
 
-                        {/* Purchase Options Footer */}
-                        <div className="pt-4 border-t border-slate-100 flex items-center justify-between">
+                        {/* Bottom Bar with Price on Left & Icons (Heart, View, Cart) Under Image */}
+                        <div className="pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
                           <div>
-                            <span className="text-[9px] font-semibold text-slate-400 uppercase tracking-widest block">Unit Value</span>
-                            <span className="text-slate-900 font-black text-lg">${productPrice.toFixed(2)}</span>
+                            <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider block">Asset Value</span>
+                            <p className="text-slate-900 font-black text-base">${productPrice.toFixed(2)}</p>
                           </div>
 
-                          {isSoldOut ? (
+                          <div className="flex items-center gap-1.5">
+                            {/* Like Icon Button */}
                             <button 
-                              disabled
-                              className="bg-slate-100 text-slate-400 px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider cursor-not-allowed"
+                              onClick={() => toggleLike(productId)}
+                              className="p-2 bg-slate-50 hover:bg-purple-50 border border-slate-200/80 hover:border-purple-200 rounded-xl text-slate-500 hover:text-purple-600 transition-colors"
+                              title="Like product"
                             >
-                              Unavailable
+                              <Heart size={15} className={isLiked ? "fill-purple-600 text-purple-600" : ""} />
                             </button>
-                          ) : (
-                            <button 
-                              onClick={() => handleBuyNow(productId)}
-                              className="bg-purple-600 hover:bg-purple-700 text-white px-5 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 transition-all shadow-md shadow-purple-600/10 hover:shadow-purple-600/25 active:scale-95"
+
+                            {/* View Details Icon Button */}
+                            <Link 
+                              to={`/product/${productId}`} 
+                              className="p-2 bg-slate-50 hover:bg-purple-50 border border-slate-200/80 hover:border-purple-200 rounded-xl text-slate-500 hover:text-purple-600 transition-colors"
+                              title="View details"
                             >
-                              <ShoppingCart size={13} />
-                              Buy Now
-                            </button>
-                          )}
+                              <Eye size={15} />
+                            </Link>
+
+                            {/* Buy / Cart Button */}
+                            {isSoldOut ? (
+                              <button 
+                                disabled
+                                className="bg-slate-100 text-slate-400 p-2 rounded-xl text-[10px] font-bold uppercase cursor-not-allowed"
+                              >
+                                Off
+                              </button>
+                            ) : (
+                              <button 
+                                onClick={() => navigate(`/product/${productId}`)}
+                                className="bg-purple-600 hover:bg-purple-700 text-white p-2 rounded-xl transition-all shadow-md shadow-purple-600/10 flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-purple-500"
+                                title="Buy Now"
+                              >
+                                <ShoppingCart size={15} />
+                              </button>
+                            )}
+                          </div>
                         </div>
                       </div>
 
