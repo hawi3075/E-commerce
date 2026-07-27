@@ -23,8 +23,8 @@ const TRANSLATIONS = {
     unitsSold: 'Units sold',
     overview: 'Overview',
     productDetails: 'Product Details',
-    relatedItems: 'Related Items',
-    relatedDesc: 'Products from the same category and style.',
+    relatedItems: 'Related Products',
+    relatedDesc: 'Other products you might be interested in.',
     browseAll: 'Browse all',
     customerReviews: 'Customer Reviews',
     feedbackDesc: 'Feedback from customers who purchased this item.',
@@ -51,8 +51,8 @@ const TRANSLATIONS = {
     unitsSold: 'የተሸጡ እቃዎች',
     overview: 'አጠቃላይ እይታ',
     productDetails: 'የምርት ዝርዝሮች',
-    relatedItems: 'ተዛማጅ እቃዎች',
-    relatedDesc: 'ከተመሳሳይ ምድብ እና ዘይቤ የተመረጡ ምርቶች።',
+    relatedItems: 'ተዛማጅ ምርቶች',
+    relatedDesc: 'ሊወዷቸው የሚችሏቸው ሌሎች ምርቶች።',
     browseAll: 'ሁሉንም ይመልከቱ',
     customerReviews: 'የደንበኞች አስተያየት',
     feedbackDesc: 'ይህን እቃ የገዙ ደንበኞች የሰጡት አስተያየት።',
@@ -80,7 +80,7 @@ const TRANSLATIONS = {
     overview: 'Waliigala',
     productDetails: 'Ibsa Meeshaa',
     relatedItems: 'Meeshoota Walfakkaatan',
-    relatedDesc: 'Meeshoota gosa fi akkaataa walfakkaatu qaban.',
+    relatedDesc: 'Meeshoota biraa kanneen sirriitti si fayyadan.',
     browseAll: 'Hunda ilaali',
     customerReviews: 'Yaada Maamiltootaa',
     feedbackDesc: 'Yaada maamiltoota meeshaa kana bitaniirraa.',
@@ -133,12 +133,16 @@ const ProductScreen = () => {
         setIsLoading(true);
         setError(null);
         
+        // Fetch Main Product Data
         const { data } = await axios.get(`/api/products/${id}`);
         setProduct(data);
 
+        // Fetch Related Products
         try {
-          const relatedRes = await axios.get(`/api/products?category=${data.category}&limit=4`);
-          setRelated(relatedRes.data.products ? relatedRes.data.products.filter(item => item._id !== id) : []);
+          const categoryParam = data.category ? `?category=${encodeURIComponent(data.category)}` : '';
+          const relatedRes = await axios.get(`/api/products${categoryParam}`);
+          const fetchedItems = relatedRes.data.products || relatedRes.data || [];
+          setRelated(fetchedItems.filter(item => item._id !== id).slice(0, 4));
         } catch (e) {
           setRelated([]);
         }
@@ -157,7 +161,7 @@ const ProductScreen = () => {
 
   if (isLoading) {
     return (
-      <div className="bg-[#f9f8f3] min-h-screen">
+      <div className="bg-gray-100 min-h-screen">
         <Navbar />
         <div className="flex flex-col items-center justify-center h-[70vh]">
           <Loader2 className="animate-spin text-purple-700 mb-3" size={44} />
@@ -169,15 +173,15 @@ const ProductScreen = () => {
 
   if (error || !product) {
     return (
-      <div className="bg-[#f9f8f3] min-h-screen">
+      <div className="bg-gray-100 min-h-screen">
         <Navbar />
         <div className="flex flex-col items-center justify-center h-[70vh] px-4 text-center">
           <AlertCircle className="text-purple-600 mb-4" size={56} />
-          <h2 className="text-2xl font-black text-slate-900 mb-3">{t.productNotFound}</h2>
-          <p className="text-base text-slate-600 mb-6">{error || t.errorFetching}</p>
+          <h2 className="text-2xl font-black text-gray-900 mb-3">{t.productNotFound}</h2>
+          <p className="text-base text-gray-600 mb-6">{error || t.errorFetching}</p>
           <button 
             onClick={() => navigate('/shop')}
-            className="px-6 py-3 bg-purple-700 text-white rounded-xl text-sm font-bold hover:bg-purple-800 transition-all"
+            className="px-6 py-3 bg-purple-700 text-white rounded-xl text-sm font-bold hover:bg-purple-800 transition-all shadow-md"
           >
             {t.backToShop}
           </button>
@@ -190,38 +194,39 @@ const ProductScreen = () => {
   const mainImage = product.images?.[0] || product.image || '/placeholder.png';
 
   return (
-    <div className="bg-[#f9f8f3] min-h-screen text-slate-800 font-sans antialiased flex flex-col justify-between">
+    <div className="bg-gray-100 min-h-screen text-gray-800 font-sans antialiased flex flex-col justify-between">
       <div>
         <Navbar />
 
         <main className="max-w-[1240px] mx-auto px-4 lg:px-8 pt-24 pb-16">
           
-          {/* Back Button */}
+          {/* Back Button with subtle Gray styling */}
           <div className="mb-6">
             <button 
               onClick={() => navigate('/shop')}
-              className="inline-flex items-center gap-2 px-5 py-2.5 border-2 border-slate-800 text-slate-900 rounded-xl text-sm font-extrabold hover:bg-slate-900 hover:text-white transition-all shadow-sm"
+              className="inline-flex items-center gap-2.5 px-5 py-2.5 bg-white hover:bg-purple-50 text-purple-700 rounded-2xl text-sm font-extrabold transition-all border border-gray-200 shadow-sm hover:shadow"
             >
-              <ArrowLeft size={18} /> {t.backToShop}
+              <ArrowLeft size={18} />
+              <span>{t.backToShop}</span>
             </button>
           </div>
 
           {/* MAIN PRODUCT CARD */}
-          <div className="bg-white rounded-3xl p-6 lg:p-10 border border-slate-200/80 shadow-sm mb-12">
+          <div className="bg-white rounded-3xl p-6 lg:p-10 border border-gray-200 shadow-sm mb-12">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
               
               {/* Product Image Section */}
               <div className="lg:col-span-6 relative">
                 {currentStock > 0 ? (
-                  <span className="absolute top-4 left-4 z-10 px-4 py-1.5 bg-purple-50 text-purple-700 font-extrabold text-sm rounded-full border border-purple-200">
+                  <span className="absolute top-4 left-4 z-10 px-4 py-1.5 bg-purple-50 text-purple-700 font-extrabold text-sm rounded-full border border-purple-200 shadow-sm">
                     {t.inStock}
                   </span>
                 ) : (
-                  <span className="absolute top-4 left-4 z-10 px-4 py-1.5 bg-red-50 text-red-700 font-extrabold text-sm rounded-full border border-red-200">
+                  <span className="absolute top-4 left-4 z-10 px-4 py-1.5 bg-red-50 text-red-700 font-extrabold text-sm rounded-full border border-red-200 shadow-sm">
                     {t.outOfStock}
                   </span>
                 )}
-                <div className="w-full h-[450px] lg:h-[520px] bg-slate-50 rounded-2xl overflow-hidden border border-slate-100 flex items-center justify-center">
+                <div className="w-full h-[450px] lg:h-[520px] bg-gray-50 rounded-2xl overflow-hidden border border-gray-100 flex items-center justify-center">
                   <img 
                     src={mainImage} 
                     alt={product.name || product.product_name} 
@@ -237,22 +242,22 @@ const ProductScreen = () => {
                     <span className="text-sm font-extrabold uppercase tracking-wider text-purple-700">
                       {product.category || 'Safety Equipment'}
                     </span>
-                    <button className="p-3 rounded-full border border-slate-200 text-slate-600 hover:bg-slate-50 transition-colors">
+                    <button className="p-3 rounded-full border border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors">
                       <Share2 size={20} />
                     </button>
                   </div>
 
-                  <h1 className="text-3xl lg:text-4xl font-black text-slate-900 mb-4 tracking-tight">
+                  <h1 className="text-3xl lg:text-4xl font-black text-gray-900 mb-4 tracking-tight">
                     {product.name || product.product_name}
                   </h1>
 
                   {/* Ratings and SKU */}
-                  <div className="flex flex-wrap items-center gap-3 text-sm font-semibold text-slate-600 mb-6">
+                  <div className="flex flex-wrap items-center gap-3 text-sm font-semibold text-gray-600 mb-6">
                     <div className="flex items-center gap-1.5">
                       {[...Array(5)].map((_, i) => (
-                        <Star key={i} size={18} className={i < Math.round(product.rating || 0) ? "fill-amber-400 text-amber-400" : "text-slate-200"} />
+                        <Star key={i} size={18} className={i < Math.round(product.rating || 0) ? "fill-amber-400 text-amber-400" : "text-gray-200"} />
                       ))}
-                      <span className="font-extrabold text-slate-900 ml-1.5 text-base">{(product.rating || 0).toFixed(1)}</span>
+                      <span className="font-extrabold text-gray-900 ml-1.5 text-base">{(product.rating || 0).toFixed(1)}</span>
                       <span>({product.numReviews || 0} reviews)</span>
                     </div>
                     {product.sku && (
@@ -264,43 +269,43 @@ const ProductScreen = () => {
                   </div>
 
                   {/* Price Banner Box */}
-                  <div className="bg-[#fcfbf9] border border-slate-200/80 rounded-2xl p-6 mb-6">
+                  <div className="bg-gray-50 border border-gray-200 rounded-2xl p-6 mb-6">
                     <p className="text-5xl font-black text-purple-900 mb-2">
                       ${Number(product.price || 0).toFixed(2)}
                     </p>
-                    <p className="text-sm text-slate-700 font-bold">
+                    <p className="text-sm text-gray-700 font-bold">
                       {currentStock} {t.unitsAvailable}
                     </p>
                   </div>
 
-                  <p className="text-base text-slate-700 leading-relaxed font-medium mb-6">
+                  <p className="text-base text-gray-700 leading-relaxed font-medium mb-6">
                     {product.description}
                   </p>
 
                   {/* Feature Highlights Grid */}
                   <div className="grid grid-cols-3 gap-3 mb-8">
-                    <div className="p-4 bg-slate-50 border border-slate-100 rounded-xl">
-                      <div className="flex items-center gap-2 text-slate-500 mb-1">
+                    <div className="p-4 bg-gray-50 border border-gray-100 rounded-xl">
+                      <div className="flex items-center gap-2 text-gray-500 mb-1">
                         <Package size={16} />
                         <span className="text-xs font-bold">{t.availability}</span>
                       </div>
-                      <p className="text-sm font-black text-slate-900">{currentStock} in stock</p>
+                      <p className="text-sm font-black text-gray-900">{currentStock} in stock</p>
                     </div>
 
-                    <div className="p-4 bg-slate-50 border border-slate-100 rounded-xl">
-                      <div className="flex items-center gap-2 text-slate-500 mb-1">
+                    <div className="p-4 bg-gray-50 border border-gray-100 rounded-xl">
+                      <div className="flex items-center gap-2 text-gray-500 mb-1">
                         <Star size={16} />
                         <span className="text-xs font-bold">{t.rating}</span>
                       </div>
-                      <p className="text-sm font-black text-slate-900">{product.rating ? `${product.rating} / 5` : t.noReviewsYet}</p>
+                      <p className="text-sm font-black text-gray-900">{product.rating ? `${product.rating} / 5` : t.noReviewsYet}</p>
                     </div>
 
-                    <div className="p-4 bg-slate-50 border border-slate-100 rounded-xl">
-                      <div className="flex items-center gap-2 text-slate-500 mb-1">
+                    <div className="p-4 bg-gray-50 border border-gray-100 rounded-xl">
+                      <div className="flex items-center gap-2 text-gray-500 mb-1">
                         <CheckCircle2 size={16} />
                         <span className="text-xs font-bold">{t.variants}</span>
                       </div>
-                      <p className="text-sm font-black text-slate-900">{t.singleConfig}</p>
+                      <p className="text-sm font-black text-gray-900">{t.singleConfig}</p>
                     </div>
                   </div>
                 </div>
@@ -308,12 +313,12 @@ const ProductScreen = () => {
                 {/* Quantity & CTA Buttons */}
                 <div className="space-y-4">
                   <div className="flex items-center gap-4">
-                    <span className="text-sm font-black text-slate-900">Quantity</span>
-                    <div className="flex items-center border border-slate-300 bg-slate-50 rounded-xl p-1">
+                    <span className="text-sm font-black text-gray-900">Quantity</span>
+                    <div className="flex items-center border border-gray-300 bg-gray-50 rounded-xl p-1">
                       <button 
                         onClick={() => setQty(Math.max(1, qty - 1))}
                         disabled={currentStock === 0 || qty <= 1}
-                        className="w-8 h-8 flex items-center justify-center font-black text-slate-700 hover:bg-white rounded-lg transition-all text-base disabled:opacity-40"
+                        className="w-8 h-8 flex items-center justify-center font-black text-gray-700 hover:bg-white rounded-lg transition-all text-base disabled:opacity-40"
                       >
                         -
                       </button>
@@ -321,7 +326,7 @@ const ProductScreen = () => {
                       <button 
                         onClick={() => setQty(Math.min(currentStock, qty + 1))}
                         disabled={currentStock === 0 || qty >= currentStock}
-                        className="w-8 h-8 flex items-center justify-center font-black text-slate-700 hover:bg-white rounded-lg transition-all text-base disabled:opacity-40"
+                        className="w-8 h-8 flex items-center justify-center font-black text-gray-700 hover:bg-white rounded-lg transition-all text-base disabled:opacity-40"
                       >
                         +
                       </button>
@@ -332,14 +337,14 @@ const ProductScreen = () => {
                     <button 
                       disabled={currentStock === 0}
                       onClick={() => navigate('/cart')}
-                      className="w-full bg-purple-700 hover:bg-purple-800 disabled:bg-slate-300 text-white py-4 px-6 rounded-xl font-extrabold text-sm flex items-center justify-center gap-2 transition-all shadow-md shadow-purple-700/10"
+                      className="w-full bg-purple-700 hover:bg-purple-800 disabled:bg-gray-300 text-white py-4 px-6 rounded-xl font-extrabold text-sm flex items-center justify-center gap-2 transition-all shadow-md shadow-purple-700/10"
                     >
                       <ShoppingCart size={18} /> {t.addToCart}
                     </button>
                     <button 
                       disabled={currentStock === 0}
                       onClick={() => navigate('/checkout')}
-                      className="w-full bg-purple-50 hover:bg-purple-100 disabled:bg-slate-100 text-purple-900 py-4 px-6 rounded-xl font-extrabold text-sm transition-all border border-purple-200"
+                      className="w-full bg-purple-50 hover:bg-purple-100 disabled:bg-gray-100 text-purple-900 py-4 px-6 rounded-xl font-extrabold text-sm transition-all border border-purple-200"
                     >
                       {t.buyNow}
                     </button>
@@ -353,60 +358,60 @@ const ProductScreen = () => {
           {/* OVERVIEW AND PRODUCT DETAILS CARDS */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
             {/* Overview */}
-            <div className="bg-white rounded-3xl p-6 lg:p-8 border border-slate-200/80 shadow-sm">
-              <h2 className="text-xl font-black text-slate-900 mb-4">{t.overview}</h2>
-              <p className="text-sm lg:text-base text-slate-700 leading-relaxed font-medium">
+            <div className="bg-white rounded-3xl p-6 lg:p-8 border border-gray-200 shadow-sm">
+              <h2 className="text-xl font-black text-gray-900 mb-4">{t.overview}</h2>
+              <p className="text-sm lg:text-base text-gray-700 leading-relaxed font-medium">
                 {product.description}
               </p>
             </div>
 
             {/* Product Details Specs */}
-            <div className="bg-white rounded-3xl p-6 lg:p-8 border border-slate-200/80 shadow-sm space-y-4">
-              <h2 className="text-xl font-black text-slate-900 mb-4">{t.productDetails}</h2>
+            <div className="bg-white rounded-3xl p-6 lg:p-8 border border-gray-200 shadow-sm space-y-4">
+              <h2 className="text-xl font-black text-gray-900 mb-4">{t.productDetails}</h2>
               
-              <div className="p-4 bg-slate-50/80 rounded-2xl flex items-center gap-4">
+              <div className="p-4 bg-gray-50 rounded-2xl flex items-center gap-4">
                 <Package size={20} className="text-purple-700" />
                 <div>
-                  <p className="text-xs font-bold uppercase text-slate-400">{t.availability}</p>
-                  <p className="text-sm font-black text-slate-800">{currentStock} in stock</p>
+                  <p className="text-xs font-bold uppercase text-gray-400">{t.availability}</p>
+                  <p className="text-sm font-black text-gray-800">{currentStock} in stock</p>
                 </div>
               </div>
 
-              <div className="p-4 bg-slate-50/80 rounded-2xl flex items-center gap-4">
+              <div className="p-4 bg-gray-50 rounded-2xl flex items-center gap-4">
                 <Tag size={20} className="text-purple-700" />
                 <div>
-                  <p className="text-xs font-bold uppercase text-slate-400">{t.category}</p>
-                  <p className="text-sm font-black text-slate-800">{product.category || 'General'}</p>
+                  <p className="text-xs font-bold uppercase text-gray-400">{t.category}</p>
+                  <p className="text-sm font-black text-gray-800">{product.category || 'General'}</p>
                 </div>
               </div>
 
               {product.sku && (
-                <div className="p-4 bg-slate-50/80 rounded-2xl flex items-center gap-4">
+                <div className="p-4 bg-gray-50 rounded-2xl flex items-center gap-4">
                   <Hash size={20} className="text-purple-700" />
                   <div>
-                    <p className="text-xs font-bold uppercase text-slate-400">{t.sku}</p>
-                    <p className="text-sm font-mono font-bold text-slate-800">{product.sku}</p>
+                    <p className="text-xs font-bold uppercase text-gray-400">{t.sku}</p>
+                    <p className="text-sm font-mono font-bold text-gray-800">{product.sku}</p>
                   </div>
                 </div>
               )}
 
-              <div className="p-4 bg-slate-50/80 rounded-2xl flex items-center gap-4">
+              <div className="p-4 bg-gray-50 rounded-2xl flex items-center gap-4">
                 <ShoppingBag size={20} className="text-purple-700" />
                 <div>
-                  <p className="text-xs font-bold uppercase text-slate-400">{t.unitsSold}</p>
-                  <p className="text-sm font-black text-slate-800">{product.soldCount || 0} total</p>
+                  <p className="text-xs font-bold uppercase text-gray-400">{t.unitsSold}</p>
+                  <p className="text-sm font-black text-gray-800">{product.soldCount || 0} total</p>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* RELATED ITEMS */}
+          {/* RELATED PRODUCTS SECTION */}
           {related.length > 0 && (
             <div className="mb-12">
               <div className="flex items-center justify-between mb-6">
                 <div>
-                  <h2 className="text-xl font-black text-slate-900">{t.relatedItems}</h2>
-                  <p className="text-sm text-slate-500 font-medium">{t.relatedDesc}</p>
+                  <h2 className="text-xl font-black text-gray-900">{t.relatedItems}</h2>
+                  <p className="text-sm text-gray-500 font-medium">{t.relatedDesc}</p>
                 </div>
                 <Link to="/shop" className="text-sm font-extrabold text-purple-700 hover:underline">
                   {t.browseAll}
@@ -414,70 +419,80 @@ const ProductScreen = () => {
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                {related.map((item) => (
-                  <div key={item._id} className="bg-white rounded-3xl overflow-hidden border border-slate-200/80 shadow-sm flex flex-col justify-between group">
-                    <div className="relative">
-                      {(item.countInStock ?? item.stock) > 0 ? (
-                        <span className="absolute top-3 right-3 z-10 px-3 py-1 bg-purple-50 text-purple-700 font-extrabold text-xs rounded-full">
-                          {item.countInStock ?? item.stock} in stock
-                        </span>
-                      ) : (
-                        <span className="absolute top-3 right-3 z-10 px-3 py-1 bg-red-100 text-red-700 font-extrabold text-xs rounded-full">
-                          Sold out
-                        </span>
-                      )}
-                      <div className="h-64 bg-slate-50 overflow-hidden">
-                        <img 
-                          src={item.image || item.images?.[0] || '/placeholder.png'} 
-                          alt={item.name || item.product_name} 
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="p-5 flex flex-col justify-between flex-grow">
-                      <div>
-                        <h3 className="text-sm font-extrabold text-slate-900 mb-1">{item.name || item.product_name}</h3>
-                        <div className="flex items-center gap-1.5 text-xs text-slate-500 mb-3">
-                          <Star size={14} className="fill-amber-400 text-amber-400" />
-                          <span className="font-extrabold text-slate-800">{item.rating || 0}</span>
+                {related.map((item) => {
+                  const itemStock = item.countInStock ?? item.stock ?? 0;
+                  const itemImg = item.images?.[0] || item.image || '/placeholder.png';
+                  return (
+                    <div 
+                      key={item._id} 
+                      onClick={() => navigate(`/product/${item._id}`)}
+                      className="bg-white rounded-3xl overflow-hidden border border-gray-200 shadow-sm flex flex-col justify-between cursor-pointer group hover:border-purple-300 hover:shadow-md transition-all"
+                    >
+                      <div className="relative">
+                        {itemStock > 0 ? (
+                          <span className="absolute top-3 right-3 z-10 px-3 py-1 bg-purple-50 text-purple-700 font-extrabold text-xs rounded-full border border-purple-200">
+                            {itemStock} in stock
+                          </span>
+                        ) : (
+                          <span className="absolute top-3 right-3 z-10 px-3 py-1 bg-red-100 text-red-700 font-extrabold text-xs rounded-full">
+                            Sold out
+                          </span>
+                        )}
+                        <div className="h-64 bg-gray-50 overflow-hidden">
+                          <img 
+                            src={itemImg} 
+                            alt={item.name || item.product_name} 
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                          />
                         </div>
                       </div>
-                      <p className="text-base font-black text-purple-800">${Number(item.price || 0).toFixed(2)}</p>
+
+                      <div className="p-5 flex flex-col justify-between flex-grow">
+                        <div>
+                          <h3 className="text-sm font-extrabold text-gray-900 mb-1 group-hover:text-purple-700 transition-colors">
+                            {item.name || item.product_name}
+                          </h3>
+                          <div className="flex items-center gap-1.5 text-xs text-gray-500 mb-3">
+                            <Star size={14} className="fill-amber-400 text-amber-400" />
+                            <span className="font-extrabold text-gray-800">{(item.rating || 0).toFixed(1)}</span>
+                          </div>
+                        </div>
+                        <p className="text-base font-black text-purple-800">${Number(item.price || 0).toFixed(2)}</p>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           )}
 
           {/* CUSTOMER REVIEWS */}
-          <div className="bg-white rounded-3xl p-6 lg:p-8 border border-slate-200/80 shadow-sm mb-12">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-4 mb-6">
+          <div className="bg-white rounded-3xl p-6 lg:p-8 border border-gray-200 shadow-sm mb-12">
+            <div className="flex items-center justify-between border-b border-gray-100 pb-4 mb-6">
               <div>
-                <h2 className="text-xl font-black text-slate-900">{t.customerReviews}</h2>
-                <p className="text-sm text-slate-500 font-medium">{t.feedbackDesc}</p>
+                <h2 className="text-xl font-black text-gray-900">{t.customerReviews}</h2>
+                <p className="text-sm text-gray-500 font-medium">{t.feedbackDesc}</p>
               </div>
-              <div className="flex items-center gap-2 text-base font-black text-slate-800">
+              <div className="flex items-center gap-2 text-base font-black text-gray-800">
                 <span>{(product.rating || 0).toFixed(1)}</span>
                 <div className="flex">
                   {[...Array(5)].map((_, i) => (
-                    <Star key={i} size={18} className={i < Math.round(product.rating || 0) ? "fill-amber-400 text-amber-400" : "text-slate-200"} />
+                    <Star key={i} size={18} className={i < Math.round(product.rating || 0) ? "fill-amber-400 text-amber-400" : "text-gray-200"} />
                   ))}
                 </div>
               </div>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-              <div className="lg:col-span-5 bg-slate-50/80 p-6 rounded-2xl border border-slate-100">
-                <h3 className="text-sm font-black text-slate-900 mb-2">{t.writeReview}</h3>
-                <p className="text-sm text-slate-600 font-medium">
+              <div className="lg:col-span-5 bg-gray-50 p-6 rounded-2xl border border-gray-100">
+                <h3 className="text-sm font-black text-gray-900 mb-2">{t.writeReview}</h3>
+                <p className="text-sm text-gray-600 font-medium">
                   Please <Link to="/login" className="text-purple-700 font-extrabold underline">log in</Link> to leave a review.
                 </p>
               </div>
 
-              <div className="lg:col-span-7 bg-slate-50/80 p-6 rounded-2xl border border-slate-100 flex items-center justify-center">
-                <p className="text-sm text-slate-600 font-semibold">
+              <div className="lg:col-span-7 bg-gray-50 p-6 rounded-2xl border border-gray-100 flex items-center justify-center">
+                <p className="text-sm text-gray-600 font-semibold">
                   {product.reviews && product.reviews.length > 0 ? `${product.reviews.length} reviews available.` : t.noReviews}
                 </p>
               </div>
