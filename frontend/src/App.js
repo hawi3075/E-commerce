@@ -8,6 +8,7 @@ import HomeScreen from './screens/HomeScreen';
 import LoginScreen from './screens/LoginScreen';
 import SignupScreen from './screens/SignupScreen';
 import OrderScreen from './screens/OrderScreen';
+import CheckoutScreen from './screens/CheckoutScreen'; // 1. IMPORT YOUR CHECKOUT SCREEN HERE
 import PaymentScreen from './screens/PaymentScreen';
 
 import ShopScreen from './screens/ShopScreen';
@@ -24,15 +25,13 @@ import ManageUsers from './screens/admin/ManageUsers';
 // Auth Provider & Context
 import { AuthProvider, AuthContext } from './context/AuthContext';
 
-// Protected Route Handler (Supports User and Admin Access Control)
+// Protected Route Handler
 const ProtectedRoute = ({ children, adminOnly = false }) => {
   const auth = useContext(AuthContext);
   const location = useLocation();
   
-  // Support either userInfo or user depending on AuthContext key naming
   const activeUser = auth?.userInfo || auth?.user;
 
-  // Save the attempted location so after login the user returns directly to checkout/order form
   if (!activeUser) {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
@@ -74,8 +73,10 @@ function App() {
             
             {/* User Protected Routes */}
             <Route path="/orders" element={<ProtectedRoute><OrderScreen /></ProtectedRoute>} />
-            {/* MAP /checkout TO OrderScreen TO SHOW THE BUY FORM */}
-            <Route path="/checkout" element={<ProtectedRoute><OrderScreen /></ProtectedRoute>} />
+            
+            {/* 2. FIXED ROUTE: MAP /checkout TO CheckoutScreen */}
+            <Route path="/checkout" element={<ProtectedRoute><CheckoutScreen /></ProtectedRoute>} />
+            
             <Route path="/payment" element={<ProtectedRoute><PaymentScreen /></ProtectedRoute>} />
 
             {/* Admin Protected Section */}

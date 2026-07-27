@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { 
   ArrowLeft, ShoppingBag, CreditCard, MapPin, User, Phone, 
@@ -9,10 +9,20 @@ const CheckoutScreen = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  // Retrieve passed product data or fallback values
-  const productData = location.state?.product || null;
+  // 1. Recover product data from router state OR localStorage fallback
+  const [productData, setProductData] = useState(() => {
+    return location.state?.product || JSON.parse(localStorage.getItem('checkout_product')) || null;
+  });
+
   const initialQty = location.state?.qty || 1;
   const initialColor = location.state?.color || 'Yellow';
+
+  // Save product to localStorage on mount so refresh doesn't wipe it
+  useEffect(() => {
+    if (location.state?.product) {
+      localStorage.setItem('checkout_product', JSON.stringify(location.state.product));
+    }
+  }, [location.state]);
 
   // State management for order options
   const [selectedColor, setSelectedColor] = useState(initialColor);
@@ -22,6 +32,7 @@ const CheckoutScreen = () => {
   const [shippingAddress, setShippingAddress] = useState({
     fullName: '',
     phone: '',
+    email: '',
     city: 'Addis Ababa',
     postalCode: '',
     address: '',
@@ -32,14 +43,15 @@ const CheckoutScreen = () => {
   const availableColors = ['Yellow', 'Red', 'Blue', 'Orange', 'Black'];
   const unitPrice = productData ? Number(productData.price) : 0;
   const subtotal = unitPrice * quantity;
-  const shippingCost = 150; // Fixed shipping cost
+  const shippingCost = 150; // Fixed shipping cost in ETB
   const totalAmount = subtotal + shippingCost;
 
   const handleQtyChange = (delta) => {
     setQuantity((prev) => Math.max(1, prev + delta));
   };
 
-  const handleSubmitOrder = (e) => {
+  // 2. Submit order and handle redirection safely
+  const handleSubmitOrder = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
 
@@ -52,12 +64,58 @@ const CheckoutScreen = () => {
       totalAmount,
     };
 
-    console.log('Submitting Order:', orderPayload);
+    console.log('Order Details:', orderPayload);
 
-    setTimeout(() => {
-      setIsSubmitting(false);
-      navigate('/orders');
-    }, 1200);
+    if (paymentMethod === 'telebirr') {
+      try {
+        // Force lowercased trim & fallback to a standard valid email domain (e.g. gmail.com)
+        const userEmail = (shippingAddress.email && shippingAddress.email.trim().includes('@'))
+          ? shippingAddress.email.trim().toLowerCase()
+          : `customer${Date.now()}@gmail.com`;
+
+        // Send request to backend to initialize Telebirr payment via Chapa API
+        const response = await fetch('http://localhost:5000/api/payments/telebirr', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            amount: totalAmount,
+            phone: shippingAddress.phone,
+            fullName: shippingAddress.fullName,
+            email: userEmail,
+            orderId: productData?._id || Date.now(),
+          }),
+        });
+
+        const data = await response.json();
+        console.log('Backend response:', data);
+
+        if (response.ok && data?.checkoutUrl) {
+          // Clear cached item and redirect directly to payment gateway
+          localStorage.removeItem('checkout_product');
+          window.location.href = data.checkoutUrl;
+        } else {
+          // Format message cleanly if backend returns error details
+          const errorMessage = typeof data?.message === 'object' 
+            ? JSON.stringify(data.message) 
+            : (data?.message || data?.error || 'Payment initiation failed.');
+
+          console.error('Telebirr Error:', errorMessage);
+          alert(`Payment Error: ${errorMessage}`);
+          setIsSubmitting(false);
+        }
+      } catch (error) {
+        console.error('Telebirr Connection Error:', error);
+        alert('Could not connect to payment backend (http://localhost:5000). Check if your backend server is running.');
+        setIsSubmitting(false);
+      }
+    } else {
+      // Cash on Delivery / Standard Flow
+      setTimeout(() => {
+        setIsSubmitting(false);
+        localStorage.removeItem('checkout_product');
+        navigate('/orders');
+      }, 1200);
+    }
   };
 
   if (!productData) {
@@ -114,18 +172,35 @@ const CheckoutScreen = () => {
                 </div>
               </div>
 
-              <div>
-                <label className="block text-xs font-bold uppercase text-gray-600 mb-1">Phone Number</label>
-                <div className="relative">
-                  <Phone size={18} className="absolute left-3.5 top-3.5 text-gray-400" />
-                  <input
-                    type="tel"
-                    required
-                    placeholder="+251 9..."
-                    value={shippingAddress.phone}
-                    onChange={(e) => setShippingAddress({ ...shippingAddress, phone: e.target.value })}
-                    className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl text-sm font-medium focus:outline-none focus:border-purple-600"
-                  />
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold uppercase text-gray-600 mb-1">Phone Number</label>
+                  <div className="relative">
+                    <Phone size={18} className="absolute left-3.5 top-3.5 text-gray-400" />
+                    <input
+                      type="tel"
+                      required
+                      placeholder="0911234567"
+                      value={shippingAddress.phone}
+                      onChange={(e) => setShippingAddress({ ...shippingAddress, phone: e.target.value })}
+                      className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl text-sm font-medium focus:outline-none focus:border-purple-600"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold uppercase text-gray-600 mb-1">Email Address</label>
+                  <div className="relative">
+                    <Mail size={18} className="absolute left-3.5 top-3.5 text-gray-400" />
+                    <input
+                      type="email"
+                      required
+                      placeholder="e.g. abebe@gmail.com"
+                      value={shippingAddress.email}
+                      onChange={(e) => setShippingAddress({ ...shippingAddress, email: e.target.value })}
+                      className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl text-sm font-medium focus:outline-none focus:border-purple-600"
+                    />
+                  </div>
                 </div>
               </div>
 
@@ -170,7 +245,7 @@ const CheckoutScreen = () => {
             </div>
           </div>
 
-          {/* 2. Payment Method */}
+          {/* 2. Payment Method Options */}
           <div className="bg-white p-6 rounded-3xl border border-gray-200 shadow-sm">
             <h2 className="text-lg font-black text-gray-900 mb-4 flex items-center gap-2">
               <CreditCard className="text-purple-700" size={20} /> Select Payment Method
@@ -210,10 +285,10 @@ const CheckoutScreen = () => {
             className="w-full bg-purple-700 hover:bg-purple-800 disabled:bg-gray-400 text-white font-black py-4 px-6 rounded-xl transition-all shadow-md flex items-center justify-center gap-2 text-base"
           >
             {isSubmitting ? (
-              <span>Processing Order...</span>
+              <span>Connecting Telebirr...</span>
             ) : (
               <>
-                <CheckCircle size={20} /> Confirm Order (${totalAmount.toFixed(2)})
+                <CheckCircle size={20} /> Pay with {paymentMethod === 'telebirr' ? 'Telebirr' : 'Selected Method'} ({totalAmount.toFixed(2)} ETB)
               </>
             )}
           </button>
@@ -236,7 +311,7 @@ const CheckoutScreen = () => {
                 />
                 <div className="flex flex-col justify-center">
                   <h3 className="font-extrabold text-sm text-gray-900 line-clamp-2">{productData.name}</h3>
-                  <p className="text-sm font-black text-purple-700 mt-1">${unitPrice.toFixed(2)} each</p>
+                  <p className="text-sm font-black text-purple-700 mt-1">{unitPrice.toFixed(2)} ETB each</p>
                 </div>
               </div>
 
@@ -292,15 +367,15 @@ const CheckoutScreen = () => {
             <div className="space-y-3 text-sm font-bold border-t border-gray-200 pt-4 mt-6">
               <div className="flex justify-between text-gray-600">
                 <span>Subtotal ({quantity} {quantity === 1 ? 'item' : 'items'})</span>
-                <span className="text-gray-900">${subtotal.toFixed(2)}</span>
+                <span className="text-gray-900">{subtotal.toFixed(2)} ETB</span>
               </div>
               <div className="flex justify-between text-gray-600">
                 <span>Shipping Fee</span>
-                <span className="text-gray-900">${shippingCost.toFixed(2)}</span>
+                <span className="text-gray-900">{shippingCost.toFixed(2)} ETB</span>
               </div>
               <div className="flex justify-between text-base font-black text-gray-900 border-t border-gray-200 pt-3">
                 <span>Total Amount</span>
-                <span className="text-purple-700 text-lg">${totalAmount.toFixed(2)}</span>
+                <span className="text-purple-700 text-lg">{totalAmount.toFixed(2)} ETB</span>
               </div>
             </div>
           </div>

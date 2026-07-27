@@ -13,7 +13,10 @@ connectDB();
 const app = express();
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: ['http://localhost:3000', 'http://localhost:5173'], // Allow React dev server
+  credentials: true
+}));
 
 // Payload size limit for image uploads
 app.use(express.json({ limit: '50mb' }));
@@ -27,6 +30,7 @@ const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
 const productRoutes = require('./routes/productRoutes');
 const orderRoutes = require('./routes/orderRoutes');
+const paymentRoutes = require('./routes/paymentRoutes'); // Added Payment Routes
 
 // Verify exports are valid middleware functions before mounting
 const safeRoute = (route) => (typeof route === 'function' ? route : (req, res, next) => next());
@@ -36,6 +40,7 @@ app.use('/api/auth', safeRoute(authRoutes));
 app.use('/api/users', safeRoute(userRoutes));
 app.use('/api/products', safeRoute(productRoutes));
 app.use('/api/orders', safeRoute(orderRoutes));
+app.use('/api/payments', safeRoute(paymentRoutes)); // Mounted Telebirr / Payment API
 
 // Basic Health Check
 app.get('/', (req, res) => {
