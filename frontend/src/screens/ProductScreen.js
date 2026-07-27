@@ -3,7 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import { 
   Star, ShoppingCart, Share2, ArrowLeft, CheckCircle2, 
-  Package, Tag, Hash, ShoppingBag, MapPin, Phone, Mail, Loader2 
+  Package, Tag, Hash, ShoppingBag, MapPin, Phone, Mail, Loader2, AlertCircle
 } from 'lucide-react';
 
 import Navbar from '../components/Navbar';
@@ -34,7 +34,9 @@ const TRANSLATIONS = {
     singleConfig: 'Single configuration',
     variants: 'Variants',
     rating: 'Rating',
-    noReviewsYet: 'No reviews yet'
+    noReviewsYet: 'No reviews yet',
+    productNotFound: 'Product not found',
+    errorFetching: 'Failed to load product details.'
   },
   am: {
     backToShop: 'ወደ ሱቅ ተመለስ',
@@ -60,7 +62,9 @@ const TRANSLATIONS = {
     singleConfig: 'አንድ ዓይነት ምርት',
     variants: 'ዓይነቶች',
     rating: 'ደረጃ',
-    noReviewsYet: 'አስተያየት አልተሰጠም'
+    noReviewsYet: 'አስተያየት አልተሰጠም',
+    productNotFound: 'ምርቱ አልተገኘም',
+    errorFetching: 'የምርቱን ዝርዝር መጫን አልተቻለም።'
   },
   om: {
     backToShop: 'Gara Dukaatti Deebi\'i',
@@ -86,33 +90,11 @@ const TRANSLATIONS = {
     singleConfig: 'Qofaa',
     variants: 'Gosoota',
     rating: 'Sadarkaa',
-    noReviewsYet: 'Yaadni hin jiru'
+    noReviewsYet: 'Yaadni hin jiru',
+    productNotFound: 'Meeshaan hin argamne',
+    errorFetching: 'Odeeffannoo meeshaa fiduun hin danda\'amne.'
   }
 };
-
-// FALLBACK MOCK DATA
-const MOCK_DETAIL = {
-  _id: '69e6b41bed56c4bf66376a27',
-  product_name: 'Slim Fit Chinos',
-  sku: 'SKU-1776727065730-11',
-  price: 0.34,
-  stock: 56,
-  rating: 0.0,
-  numReviews: 0,
-  category: 'MEN',
-  description: 'Comfortable and stylish chinos for daily use.',
-  images: [
-    'https://images.unsplash.com/photo-1541099649105-f69ad21f3246?auto=format&fit=crop&q=80&w=800'
-  ],
-  soldCount: 4
-};
-
-const MOCK_RELATED = [
-  { _id: 'r1', name: 'Classic Casual Shirt', price: 0.28, stock: 80, rating: 4.6, image: 'https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?auto=format&fit=crop&q=80&w=400' },
-  { _id: 'r2', name: 'Kids Cotton Hoodie', price: 0.22, stock: 100, rating: 4.7, image: 'https://images.unsplash.com/photo-1503944583220-79d8926ad5e2?auto=format&fit=crop&q=80&w=400' },
-  { _id: 'r3', name: 'Decorative Wall Mirror', price: 0.78, stock: 18, rating: 5.0, image: 'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&q=80&w=400' },
-  { _id: 'r4', name: 'Leather Minimalist Wallet', price: 0.28, stock: 0, rating: 5.0, image: 'https://images.unsplash.com/photo-1627123424574-724758594e93?auto=format&fit=crop&q=80&w=400' }
-];
 
 const ProductScreen = () => {
   const { id } = useParams();
@@ -131,6 +113,7 @@ const ProductScreen = () => {
   const [related, setRelated] = useState([]);
   const [qty, setQty] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const syncLang = () => setLang(getCurrentLang());
@@ -145,38 +128,66 @@ const ProductScreen = () => {
   const t = TRANSLATIONS[lang] || TRANSLATIONS.en;
 
   useEffect(() => {
-    const fetchProduct = async () => {
+    const fetchProductData = async () => {
       try {
         setIsLoading(true);
+        setError(null);
+        
         const { data } = await axios.get(`/api/products/${id}`);
         setProduct(data);
-      } catch (error) {
-        setProduct(MOCK_DETAIL);
+
+        try {
+          const relatedRes = await axios.get(`/api/products?category=${data.category}&limit=4`);
+          setRelated(relatedRes.data.products ? relatedRes.data.products.filter(item => item._id !== id) : []);
+        } catch (e) {
+          setRelated([]);
+        }
+
+      } catch (err) {
+        setError(err.response?.data?.message || t.errorFetching);
       } finally {
         setIsLoading(false);
       }
     };
 
-    fetchProduct();
-    setRelated(MOCK_RELATED);
-  }, [id]);
+    if (id) {
+      fetchProductData();
+    }
+  }, [id, t.errorFetching]);
 
   if (isLoading) {
     return (
       <div className="bg-[#f9f8f3] min-h-screen">
         <Navbar />
         <div className="flex flex-col items-center justify-center h-[70vh]">
-          <Loader2 className="animate-spin text-emerald-700 mb-3" size={36} />
-          <p className="text-xs font-bold text-gray-500 uppercase tracking-widest">Loading product details...</p>
+          <Loader2 className="animate-spin text-purple-700 mb-3" size={44} />
+          <p className="text-base font-extrabold text-gray-600 uppercase tracking-widest">Loading details...</p>
         </div>
       </div>
     );
   }
 
-  if (!product) return null;
+  if (error || !product) {
+    return (
+      <div className="bg-[#f9f8f3] min-h-screen">
+        <Navbar />
+        <div className="flex flex-col items-center justify-center h-[70vh] px-4 text-center">
+          <AlertCircle className="text-purple-600 mb-4" size={56} />
+          <h2 className="text-2xl font-black text-slate-900 mb-3">{t.productNotFound}</h2>
+          <p className="text-base text-slate-600 mb-6">{error || t.errorFetching}</p>
+          <button 
+            onClick={() => navigate('/shop')}
+            className="px-6 py-3 bg-purple-700 text-white rounded-xl text-sm font-bold hover:bg-purple-800 transition-all"
+          >
+            {t.backToShop}
+          </button>
+        </div>
+      </div>
+    );
+  }
 
-  const currentStock = product.stock ?? product.countInStock ?? 0;
-  const mainImage = product.images?.[0] || product.image || MOCK_DETAIL.images[0];
+  const currentStock = product.countInStock ?? product.stock ?? 0;
+  const mainImage = product.images?.[0] || product.image || '/placeholder.png';
 
   return (
     <div className="bg-[#f9f8f3] min-h-screen text-slate-800 font-sans antialiased flex flex-col justify-between">
@@ -189,9 +200,9 @@ const ProductScreen = () => {
           <div className="mb-6">
             <button 
               onClick={() => navigate('/shop')}
-              className="inline-flex items-center gap-2 px-4 py-2 border-2 border-slate-800 text-slate-900 rounded-xl text-xs font-extrabold hover:bg-slate-900 hover:text-white transition-all shadow-sm"
+              className="inline-flex items-center gap-2 px-5 py-2.5 border-2 border-slate-800 text-slate-900 rounded-xl text-sm font-extrabold hover:bg-slate-900 hover:text-white transition-all shadow-sm"
             >
-              <ArrowLeft size={16} /> {t.backToShop}
+              <ArrowLeft size={18} /> {t.backToShop}
             </button>
           </div>
 
@@ -201,15 +212,19 @@ const ProductScreen = () => {
               
               {/* Product Image Section */}
               <div className="lg:col-span-6 relative">
-                {currentStock > 0 && (
-                  <span className="absolute top-4 left-4 z-10 px-3.5 py-1 bg-[#dcfce7] text-[#15803d] font-bold text-xs rounded-full border border-emerald-200">
+                {currentStock > 0 ? (
+                  <span className="absolute top-4 left-4 z-10 px-4 py-1.5 bg-purple-50 text-purple-700 font-extrabold text-sm rounded-full border border-purple-200">
                     {t.inStock}
                   </span>
+                ) : (
+                  <span className="absolute top-4 left-4 z-10 px-4 py-1.5 bg-red-50 text-red-700 font-extrabold text-sm rounded-full border border-red-200">
+                    {t.outOfStock}
+                  </span>
                 )}
-                <div className="w-full h-[450px] lg:h-[500px] bg-slate-50 rounded-2xl overflow-hidden border border-slate-100 flex items-center justify-center">
+                <div className="w-full h-[450px] lg:h-[520px] bg-slate-50 rounded-2xl overflow-hidden border border-slate-100 flex items-center justify-center">
                   <img 
                     src={mainImage} 
-                    alt={product.product_name} 
+                    alt={product.name || product.product_name} 
                     className="w-full h-full object-cover object-center"
                   />
                 </div>
@@ -219,104 +234,112 @@ const ProductScreen = () => {
               <div className="lg:col-span-6 flex flex-col justify-between">
                 <div>
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-xs font-bold uppercase tracking-wider text-[#15803d]">
-                      {product.category || 'General'}
+                    <span className="text-sm font-extrabold uppercase tracking-wider text-purple-700">
+                      {product.category || 'Safety Equipment'}
                     </span>
-                    <button className="p-2.5 rounded-full border border-slate-200 text-slate-600 hover:bg-slate-50 transition-colors">
-                      <Share2 size={18} />
+                    <button className="p-3 rounded-full border border-slate-200 text-slate-600 hover:bg-slate-50 transition-colors">
+                      <Share2 size={20} />
                     </button>
                   </div>
 
-                  <h1 className="text-2xl lg:text-3xl font-black text-slate-900 mb-3 tracking-tight">
-                    {product.product_name}
+                  <h1 className="text-3xl lg:text-4xl font-black text-slate-900 mb-4 tracking-tight">
+                    {product.name || product.product_name}
                   </h1>
 
                   {/* Ratings and SKU */}
-                  <div className="flex flex-wrap items-center gap-3 text-xs font-medium text-slate-500 mb-6">
-                    <div className="flex items-center gap-1">
+                  <div className="flex flex-wrap items-center gap-3 text-sm font-semibold text-slate-600 mb-6">
+                    <div className="flex items-center gap-1.5">
                       {[...Array(5)].map((_, i) => (
-                        <Star key={i} size={16} className="text-slate-300" />
+                        <Star key={i} size={18} className={i < Math.round(product.rating || 0) ? "fill-amber-400 text-amber-400" : "text-slate-200"} />
                       ))}
-                      <span className="font-bold text-slate-900 ml-1">{(product.rating || 0).toFixed(1)}</span>
-                      <span>{product.numReviews || 0} reviews</span>
+                      <span className="font-extrabold text-slate-900 ml-1.5 text-base">{(product.rating || 0).toFixed(1)}</span>
+                      <span>({product.numReviews || 0} reviews)</span>
                     </div>
-                    <span>•</span>
-                    <span className="font-mono">{t.sku}: {product.sku || 'N/A'}</span>
+                    {product.sku && (
+                      <>
+                        <span>•</span>
+                        <span className="font-mono text-xs">{t.sku}: {product.sku}</span>
+                      </>
+                    )}
                   </div>
 
                   {/* Price Banner Box */}
                   <div className="bg-[#fcfbf9] border border-slate-200/80 rounded-2xl p-6 mb-6">
-                    <p className="text-4xl font-black text-[#166534] mb-2">
+                    <p className="text-5xl font-black text-purple-900 mb-2">
                       ${Number(product.price || 0).toFixed(2)}
                     </p>
-                    <p className="text-xs text-slate-600 font-medium">
+                    <p className="text-sm text-slate-700 font-bold">
                       {currentStock} {t.unitsAvailable}
                     </p>
                   </div>
 
-                  <p className="text-xs lg:text-sm text-slate-600 leading-relaxed mb-6">
+                  <p className="text-base text-slate-700 leading-relaxed font-medium mb-6">
                     {product.description}
                   </p>
 
                   {/* Feature Highlights Grid */}
                   <div className="grid grid-cols-3 gap-3 mb-8">
-                    <div className="p-3.5 bg-slate-50 border border-slate-100 rounded-xl">
+                    <div className="p-4 bg-slate-50 border border-slate-100 rounded-xl">
                       <div className="flex items-center gap-2 text-slate-500 mb-1">
-                        <Package size={14} />
-                        <span className="text-[11px] font-semibold">{t.availability}</span>
+                        <Package size={16} />
+                        <span className="text-xs font-bold">{t.availability}</span>
                       </div>
-                      <p className="text-xs font-black text-slate-900">{currentStock} in stock</p>
+                      <p className="text-sm font-black text-slate-900">{currentStock} in stock</p>
                     </div>
 
-                    <div className="p-3.5 bg-slate-50 border border-slate-100 rounded-xl">
+                    <div className="p-4 bg-slate-50 border border-slate-100 rounded-xl">
                       <div className="flex items-center gap-2 text-slate-500 mb-1">
-                        <Star size={14} />
-                        <span className="text-[11px] font-semibold">{t.rating}</span>
+                        <Star size={16} />
+                        <span className="text-xs font-bold">{t.rating}</span>
                       </div>
-                      <p className="text-xs font-black text-slate-900">{t.noReviewsYet}</p>
+                      <p className="text-sm font-black text-slate-900">{product.rating ? `${product.rating} / 5` : t.noReviewsYet}</p>
                     </div>
 
-                    <div className="p-3.5 bg-slate-50 border border-slate-100 rounded-xl">
+                    <div className="p-4 bg-slate-50 border border-slate-100 rounded-xl">
                       <div className="flex items-center gap-2 text-slate-500 mb-1">
-                        <CheckCircle2 size={14} />
-                        <span className="text-[11px] font-semibold">{t.variants}</span>
+                        <CheckCircle2 size={16} />
+                        <span className="text-xs font-bold">{t.variants}</span>
                       </div>
-                      <p className="text-xs font-black text-slate-900">{t.singleConfig}</p>
+                      <p className="text-sm font-black text-slate-900">{t.singleConfig}</p>
                     </div>
                   </div>
                 </div>
 
                 {/* Quantity & CTA Buttons */}
                 <div className="space-y-4">
-                  <div className="flex items-center gap-3">
-                    <span className="text-xs font-bold text-slate-900">Quantity</span>
-                    <div className="flex items-center border border-slate-200 bg-slate-50 rounded-xl p-1">
+                  <div className="flex items-center gap-4">
+                    <span className="text-sm font-black text-slate-900">Quantity</span>
+                    <div className="flex items-center border border-slate-300 bg-slate-50 rounded-xl p-1">
                       <button 
                         onClick={() => setQty(Math.max(1, qty - 1))}
-                        className="w-7 h-7 flex items-center justify-center font-bold text-slate-600 hover:bg-white rounded-lg transition-all"
+                        disabled={currentStock === 0 || qty <= 1}
+                        className="w-8 h-8 flex items-center justify-center font-black text-slate-700 hover:bg-white rounded-lg transition-all text-base disabled:opacity-40"
                       >
                         -
                       </button>
-                      <span className="w-8 text-center text-xs font-black">{qty}</span>
+                      <span className="w-10 text-center text-base font-black">{qty}</span>
                       <button 
                         onClick={() => setQty(Math.min(currentStock, qty + 1))}
-                        className="w-7 h-7 flex items-center justify-center font-bold text-slate-600 hover:bg-white rounded-lg transition-all"
+                        disabled={currentStock === 0 || qty >= currentStock}
+                        className="w-8 h-8 flex items-center justify-center font-black text-slate-700 hover:bg-white rounded-lg transition-all text-base disabled:opacity-40"
                       >
                         +
                       </button>
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <button 
+                      disabled={currentStock === 0}
                       onClick={() => navigate('/cart')}
-                      className="w-full bg-[#15803d] hover:bg-[#166534] text-white py-3.5 px-6 rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition-all"
+                      className="w-full bg-purple-700 hover:bg-purple-800 disabled:bg-slate-300 text-white py-4 px-6 rounded-xl font-extrabold text-sm flex items-center justify-center gap-2 transition-all shadow-md shadow-purple-700/10"
                     >
-                      <ShoppingCart size={16} /> {t.addToCart}
+                      <ShoppingCart size={18} /> {t.addToCart}
                     </button>
                     <button 
+                      disabled={currentStock === 0}
                       onClick={() => navigate('/checkout')}
-                      className="w-full bg-[#fef2f2] hover:bg-[#fee2e2] text-[#991b1b] py-3.5 px-6 rounded-xl font-bold text-xs transition-all border border-red-100"
+                      className="w-full bg-purple-50 hover:bg-purple-100 disabled:bg-slate-100 text-purple-900 py-4 px-6 rounded-xl font-extrabold text-sm transition-all border border-purple-200"
                     >
                       {t.buyNow}
                     </button>
@@ -331,116 +354,115 @@ const ProductScreen = () => {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
             {/* Overview */}
             <div className="bg-white rounded-3xl p-6 lg:p-8 border border-slate-200/80 shadow-sm">
-              <h2 className="text-base font-black text-slate-900 mb-4">{t.overview}</h2>
-              <p className="text-xs text-slate-600 leading-relaxed">
+              <h2 className="text-xl font-black text-slate-900 mb-4">{t.overview}</h2>
+              <p className="text-sm lg:text-base text-slate-700 leading-relaxed font-medium">
                 {product.description}
               </p>
             </div>
 
             {/* Product Details Specs */}
-            <div className="bg-white rounded-3xl p-6 lg:p-8 border border-slate-200/80 shadow-sm space-y-3">
-              <h2 className="text-base font-black text-slate-900 mb-4">{t.productDetails}</h2>
+            <div className="bg-white rounded-3xl p-6 lg:p-8 border border-slate-200/80 shadow-sm space-y-4">
+              <h2 className="text-xl font-black text-slate-900 mb-4">{t.productDetails}</h2>
               
-              <div className="p-3 bg-slate-50/80 rounded-2xl flex items-center gap-3">
-                <Package size={16} className="text-[#15803d]" />
+              <div className="p-4 bg-slate-50/80 rounded-2xl flex items-center gap-4">
+                <Package size={20} className="text-purple-700" />
                 <div>
-                  <p className="text-[10px] font-bold uppercase text-slate-400">{t.availability}</p>
-                  <p className="text-xs font-black text-slate-800">{currentStock} in stock</p>
+                  <p className="text-xs font-bold uppercase text-slate-400">{t.availability}</p>
+                  <p className="text-sm font-black text-slate-800">{currentStock} in stock</p>
                 </div>
               </div>
 
-              <div className="p-3 bg-slate-50/80 rounded-2xl flex items-center gap-3">
-                <Tag size={16} className="text-[#15803d]" />
+              <div className="p-4 bg-slate-50/80 rounded-2xl flex items-center gap-4">
+                <Tag size={20} className="text-purple-700" />
                 <div>
-                  <p className="text-[10px] font-bold uppercase text-slate-400">{t.category}</p>
-                  <p className="text-xs font-black text-slate-800">{product.category || 'General'}</p>
+                  <p className="text-xs font-bold uppercase text-slate-400">{t.category}</p>
+                  <p className="text-sm font-black text-slate-800">{product.category || 'General'}</p>
                 </div>
               </div>
 
-              <div className="p-3 bg-slate-50/80 rounded-2xl flex items-center gap-3">
-                <Hash size={16} className="text-[#15803d]" />
-                <div>
-                  <p className="text-[10px] font-bold uppercase text-slate-400">{t.sku}</p>
-                  <p className="text-xs font-mono font-bold text-slate-800">{product.sku || 'N/A'}</p>
+              {product.sku && (
+                <div className="p-4 bg-slate-50/80 rounded-2xl flex items-center gap-4">
+                  <Hash size={20} className="text-purple-700" />
+                  <div>
+                    <p className="text-xs font-bold uppercase text-slate-400">{t.sku}</p>
+                    <p className="text-sm font-mono font-bold text-slate-800">{product.sku}</p>
+                  </div>
                 </div>
-              </div>
+              )}
 
-              <div className="p-3 bg-slate-50/80 rounded-2xl flex items-center gap-3">
-                <ShoppingBag size={16} className="text-[#15803d]" />
+              <div className="p-4 bg-slate-50/80 rounded-2xl flex items-center gap-4">
+                <ShoppingBag size={20} className="text-purple-700" />
                 <div>
-                  <p className="text-[10px] font-bold uppercase text-slate-400">{t.unitsSold}</p>
-                  <p className="text-xs font-black text-slate-800">{product.soldCount || 4} total</p>
+                  <p className="text-xs font-bold uppercase text-slate-400">{t.unitsSold}</p>
+                  <p className="text-sm font-black text-slate-800">{product.soldCount || 0} total</p>
                 </div>
               </div>
             </div>
           </div>
 
           {/* RELATED ITEMS */}
-          <div className="mb-12">
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <h2 className="text-base font-black text-slate-900">{t.relatedItems}</h2>
-                <p className="text-xs text-slate-500">{t.relatedDesc}</p>
+          {related.length > 0 && (
+            <div className="mb-12">
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h2 className="text-xl font-black text-slate-900">{t.relatedItems}</h2>
+                  <p className="text-sm text-slate-500 font-medium">{t.relatedDesc}</p>
+                </div>
+                <Link to="/shop" className="text-sm font-extrabold text-purple-700 hover:underline">
+                  {t.browseAll}
+                </Link>
               </div>
-              <Link to="/shop" className="text-xs font-bold text-[#15803d] hover:underline">
-                {t.browseAll}
-              </Link>
-            </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {related.map((item) => (
-                <div key={item._id} className="bg-white rounded-3xl overflow-hidden border border-slate-200/80 shadow-sm flex flex-col justify-between group">
-                  <div className="relative">
-                    {item.stock > 0 ? (
-                      <span className="absolute top-3 right-3 z-10 px-2.5 py-0.5 bg-[#dcfce7] text-[#15803d] font-bold text-[10px] rounded-full">
-                        {item.stock} in stock
-                      </span>
-                    ) : (
-                      <span className="absolute top-3 right-3 z-10 px-2.5 py-0.5 bg-red-100 text-red-700 font-bold text-[10px] rounded-full">
-                        Sold out
-                      </span>
-                    )}
-                    <div className="h-64 bg-slate-50 overflow-hidden">
-                      <img 
-                        src={item.image} 
-                        alt={item.name} 
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="p-4 flex flex-col justify-between flex-grow">
-                    <div>
-                      {item.name === 'Kids Cotton Hoodie' && (
-                        <button className="w-full bg-[#15803d] text-white py-2 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 mb-3">
-                          <ShoppingCart size={14} /> Add to Cart
-                        </button>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                {related.map((item) => (
+                  <div key={item._id} className="bg-white rounded-3xl overflow-hidden border border-slate-200/80 shadow-sm flex flex-col justify-between group">
+                    <div className="relative">
+                      {(item.countInStock ?? item.stock) > 0 ? (
+                        <span className="absolute top-3 right-3 z-10 px-3 py-1 bg-purple-50 text-purple-700 font-extrabold text-xs rounded-full">
+                          {item.countInStock ?? item.stock} in stock
+                        </span>
+                      ) : (
+                        <span className="absolute top-3 right-3 z-10 px-3 py-1 bg-red-100 text-red-700 font-extrabold text-xs rounded-full">
+                          Sold out
+                        </span>
                       )}
-                      <h3 className="text-xs font-extrabold text-slate-900 mb-1">{item.name}</h3>
-                      <div className="flex items-center gap-1 text-[11px] text-slate-500 mb-2">
-                        <Star size={12} className="fill-amber-400 text-amber-400" />
-                        <span className="font-bold text-slate-800">{item.rating}</span>
+                      <div className="h-64 bg-slate-50 overflow-hidden">
+                        <img 
+                          src={item.image || item.images?.[0] || '/placeholder.png'} 
+                          alt={item.name || item.product_name} 
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        />
                       </div>
                     </div>
-                    <p className="text-sm font-black text-[#166534]">${item.price.toFixed(2)}</p>
+
+                    <div className="p-5 flex flex-col justify-between flex-grow">
+                      <div>
+                        <h3 className="text-sm font-extrabold text-slate-900 mb-1">{item.name || item.product_name}</h3>
+                        <div className="flex items-center gap-1.5 text-xs text-slate-500 mb-3">
+                          <Star size={14} className="fill-amber-400 text-amber-400" />
+                          <span className="font-extrabold text-slate-800">{item.rating || 0}</span>
+                        </div>
+                      </div>
+                      <p className="text-base font-black text-purple-800">${Number(item.price || 0).toFixed(2)}</p>
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
-          </div>
+          )}
 
           {/* CUSTOMER REVIEWS */}
           <div className="bg-white rounded-3xl p-6 lg:p-8 border border-slate-200/80 shadow-sm mb-12">
             <div className="flex items-center justify-between border-b border-slate-100 pb-4 mb-6">
               <div>
-                <h2 className="text-base font-black text-slate-900">{t.customerReviews}</h2>
-                <p className="text-xs text-slate-500">{t.feedbackDesc}</p>
+                <h2 className="text-xl font-black text-slate-900">{t.customerReviews}</h2>
+                <p className="text-sm text-slate-500 font-medium">{t.feedbackDesc}</p>
               </div>
-              <div className="flex items-center gap-1 text-sm font-bold text-slate-800">
-                <span>0.0</span>
+              <div className="flex items-center gap-2 text-base font-black text-slate-800">
+                <span>{(product.rating || 0).toFixed(1)}</span>
                 <div className="flex">
                   {[...Array(5)].map((_, i) => (
-                    <Star key={i} size={16} className="text-slate-200" />
+                    <Star key={i} size={18} className={i < Math.round(product.rating || 0) ? "fill-amber-400 text-amber-400" : "text-slate-200"} />
                   ))}
                 </div>
               </div>
@@ -448,14 +470,16 @@ const ProductScreen = () => {
 
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
               <div className="lg:col-span-5 bg-slate-50/80 p-6 rounded-2xl border border-slate-100">
-                <h3 className="text-xs font-black text-slate-900 mb-2">{t.writeReview}</h3>
-                <p className="text-xs text-slate-500">
-                  Please <Link to="/login" className="text-[#15803d] font-bold underline">log in</Link> to leave a review.
+                <h3 className="text-sm font-black text-slate-900 mb-2">{t.writeReview}</h3>
+                <p className="text-sm text-slate-600 font-medium">
+                  Please <Link to="/login" className="text-purple-700 font-extrabold underline">log in</Link> to leave a review.
                 </p>
               </div>
 
               <div className="lg:col-span-7 bg-slate-50/80 p-6 rounded-2xl border border-slate-100 flex items-center justify-center">
-                <p className="text-xs text-slate-500 font-medium">{t.noReviews}</p>
+                <p className="text-sm text-slate-600 font-semibold">
+                  {product.reviews && product.reviews.length > 0 ? `${product.reviews.length} reviews available.` : t.noReviews}
+                </p>
               </div>
             </div>
           </div>
@@ -463,22 +487,22 @@ const ProductScreen = () => {
         </main>
       </div>
 
-      {/* EFOY GABEYA FOOTER */}
+      {/* LUU SAFETY FOOTER */}
       <footer className="bg-black text-white pt-12 pb-8 rounded-t-3xl">
         <div className="max-w-[1240px] mx-auto px-6 lg:px-8 grid grid-cols-1 md:grid-cols-3 gap-8 pb-8 border-b border-zinc-800">
           <div>
             <div className="flex items-center gap-2 mb-3">
-              <div className="w-6 h-6 rounded-md bg-[#15803d] flex items-center justify-center font-bold text-xs">E</div>
-              <span className="text-base font-black tracking-tight">Efoy Gabeya</span>
+              <div className="w-7 h-7 rounded-md bg-purple-600 flex items-center justify-center font-black text-sm text-white">L</div>
+              <span className="text-lg font-black tracking-tight">Luu Safety</span>
             </div>
-            <p className="text-xs text-zinc-400 max-w-sm leading-relaxed">
-              Your trusted marketplace for quality products and fast delivery. Providing excellent service across Ethiopia.
+            <p className="text-sm text-zinc-400 max-w-sm leading-relaxed font-medium">
+              Your trusted marketplace for quality safety gear and protective products with reliable service across Ethiopia.
             </p>
           </div>
 
           <div>
-            <h4 className="text-xs font-black uppercase tracking-wider text-zinc-400 mb-3">Quick Links</h4>
-            <ul className="space-y-2 text-xs font-medium text-zinc-300">
+            <h4 className="text-sm font-black uppercase tracking-wider text-zinc-400 mb-3">Quick Links</h4>
+            <ul className="space-y-2.5 text-sm font-semibold text-zinc-300">
               <li><Link to="/" className="hover:text-white transition-colors">Home</Link></li>
               <li><Link to="/shop" className="hover:text-white transition-colors">Shop</Link></li>
               <li><Link to="/about" className="hover:text-white transition-colors">About</Link></li>
@@ -487,16 +511,16 @@ const ProductScreen = () => {
           </div>
 
           <div>
-            <h4 className="text-xs font-black uppercase tracking-wider text-zinc-400 mb-3">Headquarters</h4>
-            <ul className="space-y-2.5 text-xs text-zinc-300">
-              <li className="flex items-center gap-2">
-                <MapPin size={14} className="text-[#15803d]" /> Bole Road, Addis Ababa
+            <h4 className="text-sm font-black uppercase tracking-wider text-zinc-400 mb-3">Headquarters</h4>
+            <ul className="space-y-3 text-sm font-medium text-zinc-300">
+              <li className="flex items-center gap-2.5">
+                <MapPin size={16} className="text-purple-400" /> Bole Road, Addis Ababa
               </li>
-              <li className="flex items-center gap-2">
-                <Phone size={14} className="text-[#15803d]" /> +251 911 223344
+              <li className="flex items-center gap-2.5">
+                <Phone size={16} className="text-purple-400" /> +251 911 223344
               </li>
-              <li className="flex items-center gap-2">
-                <Mail size={14} className="text-[#15803d]" /> hub@efoygabeya.com
+              <li className="flex items-center gap-2.5">
+                <Mail size={16} className="text-purple-400" /> support@luusafety.com
               </li>
             </ul>
           </div>
