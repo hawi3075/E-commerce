@@ -4,8 +4,47 @@ import {
   Search, ShoppingCart, Moon, Sun, LogIn, LogOut, User, Menu, X 
 } from 'lucide-react';
 
-// Import your custom logo image
-import logoImg from './ChatGPT Image Jul 27, 2026, 08_42_30 AM.webp';
+import logoImg from './logo.webp';
+
+// Translation Dictionary
+const translations = {
+  English: {
+    home: 'Home',
+    shop: 'Shop',
+    about: 'About',
+    contact: 'Contact',
+    searchPlaceholder: 'Search equipment...',
+    searchBtn: 'Search',
+    signIn: 'Sign In',
+    orders: 'Orders',
+    logout: 'Log Out',
+    cart: 'Cart',
+  },
+  Amharic: {
+    home: 'መነሻ',
+    shop: 'ሱቅ',
+    about: 'ስለ እኛ',
+    contact: 'ግንኙነት',
+    searchPlaceholder: 'እቃዎችን ይፈልጉ...',
+    searchBtn: 'ፈልግ',
+    signIn: 'ግቡ',
+    orders: 'ትዕዛዞች',
+    logout: 'ውጡ',
+    cart: 'ካርት',
+  },
+  'Afaan Oromo': {
+    home: 'Mana',
+    shop: 'Sookii',
+    about: 'Sinnisa',
+    contact: 'Quunnamtii',
+    searchPlaceholder: 'Meeshaalee barbaadi...',
+    searchBtn: 'Barbaadi',
+    signIn: 'Seeni',
+    orders: 'Ajjaja',
+    logout: "Ba'i",
+    cart: 'Gaarii',
+  },
+};
 
 const Navbar = () => {
   const navigate = useNavigate();
@@ -17,22 +56,27 @@ const Navbar = () => {
   // Search State
   const [searchQuery, setSearchQuery] = useState('');
 
-  // Preferences States
+  // Language & Currency State
   const [language, setLanguage] = useState('English');
   const [currency, setCurrency] = useState('ETB');
+
+  // Dark Mode State
   const [darkMode, setDarkMode] = useState(
     localStorage.getItem('theme') === 'dark'
   );
 
-  // Cart Items Count State
+  // Cart Count State
   const [cartCount, setCartCount] = useState(0);
 
-  // Authentication State
+  // Auth State
   const rawUserInfo = localStorage.getItem('userInfo');
   const userInfo = rawUserInfo ? JSON.parse(rawUserInfo) : null;
   const isLoggedIn = !!userInfo;
 
-  // Sync theme with DOM and localStorage
+  // Active translation dictionary
+  const t = translations[language] || translations.English;
+
+  // Sync Dark Mode state to root <html> element
   useEffect(() => {
     if (darkMode) {
       document.documentElement.classList.add('dark');
@@ -43,7 +87,7 @@ const Navbar = () => {
     }
   }, [darkMode]);
 
-  // Sync Cart Count from localStorage
+  // Sync Cart Count from local storage
   useEffect(() => {
     const updateCartCount = () => {
       const storedCart = localStorage.getItem('cartItems');
@@ -65,7 +109,6 @@ const Navbar = () => {
     return () => window.removeEventListener('storage', updateCartCount);
   }, [location]);
 
-  // Handlers
   const handleLogout = () => {
     localStorage.removeItem('userInfo');
     navigate('/login');
@@ -83,191 +126,191 @@ const Navbar = () => {
   const isActive = (path) => location.pathname === path;
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 transition-colors duration-200 font-sans">
-      <div className="max-w-[1600px] mx-auto px-4 h-18 flex items-center justify-between gap-4">
+    <header className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-slate-200 shadow-sm transition-colors duration-200 font-sans">
+      <div className="max-w-[1600px] mx-auto px-5 h-20 flex items-center justify-between gap-6">
         
-        {/* 1. LOGO & WEBSITE NAME */}
+        {/* LOGO & BRAND NAME */}
         <div className="flex items-center gap-3 min-w-max">
-          <Link to="/" className="flex items-center gap-2 group">
+          <Link to="/" className="flex items-center gap-2.5 group">
             <img 
               src={logoImg} 
               alt="LUU SAFETY Logo" 
-              className="h-11 w-11 object-contain rounded-full border border-purple-200 dark:border-purple-800 group-hover:scale-105 transition-transform" 
+              className="h-12 w-12 object-contain rounded-full border border-purple-200 group-hover:scale-105 transition-transform" 
             />
-            <span className="text-xl font-black text-slate-900 dark:text-white tracking-tighter">
+            <span className="text-2xl font-black text-slate-900 tracking-tight">
               LUU<span className="text-purple-600">SAFETY</span>
             </span>
           </Link>
         </div>
 
-        {/* 2. NAVIGATION LINKS: Home, Shop, About, Contact */}
-        <nav className="hidden lg:flex items-center gap-6 text-xs font-black uppercase tracking-wider">
+        {/* NAVIGATION LINKS */}
+        <nav className="hidden lg:flex items-center gap-8 text-base font-extrabold tracking-wide">
           <Link 
             to="/" 
-            className={`transition-colors ${isActive('/') ? 'text-purple-600 dark:text-purple-400' : 'text-slate-600 dark:text-slate-300 hover:text-purple-600 dark:hover:text-purple-400'}`}
+            className={`transition-colors ${isActive('/') ? 'text-purple-600' : 'text-slate-800 hover:text-purple-600'}`}
           >
-            Home
+            {t.home}
           </Link>
           <Link 
             to="/shop" 
-            className={`transition-colors ${isActive('/shop') ? 'text-purple-600 dark:text-purple-400' : 'text-slate-600 dark:text-slate-300 hover:text-purple-600 dark:hover:text-purple-400'}`}
+            className={`transition-colors ${isActive('/shop') ? 'text-purple-600' : 'text-slate-800 hover:text-purple-600'}`}
           >
-            Shop
+            {t.shop}
           </Link>
           <Link 
             to="/about" 
-            className={`transition-colors ${isActive('/about') ? 'text-purple-600 dark:text-purple-400' : 'text-slate-600 dark:text-slate-300 hover:text-purple-600 dark:hover:text-purple-400'}`}
+            className={`transition-colors ${isActive('/about') ? 'text-purple-600' : 'text-slate-800 hover:text-purple-600'}`}
           >
-            About
+            {t.about}
           </Link>
           <Link 
             to="/contact" 
-            className={`transition-colors ${isActive('/contact') ? 'text-purple-600 dark:text-purple-400' : 'text-slate-600 dark:text-slate-300 hover:text-purple-600 dark:hover:text-purple-400'}`}
+            className={`transition-colors ${isActive('/contact') ? 'text-purple-600' : 'text-slate-800 hover:text-purple-600'}`}
           >
-            Contact
+            {t.contact}
           </Link>
         </nav>
 
-        {/* 3. SEARCH BAR */}
-        <form onSubmit={handleSearchSubmit} className="flex-1 max-w-sm hidden md:flex items-center">
-          <div className="relative w-full flex items-center">
-            <Search size={16} className="absolute left-3 text-slate-400" />
+        {/* REDESIGNED SEARCH BAR */}
+        <form onSubmit={handleSearchSubmit} className="flex-1 max-w-md hidden md:flex items-center">
+          <div className="relative w-full flex items-center bg-slate-50 border border-slate-300 rounded-full p-1 shadow-inner focus-within:border-purple-600 focus-within:ring-2 focus-within:ring-purple-500/20 transition-all">
+            <Search size={18} className="ml-3.5 text-slate-400 shrink-0" />
             <input 
               type="text" 
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search equipment..." 
-              className="w-full bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-l-xl py-2 pl-9 pr-3 text-xs font-semibold text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-purple-500 transition-all"
+              placeholder={t.searchPlaceholder} 
+              className="w-full bg-transparent px-3 py-1.5 text-sm font-semibold text-slate-900 placeholder-slate-400 focus:outline-none"
             />
             <button 
               type="submit" 
-              className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-r-xl text-xs font-bold uppercase transition-colors"
+              className="bg-purple-600 hover:bg-purple-700 active:scale-95 text-white px-5 py-2 rounded-full text-xs font-extrabold uppercase tracking-wider transition-all shadow-md shadow-purple-600/20"
             >
-              Search
+              {t.searchBtn}
             </button>
           </div>
         </form>
 
-        {/* RIGHT CONTROLS: Language, Currency, Theme, Auth, Cart */}
+        {/* CONTROLS */}
         <div className="flex items-center gap-4">
           
-          {/* 4. LANGUAGE SELECTOR */}
+          {/* LANGUAGE SELECTOR */}
           <div className="hidden xl:flex items-center">
             <select 
               value={language}
               onChange={(e) => setLanguage(e.target.value)}
-              className="text-[11px] font-bold bg-transparent outline-none cursor-pointer uppercase text-slate-600 dark:text-slate-300 hover:text-purple-600 dark:hover:text-purple-400"
+              className="text-xs font-bold bg-white text-slate-800 outline-none cursor-pointer hover:text-purple-600 py-1"
             >
-              <option value="English" className="dark:bg-slate-800">English</option>
-              <option value="Amharic" className="dark:bg-slate-800">Amharic</option>
-              <option value="Afaan Oromo" className="dark:bg-slate-800">Afaan Oromo</option>
+              <option value="English">English</option>
+              <option value="Amharic">አማርኛ (Amharic)</option>
+              <option value="Afaan Oromo">Afaan Oromo</option>
             </select>
           </div>
 
-          {/* 5. CURRENCY SELECTOR */}
-          <div className="hidden xl:flex items-center border-r border-slate-200 dark:border-slate-700 pr-3">
+          {/* CURRENCY SELECTOR */}
+          <div className="hidden xl:flex items-center border-r border-slate-300 pr-3">
             <select 
               value={currency}
               onChange={(e) => setCurrency(e.target.value)}
-              className="text-[11px] font-bold bg-transparent outline-none cursor-pointer uppercase text-slate-600 dark:text-slate-300 hover:text-purple-600 dark:hover:text-purple-400"
+              className="text-xs font-bold bg-white text-slate-800 outline-none cursor-pointer uppercase hover:text-purple-600 py-1"
             >
-              <option value="ETB" className="dark:bg-slate-800">ETB</option>
-              <option value="USD" className="dark:bg-slate-800">USD</option>
+              <option value="ETB">ETB</option>
+              <option value="USD">USD</option>
             </select>
           </div>
 
-          {/* 6. DARK / LIGHT MODE ICON */}
+          {/* DARK / LIGHT TOGGLE */}
           <button 
             onClick={() => setDarkMode(!darkMode)}
-            className="p-2 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-            aria-label="Toggle Theme"
+            className="p-2.5 rounded-xl text-slate-800 hover:bg-slate-100 transition-colors"
+            aria-label="Toggle Dark/Light Mode"
           >
-            {darkMode ? <Sun size={18} className="text-amber-400" /> : <Moon size={18} />}
+            {darkMode ? <Sun size={20} className="text-amber-500" /> : <Moon size={20} />}
           </button>
 
-          {/* 7. SIGN IN / LOGOUT */}
+          {/* SIGN IN / USER ACTION */}
           {isLoggedIn ? (
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-4">
               <Link 
                 to="/orders" 
-                className="flex flex-col items-center gap-0.5 text-slate-600 dark:text-slate-300 hover:text-purple-600 dark:hover:text-purple-400 transition-colors"
+                className="flex flex-col items-center text-slate-800 hover:text-purple-600 transition-colors"
               >
-                <User size={18} />
-                <span className="text-[9px] font-black uppercase tracking-wider">{userInfo.name || 'Account'}</span>
+                <User size={20} />
+                <span className="text-[10px] font-bold uppercase tracking-wider">{userInfo.name || t.orders}</span>
               </Link>
               <button 
                 onClick={handleLogout}
-                className="flex flex-col items-center gap-0.5 text-slate-600 dark:text-slate-300 hover:text-red-500 transition-colors"
+                className="flex flex-col items-center text-slate-800 hover:text-red-600 transition-colors"
               >
-                <LogOut size={18} />
-                <span className="text-[9px] font-black uppercase tracking-wider">Log Out</span>
+                <LogOut size={20} />
+                <span className="text-[10px] font-bold uppercase tracking-wider">{t.logout}</span>
               </button>
             </div>
           ) : (
             <Link 
               to="/login" 
-              className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-xl flex items-center gap-1.5 transition-all shadow-md shadow-purple-600/10 active:scale-95"
+              className="bg-purple-600 hover:bg-purple-700 text-white px-5 py-2.5 rounded-xl flex items-center gap-2 transition-all shadow-md shadow-purple-600/20 active:scale-95"
             >
-              <LogIn size={15} />
-              <span className="text-[11px] font-black uppercase tracking-wider">Sign In</span>
+              <LogIn size={18} />
+              <span className="text-xs font-black uppercase tracking-wider">{t.signIn}</span>
             </Link>
           )}
 
-          {/* 8. CART ICON */}
+          {/* CART ICON */}
           <Link 
             to="/cart" 
-            className="flex flex-col items-center gap-0.5 text-slate-600 dark:text-slate-300 hover:text-purple-600 dark:hover:text-purple-400 transition-colors relative p-1"
+            className="flex flex-col items-center text-slate-800 hover:text-purple-600 transition-colors relative p-1"
           >
-            <ShoppingCart size={20} />
-            <span className="text-[9px] font-black uppercase tracking-wider">Cart</span>
+            <ShoppingCart size={22} />
+            <span className="text-[10px] font-bold uppercase tracking-wider">{t.cart}</span>
             {cartCount > 0 && (
-              <span className="absolute -top-1 -right-1 bg-purple-600 text-white text-[10px] w-4 h-4 flex items-center justify-center rounded-full border-2 border-white dark:border-slate-900 font-bold animate-pulse">
+              <span className="absolute -top-1 -right-1 bg-purple-600 text-white text-[10px] w-5 h-5 flex items-center justify-center rounded-full border-2 border-white font-extrabold animate-pulse">
                 {cartCount}
               </span>
             )}
           </Link>
 
-          {/* Mobile Menu Toggle Button */}
+          {/* MOBILE MENU TOGGLE */}
           <button 
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="lg:hidden p-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl"
+            className="lg:hidden p-2 text-slate-800 hover:bg-slate-100 rounded-xl"
           >
-            {mobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
+            {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
         </div>
 
       </div>
 
-      {/* MOBILE DROPDOWN MENU */}
+      {/* MOBILE MENU DROPDOWN */}
       {mobileMenuOpen && (
-        <div className="lg:hidden bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-6 py-4 space-y-4">
-          <form onSubmit={handleSearchSubmit} className="flex items-center mb-4">
+        <div className="lg:hidden bg-white border-b border-slate-200 px-6 py-5 space-y-4">
+          <form onSubmit={handleSearchSubmit} className="flex items-center mb-4 bg-slate-50 border border-slate-300 rounded-full p-1">
             <input 
               type="text" 
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search..." 
-              className="w-full bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-l-xl py-2 px-3 text-xs text-slate-800 dark:text-white"
+              placeholder={t.searchPlaceholder} 
+              className="w-full bg-transparent px-3 py-1.5 text-sm text-slate-900 focus:outline-none"
             />
-            <button type="submit" className="bg-purple-600 text-white px-4 py-2 rounded-r-xl text-xs font-bold">
-              Go
+            <button type="submit" className="bg-purple-600 text-white px-4 py-1.5 rounded-full text-xs font-bold uppercase">
+              {t.searchBtn}
             </button>
           </form>
 
-          <div className="flex flex-col space-y-3 text-xs font-black uppercase tracking-wider">
-            <Link to="/" onClick={() => setMobileMenuOpen(false)} className="text-slate-700 dark:text-slate-200 hover:text-purple-600">Home</Link>
-            <Link to="/shop" onClick={() => setMobileMenuOpen(false)} className="text-slate-700 dark:text-slate-200 hover:text-purple-600">Shop</Link>
-            <Link to="/about" onClick={() => setMobileMenuOpen(false)} className="text-slate-700 dark:text-slate-200 hover:text-purple-600">About</Link>
-            <Link to="/contact" onClick={() => setMobileMenuOpen(false)} className="text-slate-700 dark:text-slate-200 hover:text-purple-600">Contact</Link>
+          <div className="flex flex-col space-y-3 text-sm font-extrabold uppercase tracking-wider">
+            <Link to="/" onClick={() => setMobileMenuOpen(false)} className="text-slate-800 hover:text-purple-600">{t.home}</Link>
+            <Link to="/shop" onClick={() => setMobileMenuOpen(false)} className="text-slate-800 hover:text-purple-600">{t.shop}</Link>
+            <Link to="/about" onClick={() => setMobileMenuOpen(false)} className="text-slate-800 hover:text-purple-600">{t.about}</Link>
+            <Link to="/contact" onClick={() => setMobileMenuOpen(false)} className="text-slate-800 hover:text-purple-600">{t.contact}</Link>
           </div>
 
-          <div className="pt-3 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between">
-            <select value={language} onChange={(e) => setLanguage(e.target.value)} className="text-xs font-bold bg-transparent text-slate-700 dark:text-slate-200">
+          <div className="pt-4 border-t border-slate-200 flex items-center justify-between">
+            <select value={language} onChange={(e) => setLanguage(e.target.value)} className="text-xs font-bold bg-white text-slate-800">
               <option value="English">English</option>
-              <option value="Amharic">Amharic</option>
+              <option value="Amharic">አማርኛ</option>
               <option value="Afaan Oromo">Afaan Oromo</option>
             </select>
-            <select value={currency} onChange={(e) => setCurrency(e.target.value)} className="text-xs font-bold bg-transparent text-slate-700 dark:text-slate-200">
+            <select value={currency} onChange={(e) => setCurrency(e.target.value)} className="text-xs font-bold bg-white text-slate-800">
               <option value="ETB">ETB</option>
               <option value="USD">USD</option>
             </select>
