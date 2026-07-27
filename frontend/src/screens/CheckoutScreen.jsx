@@ -9,7 +9,7 @@ const CheckoutScreen = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  // 1. Recover product data from router state OR localStorage fallback
+  // Recover product data from router state OR localStorage fallback
   const [productData, setProductData] = useState(() => {
     return location.state?.product || JSON.parse(localStorage.getItem('checkout_product')) || null;
   });
@@ -50,28 +50,17 @@ const CheckoutScreen = () => {
     setQuantity((prev) => Math.max(1, prev + delta));
   };
 
-  // 2. Submit order and handle redirection safely
+  // Submit order and handle redirection safely
   const handleSubmitOrder = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
 
-    const orderPayload = {
-      product: productData,
-      color: selectedColor,
-      quantity,
-      shippingAddress,
-      paymentMethod,
-      totalAmount,
-    };
-
-    console.log('Order Details:', orderPayload);
-
     if (paymentMethod === 'telebirr') {
       try {
-        // Force lowercased trim & fallback to a standard valid email domain (e.g. gmail.com)
-        const userEmail = (shippingAddress.email && shippingAddress.email.trim().includes('@'))
-          ? shippingAddress.email.trim().toLowerCase()
-          : `customer${Date.now()}@gmail.com`;
+        // Sanitize email to guarantee Chapa API accepts it
+        const rawEmail = (shippingAddress.email || '').trim().toLowerCase();
+        const isValidEmail = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(rawEmail);
+        const safeEmail = isValidEmail ? rawEmail : 'customer@gmail.com';
 
         // Send request to backend to initialize Telebirr payment via Chapa API
         const response = await fetch('http://localhost:5000/api/payments/telebirr', {
@@ -79,9 +68,9 @@ const CheckoutScreen = () => {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             amount: totalAmount,
-            phone: shippingAddress.phone,
-            fullName: shippingAddress.fullName,
-            email: userEmail,
+            phone: shippingAddress.phone || '0911234567',
+            fullName: shippingAddress.fullName || 'Customer User',
+            email: safeEmail,
             orderId: productData?._id || Date.now(),
           }),
         });
@@ -150,7 +139,7 @@ const CheckoutScreen = () => {
         {/* Left Side: Delivery Details & Payment */}
         <div className="lg:col-span-7 space-y-6">
           
-          {/* 1. Delivery Details */}
+          {/* Delivery Details */}
           <div className="bg-white p-6 rounded-3xl border border-gray-200 shadow-sm">
             <h2 className="text-lg font-black text-gray-900 mb-6 flex items-center gap-2">
               <MapPin className="text-purple-700" size={20} /> Delivery Details
@@ -245,7 +234,7 @@ const CheckoutScreen = () => {
             </div>
           </div>
 
-          {/* 2. Payment Method Options */}
+          {/* Payment Method Options */}
           <div className="bg-white p-6 rounded-3xl border border-gray-200 shadow-sm">
             <h2 className="text-lg font-black text-gray-900 mb-4 flex items-center gap-2">
               <CreditCard className="text-purple-700" size={20} /> Select Payment Method
