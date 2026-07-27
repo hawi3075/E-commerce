@@ -27,11 +27,14 @@ import { AuthProvider, AuthContext } from './context/AuthContext';
 // Protected Route Handler (Supports User and Admin Access Control)
 const ProtectedRoute = ({ children, adminOnly = false }) => {
   const auth = useContext(AuthContext);
+  const location = useLocation();
+  
   // Support either userInfo or user depending on AuthContext key naming
   const activeUser = auth?.userInfo || auth?.user;
 
+  // Save the attempted location so after login the user returns directly to checkout/order form
   if (!activeUser) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
   if (adminOnly && !(activeUser.isAdmin || activeUser.role === 'admin')) {
@@ -71,7 +74,9 @@ function App() {
             
             {/* User Protected Routes */}
             <Route path="/orders" element={<ProtectedRoute><OrderScreen /></ProtectedRoute>} />
-            <Route path="/checkout" element={<ProtectedRoute><PaymentScreen /></ProtectedRoute>} />
+            {/* MAP /checkout TO OrderScreen TO SHOW THE BUY FORM */}
+            <Route path="/checkout" element={<ProtectedRoute><OrderScreen /></ProtectedRoute>} />
+            <Route path="/payment" element={<ProtectedRoute><PaymentScreen /></ProtectedRoute>} />
 
             {/* Admin Protected Section */}
             <Route 
@@ -99,6 +104,7 @@ function App() {
               } 
             />
 
+            {/* Fallback Catch-All */}
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </LayoutWrapper>

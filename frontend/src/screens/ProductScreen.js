@@ -3,7 +3,8 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import { 
   Star, ShoppingCart, Share2, ArrowLeft, CheckCircle2, 
-  Package, Tag, Hash, ShoppingBag, MapPin, Phone, Mail, Loader2, AlertCircle
+  Package, Tag, Hash, ShoppingBag, MapPin, Phone, Mail, Loader2, AlertCircle,
+  Palette
 } from 'lucide-react';
 
 import Navbar from '../components/Navbar';
@@ -36,7 +37,8 @@ const TRANSLATIONS = {
     rating: 'Rating',
     noReviewsYet: 'No reviews yet',
     productNotFound: 'Product not found',
-    errorFetching: 'Failed to load product details.'
+    errorFetching: 'Failed to load product details.',
+    color: 'Select Color'
   },
   am: {
     backToShop: 'ወደ ሱቅ ተመለስ',
@@ -64,7 +66,8 @@ const TRANSLATIONS = {
     rating: 'ደረጃ',
     noReviewsYet: 'አስተያየት አልተሰጠም',
     productNotFound: 'ምርቱ አልተገኘም',
-    errorFetching: 'የምርቱን ዝርዝር መጫን አልተቻለም።'
+    errorFetching: 'የምርቱን ዝርዝር መጫን አልተቻለም።',
+    color: 'ቀለም ይምረጡ'
   },
   om: {
     backToShop: 'Gara Dukaatti Deebi\'i',
@@ -92,9 +95,12 @@ const TRANSLATIONS = {
     rating: 'Sadarkaa',
     noReviewsYet: 'Yaadni hin jiru',
     productNotFound: 'Meeshaan hin argamne',
-    errorFetching: 'Odeeffannoo meeshaa fiduun hin danda\'amne.'
+    errorFetching: 'Odeeffannoo meeshaa fiduun hin danda\'amne.',
+    color: 'Halluu Filadhu'
   }
 };
+
+const AVAILABLE_COLORS = ['Yellow', 'Black', 'Red', 'Blue'];
 
 const ProductScreen = () => {
   const { id } = useParams();
@@ -112,6 +118,7 @@ const ProductScreen = () => {
   const [product, setProduct] = useState(null);
   const [related, setRelated] = useState([]);
   const [qty, setQty] = useState(1);
+  const [selectedColor, setSelectedColor] = useState('Yellow');
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -159,6 +166,35 @@ const ProductScreen = () => {
     }
   }, [id, t.errorFetching]);
 
+  // Handle Buy Now Click
+  const handleBuyNow = () => {
+    if (!product) return;
+    
+    navigate('/checkout', {
+      state: {
+        product: {
+          _id: product._id,
+          name: product.name || product.product_name,
+          price: product.price,
+          image: product.images?.[0] || product.image
+        },
+        qty: qty,
+        color: selectedColor
+      }
+    });
+  };
+
+  // Handle Add To Cart Click
+  const handleAddToCart = () => {
+    navigate('/cart', {
+      state: {
+        product,
+        qty,
+        color: selectedColor
+      }
+    });
+  };
+
   if (isLoading) {
     return (
       <div className="bg-gray-100 min-h-screen">
@@ -200,7 +236,7 @@ const ProductScreen = () => {
 
         <main className="max-w-[1240px] mx-auto px-4 lg:px-8 pt-24 pb-16">
           
-          {/* Back Button with subtle Gray styling */}
+          {/* Back Button */}
           <div className="mb-6">
             <button 
               onClick={() => navigate('/shop')}
@@ -282,6 +318,30 @@ const ProductScreen = () => {
                     {product.description}
                   </p>
 
+                  {/* COLOR SELECTION */}
+                  <div className="mb-6">
+                    <label className="flex items-center gap-2 text-sm font-black text-gray-900 mb-3">
+                      <Palette size={18} className="text-purple-700" />
+                      {t.color}: <span className="text-purple-700 font-extrabold">{selectedColor}</span>
+                    </label>
+                    <div className="flex flex-wrap gap-2.5">
+                      {AVAILABLE_COLORS.map((clr) => (
+                        <button
+                          key={clr}
+                          type="button"
+                          onClick={() => setSelectedColor(clr)}
+                          className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all border ${
+                            selectedColor === clr
+                              ? 'bg-purple-700 text-white border-purple-700 shadow-md'
+                              : 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100'
+                          }`}
+                        >
+                          {clr}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
                   {/* Feature Highlights Grid */}
                   <div className="grid grid-cols-3 gap-3 mb-8">
                     <div className="p-4 bg-gray-50 border border-gray-100 rounded-xl">
@@ -305,7 +365,7 @@ const ProductScreen = () => {
                         <CheckCircle2 size={16} />
                         <span className="text-xs font-bold">{t.variants}</span>
                       </div>
-                      <p className="text-sm font-black text-gray-900">{t.singleConfig}</p>
+                      <p className="text-sm font-black text-gray-900">{AVAILABLE_COLORS.length} Colors</p>
                     </div>
                   </div>
                 </div>
@@ -336,14 +396,15 @@ const ProductScreen = () => {
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <button 
                       disabled={currentStock === 0}
-                      onClick={() => navigate('/cart')}
+                      onClick={handleAddToCart}
                       className="w-full bg-purple-700 hover:bg-purple-800 disabled:bg-gray-300 text-white py-4 px-6 rounded-xl font-extrabold text-sm flex items-center justify-center gap-2 transition-all shadow-md shadow-purple-700/10"
                     >
                       <ShoppingCart size={18} /> {t.addToCart}
                     </button>
+                    
                     <button 
                       disabled={currentStock === 0}
-                      onClick={() => navigate('/checkout')}
+                      onClick={handleBuyNow}
                       className="w-full bg-purple-50 hover:bg-purple-100 disabled:bg-gray-100 text-purple-900 py-4 px-6 rounded-xl font-extrabold text-sm transition-all border border-purple-200"
                     >
                       {t.buyNow}
@@ -502,7 +563,7 @@ const ProductScreen = () => {
         </main>
       </div>
 
-      {/* LUU SAFETY FOOTER */}
+      {/* FOOTER */}
       <footer className="bg-black text-white pt-12 pb-8 rounded-t-3xl">
         <div className="max-w-[1240px] mx-auto px-6 lg:px-8 grid grid-cols-1 md:grid-cols-3 gap-8 pb-8 border-b border-zinc-800">
           <div>
