@@ -24,12 +24,11 @@ import ProfileScreen from './screens/ProfileScreen';
 // Admin Screen Imports
 import Dashboard from './screens/admin/Dashboard'; 
 import UploadProduct from './screens/admin/UploadProduct';
-import ManageUsers from './screens/admin/ManageUsers';
 import Orders from './screens/admin/Orders';
 
-// New Admin Screens Imports
+// Updated Admin Screens
 import Messages from './screens/admin/Messages';
-import Customers from './screens/admin/Customers';
+import Customers from './screens/admin/Customers'; // <--- THIS COMPONENT HAS THE SEARCH BAR
 import Performance from './screens/admin/Performance';
 import AdminTeam from './screens/admin/AdminTeam';
 
@@ -124,16 +123,17 @@ function App() {
                 </ProtectedRoute>
               } 
             />
+
+            {/* FIXED: Changed ManageUsers to Customers */}
             <Route 
               path="/admin/users" 
               element={
                 <ProtectedRoute adminOnly={true}>
-                  <div className="flex"><AdminSidebar /><ManageUsers /></div>
+                  <div className="flex"><AdminSidebar /><Customers /></div>
                 </ProtectedRoute>
               } 
             />
 
-            {/* Added Routes corresponding to Admin Sidebar items */}
             <Route 
               path="/admin/messages" 
               element={

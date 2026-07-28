@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { 
   DollarSign, ShoppingBag, Users, Package, 
-  TrendingUp, Clock, MapPin 
+  Clock, MapPin, AlertCircle
 } from 'lucide-react';
 
 const Dashboard = () => {
@@ -15,30 +15,45 @@ const Dashboard = () => {
     recentProducts: []
   });
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const [lastUpdated, setLastUpdated] = useState('');
 
   const fetchDashboardData = async () => {
     setLoading(true);
+    setError('');
+
     try {
-      // Calling real backend endpoints simultaneously
+      // Retrieve JWT token from local storage
+      const rawUserInfo = localStorage.getItem('userInfo');
+      const userInfo = rawUserInfo ? JSON.parse(rawUserInfo) : {};
+      const token = userInfo.token || localStorage.getItem('token');
+
+      const config = {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      };
+
+      // Call database endpoints in parallel
       const [statsRes, ordersRes, productsRes] = await Promise.all([
-        axios.get('/api/admin/stats'),
-        axios.get('/api/admin/orders?limit=4'),
-        axios.get('/api/admin/products?limit=3')
+        axios.get('/api/admin/stats', config),
+        axios.get('/api/admin/orders?limit=4', config),
+        axios.get('/api/admin/products?limit=3', config)
       ]);
 
       setData({
-        totalRevenue: statsRes.data.totalRevenue || 0,
-        activeOrdersCount: statsRes.data.activeOrdersCount || statsRes.data.activeOrders || 0,
-        totalCustomersCount: statsRes.data.totalCustomersCount || statsRes.data.newUsers || 0,
-        inventoryItemsCount: statsRes.data.inventoryItemsCount || 0,
-        recentOrders: ordersRes.data || [],
-        recentProducts: productsRes.data || []
+        totalRevenue: statsRes.data?.totalRevenue || 0,
+        activeOrdersCount: statsRes.data?.activeOrdersCount || 0,
+        totalCustomersCount: statsRes.data?.totalCustomersCount || 0,
+        inventoryItemsCount: statsRes.data?.inventoryItemsCount || 0,
+        recentOrders: Array.isArray(ordersRes.data) ? ordersRes.data : ordersRes.data?.orders || [],
+        recentProducts: Array.isArray(productsRes.data) ? productsRes.data : productsRes.data?.products || []
       });
 
       setLastUpdated(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }));
-    } catch (error) {
-      console.error('Error fetching real dashboard data:', error);
+    } catch (err) {
+      console.error('Error fetching database metrics:', err);
+      setError(err.response?.data?.message || 'Failed to load real-time database metrics.');
     } finally {
       setLoading(false);
     }
@@ -51,7 +66,7 @@ const Dashboard = () => {
   if (loading) {
     return (
       <div className="flex-1 min-h-screen bg-slate-50/60 p-8 flex items-center justify-center">
-        <p className="text-sm font-bold text-purple-600 animate-pulse">Loading Live Data...</p>
+        <p className="text-sm font-bold text-purple-600 animate-pulse">Loading Database Metrics...</p>
       </div>
     );
   }
@@ -70,30 +85,43 @@ const Dashboard = () => {
           </p>
         </div>
 
-        {/* Live Status Badge */}
-        <div className="flex items-center gap-2 bg-white px-4 py-2 rounded-xl border border-slate-200/80 shadow-sm self-start md:self-auto">
-          <Clock size={16} className="text-slate-400" />
-          <span className="text-xs font-bold text-slate-600">
-            Last updated: {lastUpdated || 'Just now'}
-          </span>
+        {/* Live Status & Refresh Button */}
+        <div className="flex items-center gap-3 self-start md:self-auto">
+          <button 
+            onClick={fetchDashboardData}
+            className="px-3 py-1.5 bg-white border border-slate-200 text-xs font-bold text-slate-700 rounded-xl hover:bg-slate-50 shadow-sm transition-colors"
+          >
+            Refresh Data
+          </button>
+          <div className="flex items-center gap-2 bg-white px-4 py-2 rounded-xl border border-slate-200/80 shadow-sm">
+            <Clock size={16} className="text-slate-400" />
+            <span className="text-xs font-bold text-slate-600">
+              Last updated: {lastUpdated || 'Just now'}
+            </span>
+          </div>
         </div>
       </div>
 
-      {/* 4 Cards Grid */}
+      {/* Error Alert */}
+      {error && (
+        <div className="mb-6 p-4 bg-rose-50 border border-rose-200 rounded-xl flex items-center gap-3 text-rose-700 text-xs font-bold">
+          <AlertCircle size={18} />
+          <span>{error}</span>
+        </div>
+      )}
+
+      {/* Metric Cards Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
         
         {/* Total Revenue */}
-        <div className="bg-white p-6 rounded-2xl border border-purple-500/30 shadow-sm relative overflow-hidden">
+        <div className="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm relative overflow-hidden">
           <div className="flex items-center justify-between mb-6">
             <div className="w-10 h-10 bg-emerald-50 rounded-xl flex items-center justify-center text-emerald-600">
               <DollarSign size={22} />
             </div>
-            <span className="flex items-center gap-1 text-xs font-bold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full">
-              <TrendingUp size={12} /> +0%
-            </span>
           </div>
           <h2 className="text-3xl font-extrabold text-slate-900 tracking-tight">
-            ${Number(data.totalRevenue).toLocaleString('en-US', { minimumFractionDigits: 2 })}
+            ${Number(data.totalRevenue).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
           </h2>
           <p className="text-xs font-black text-slate-400 uppercase tracking-wider mt-2">
             TOTAL REVENUE
@@ -106,9 +134,6 @@ const Dashboard = () => {
             <div className="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center text-blue-600">
               <ShoppingBag size={22} />
             </div>
-            <span className="flex items-center gap-1 text-xs font-bold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full">
-              <TrendingUp size={12} /> +4.2%
-            </span>
           </div>
           <h2 className="text-3xl font-extrabold text-slate-900 tracking-tight">
             {data.activeOrdersCount}
@@ -124,9 +149,6 @@ const Dashboard = () => {
             <div className="w-10 h-10 bg-purple-50 rounded-xl flex items-center justify-center text-purple-600">
               <Users size={22} />
             </div>
-            <span className="flex items-center gap-1 text-xs font-bold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full">
-              <TrendingUp size={12} /> +8.1%
-            </span>
           </div>
           <h2 className="text-3xl font-extrabold text-slate-900 tracking-tight">
             {data.totalCustomersCount}
@@ -153,10 +175,10 @@ const Dashboard = () => {
 
       </div>
 
-      {/* Main Content Layout (Recent Orders + Inventory Stream) */}
+      {/* Main Content Layout */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         
-        {/* Recent Orders Section */}
+        {/* Recent Orders Table */}
         <div className="lg:col-span-2 bg-white rounded-2xl border border-slate-200/80 p-6 shadow-sm">
           <h3 className="text-xl font-bold text-slate-900 mb-6">
             Recent Orders
@@ -174,23 +196,25 @@ const Dashboard = () => {
               <tbody className="divide-y divide-slate-100">
                 {data.recentOrders.length > 0 ? (
                   data.recentOrders.map((order) => (
-                    <tr key={order._id || order.id}>
+                    <tr key={order._id}>
                       <td className="py-4 font-extrabold text-slate-900">
-                        #{order._id ? order._id.substring(order._id.length - 6).toUpperCase() : order.id}
+                        #{order._id ? order._id.substring(order._id.length - 6).toUpperCase() : 'N/A'}
                       </td>
                       <td className="py-4 font-bold text-slate-800">
-                        {order.user?.name || order.customer || 'Customer'}
+                        {order.user?.name || order.shippingAddress?.fullName || 'Customer'}
                       </td>
                       <td className="py-4 text-slate-600 flex items-center gap-1.5">
-                        <MapPin size={14} className="text-slate-400" />
-                        <span>{order.shippingAddress?.address || order.location || 'N/A'}</span>
+                        <MapPin size={14} className="text-slate-400 shrink-0" />
+                        <span className="truncate max-w-[200px]">
+                          {order.shippingAddress?.address || order.shippingAddress?.city || 'N/A'}
+                        </span>
                       </td>
                     </tr>
                   ))
                 ) : (
                   <tr>
                     <td colSpan="3" className="py-6 text-center text-slate-400 font-medium">
-                      No recent orders available.
+                      No orders recorded in the database yet.
                     </td>
                   </tr>
                 )}
@@ -205,7 +229,7 @@ const Dashboard = () => {
             <h3 className="text-xl font-bold text-slate-900">
               Inventory Stream
             </h3>
-            <span className="text-[10px] font-black text-rose-500 bg-rose-50 px-2 py-0.5 rounded-md uppercase tracking-wider">
+            <span className="text-[10px] font-black text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md uppercase tracking-wider">
               LIVE
             </span>
           </div>
@@ -214,11 +238,11 @@ const Dashboard = () => {
             {data.recentProducts.length > 0 ? (
               data.recentProducts.map((product) => (
                 <div 
-                  key={product._id || product.id}
+                  key={product._id}
                   className="flex items-center gap-4 p-3 rounded-xl border border-slate-100 bg-slate-50/50 hover:bg-slate-50 transition-colors"
                 >
                   <img 
-                    src={product.image || product.images?.[0] || '/logo.webp'} 
+                    src={product.image || (product.images && product.images[0]) || '/placeholder.png'} 
                     alt={product.name} 
                     className="w-14 h-14 object-cover rounded-lg bg-white border border-slate-200"
                   />
@@ -230,7 +254,7 @@ const Dashboard = () => {
                       <span className="text-xs font-extrabold text-slate-800">
                         ${Number(product.price).toFixed(2)}
                       </span>
-                      <span className="text-xs font-bold text-rose-500">
+                      <span className={`text-xs font-bold ${product.countInStock > 0 ? 'text-emerald-600' : 'text-rose-500'}`}>
                         {product.countInStock ?? product.stock ?? 0} in stock
                       </span>
                     </div>
@@ -239,7 +263,7 @@ const Dashboard = () => {
               ))
             ) : (
               <p className="text-center py-6 text-slate-400 font-medium text-xs">
-                No inventory data available.
+                No products found in database.
               </p>
             )}
           </div>
