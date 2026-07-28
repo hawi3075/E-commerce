@@ -11,11 +11,15 @@ const {
   createProduct,
   updateProduct,
   deleteProduct,
+  createProductReview,
 } = require('../controllers/productController');
 
 // Public routes
 router.get('/', getProducts);
 router.get('/:id', getProductById);
+
+// Protected user routes
+router.post('/:id/reviews', protect, createProductReview);
 
 // Admin-only routes (protected by authMiddleware)
 router.post('/', protect, isAdmin, createProduct);
