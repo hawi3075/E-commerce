@@ -1,28 +1,30 @@
-const Order = require('../models/orderModel');
-const User = require('../models/userModel');
-const Product = require('../models/productModel');
+// backend/models/orderModel.js
+const mongoose = require('mongoose');
 
-const getAdminStats = async (req, res) => {
-  try {
-    const revenueResult = await Order.aggregate([
-      { $match: { isPaid: true } },
-      { $group: { _id: null, total: { $sum: '$totalPrice' } } }
-    ]);
-    const totalRevenue = revenueResult.length > 0 ? revenueResult[0].total : 0;
+const orderSchema = mongoose.Schema(
+  {
+    user: { type: mongoose.Schema.Types.ObjectId, required: true, ref: 'User' },
+    orderItems: [
+      {
+        name: { type: String, required: true },
+        qty: { type: Number, required: true },
+        image: { type: String, required: true },
+        price: { type: Number, required: true },
+        product: { type: mongoose.Schema.Types.ObjectId, required: true, ref: 'Product' }
+      }
+    ],
+    shippingAddress: {
+      address: { type: String },
+      city: { type: String },
+      postalCode: { type: String },
+      country: { type: String }
+    },
+    totalPrice: { type: Number, required: true, default: 0.0 },
+    isPaid: { type: Boolean, required: true, default: false },
+    isDelivered: { type: Boolean, required: true, default: false }
+  },
+  { timestamps: true }
+);
 
-    const activeOrdersCount = await Order.countDocuments({ isDelivered: false });
-    const totalCustomersCount = await User.countDocuments({ isAdmin: false });
-    const inventoryItemsCount = await Product.countDocuments({});
-
-    res.json({
-      totalRevenue,
-      activeOrdersCount,
-      totalCustomersCount,
-      inventoryItemsCount
-    });
-  } catch (error) {
-    res.status(500).json({ message: 'Server error loading admin stats', error: error.message });
-  }
-};
-
-module.exports = { getAdminStats };
+const Order = mongoose.model('Order', orderSchema);
+module.exports = Order;
