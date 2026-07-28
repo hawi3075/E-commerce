@@ -25,26 +25,22 @@ app.use(express.urlencoded({ limit: '50mb', extended: true }));
 // Serve static uploaded files
 app.use('/uploads', express.static(path.join(__dirname, '/uploads')));
 
-// Safe Route Imports
+// Routes
 const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
 const productRoutes = require('./routes/productRoutes');
 const orderRoutes = require('./routes/orderRoutes');
-const paymentRoutes = require('./routes/paymentRoutes'); // Added Payment Routes
+const paymentRoutes = require('./routes/paymentRoutes');
 
-// Verify exports are valid middleware functions before mounting
-const safeRoute = (route) => (typeof route === 'function' ? route : (req, res, next) => next());
-
-// Routes
-app.use('/api/auth', safeRoute(authRoutes)); 
-app.use('/api/users', safeRoute(userRoutes));
-app.use('/api/products', safeRoute(productRoutes));
-app.use('/api/orders', safeRoute(orderRoutes));
-app.use('/api/payments', safeRoute(paymentRoutes)); // Mounted Telebirr / Payment API
+app.use('/api/auth', authRoutes); 
+app.use('/api/users', userRoutes);
+app.use('/api/products', productRoutes);
+app.use('/api/orders', orderRoutes);
+app.use('/api/payments', paymentRoutes);
 
 // Basic Health Check
 app.get('/', (req, res) => {
-    res.send('AuraSync API is running with MongoDB...');
+    res.send('Luu Safety API is running with MongoDB...');
 });
 
 // 404 Handler
@@ -58,7 +54,7 @@ app.use((req, res, next) => {
 app.use((err, req, res, next) => {
     const statusCode = res.statusCode === 200 ? 500 : res.statusCode;
     res.status(statusCode).json({
-        message: err.message ? err.message.toUpperCase() : 'SERVER ERROR',
+        message: err.message ? err.message : 'SERVER ERROR',
         stack: process.env.NODE_ENV === 'production' ? null : err.stack,
     });
 });
