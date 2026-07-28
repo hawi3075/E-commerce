@@ -1,5 +1,21 @@
 const mongoose = require('mongoose');
 
+// 1. Define Review Schema
+const reviewSchema = mongoose.Schema(
+  {
+    name: { type: String, required: true },
+    rating: { type: Number, required: true },
+    comment: { type: String, required: true },
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      required: true,
+      ref: 'User',
+    },
+  },
+  { timestamps: true }
+);
+
+// 2. Define Product Schema
 const productSchema = mongoose.Schema(
   {
     user: {
@@ -21,6 +37,11 @@ const productSchema = mongoose.Schema(
     color: { type: String, required: true },
     description: { type: String, required: true },
     image: { type: String, required: true },
+
+    // Added fields for reviews and ratings
+    reviews: [reviewSchema],
+    rating: { type: Number, required: true, default: 0 },
+    numReviews: { type: Number, required: true, default: 0 },
   },
   { timestamps: true }
 );
