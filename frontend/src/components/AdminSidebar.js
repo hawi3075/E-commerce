@@ -59,12 +59,13 @@ const AdminSidebar = () => {
         <div className="flex items-center gap-3 px-2 py-2 mb-5">
           <img 
             src={logoImg} 
-            alt="Efoy Gabeya Logo" 
+            alt="luu safty Logo" 
             className="w-11 h-11 object-contain rounded-xl shadow-sm" 
           />
           <div>
             <h2 className="text-base font-black text-slate-900 tracking-tight leading-tight">
-              Efoy Gabeya
+              LUU SAFTY
+
             </h2>
             <p className="text-[11px] font-black text-purple-600 uppercase tracking-widest mt-0.5">
               ADMIN CONSOLE
