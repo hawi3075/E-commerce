@@ -34,26 +34,41 @@ const Dashboard = () => {
         }
       };
 
-      // Call database endpoints in parallel
-      const [statsRes, ordersRes, productsRes] = await Promise.all([
+      // Use Promise.allSettled so individual failing requests don't crash the whole page
+      const [statsRes, ordersRes, productsRes] = await Promise.allSettled([
         axios.get('/api/admin/stats', config),
         axios.get('/api/admin/orders?limit=4', config),
         axios.get('/api/admin/products?limit=3', config)
       ]);
 
+      // Extract fulfilled responses safely
+      const statsData = statsRes.status === 'fulfilled' ? statsRes.value.data : {};
+      const ordersData = ordersRes.status === 'fulfilled' ? ordersRes.value.data : [];
+      const productsData = productsRes.status === 'fulfilled' ? productsRes.value.data : [];
+
+      // Check if ALL requests failed to trigger a general warning
+      if (
+        statsRes.status === 'rejected' && 
+        ordersRes.status === 'rejected' && 
+        productsRes.status === 'rejected'
+      ) {
+        const firstErr = statsRes.reason;
+        setError(firstErr?.response?.data?.message || 'Failed to connect to backend endpoints.');
+      }
+
       setData({
-        totalRevenue: statsRes.data?.totalRevenue || 0,
-        activeOrdersCount: statsRes.data?.activeOrdersCount || 0,
-        totalCustomersCount: statsRes.data?.totalCustomersCount || 0,
-        inventoryItemsCount: statsRes.data?.inventoryItemsCount || 0,
-        recentOrders: Array.isArray(ordersRes.data) ? ordersRes.data : ordersRes.data?.orders || [],
-        recentProducts: Array.isArray(productsRes.data) ? productsRes.data : productsRes.data?.products || []
+        totalRevenue: statsData.totalRevenue || 0,
+        activeOrdersCount: statsData.activeOrdersCount || 0,
+        totalCustomersCount: statsData.totalCustomersCount || 0,
+        inventoryItemsCount: statsData.inventoryItemsCount || 0,
+        recentOrders: Array.isArray(ordersData) ? ordersData : ordersData.orders || [],
+        recentProducts: Array.isArray(productsData) ? productsData : productsData.products || []
       });
 
       setLastUpdated(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }));
     } catch (err) {
       console.error('Error fetching database metrics:', err);
-      setError(err.response?.data?.message || 'Failed to load real-time database metrics.');
+      setError('Unexpected error loading dashboard data.');
     } finally {
       setLoading(false);
     }
@@ -102,7 +117,7 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* Error Alert */}
+      {/* Error Alert Banner */}
       {error && (
         <div className="mb-6 p-4 bg-rose-50 border border-rose-200 rounded-xl flex items-center gap-3 text-rose-700 text-xs font-bold">
           <AlertCircle size={18} />
@@ -254,7 +269,7 @@ const Dashboard = () => {
                       <span className="text-xs font-extrabold text-slate-800">
                         ${Number(product.price).toFixed(2)}
                       </span>
-                      <span className={`text-xs font-bold ${product.countInStock > 0 ? 'text-emerald-600' : 'text-rose-500'}`}>
+                      <span className={`text-xs font-bold ${(product.countInStock ?? product.stock ?? 0) > 0 ? 'text-emerald-600' : 'text-rose-500'}`}>
                         {product.countInStock ?? product.stock ?? 0} in stock
                       </span>
                     </div>
