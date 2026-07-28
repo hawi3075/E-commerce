@@ -173,6 +173,7 @@ const MOCK_PRODUCTS = [
     rawProduct: 'Steel/Polymer',
     workCategory: 'Construction',
     rating: 5,
+    numReviews: 12,
     image: 'https://images.unsplash.com/photo-1590483736622-39da8caf3ef8?auto=format&fit=crop&q=80&w=500' 
   },
   { 
@@ -184,7 +185,8 @@ const MOCK_PRODUCTS = [
     gender: 'Female',
     rawProduct: 'Cotton/Polyester',
     workCategory: 'Farmer',
-    rating: 4,
+    rating: 4.8,
+    numReviews: 8,
     image: 'https://images.unsplash.com/photo-1578328819058-b69f3a3b0f6b?auto=format&fit=crop&q=80&w=500' 
   }
 ];
@@ -536,6 +538,10 @@ const ShopScreen = () => {
                   const imageUrl = p.image || 'https://via.placeholder.com/500';
                   const isLiked = !!likedItems[productId];
 
+                  // Rating and review count extraction
+                  const productRating = p.rating ? Number(p.rating).toFixed(1) : '5.0';
+                  const numReviews = p.numReviews || 0;
+
                   return (
                     <div 
                       key={productId}
@@ -568,15 +574,22 @@ const ShopScreen = () => {
                       {/* Details & Actions Under Image */}
                       <div className="space-y-3 flex-1 flex flex-col justify-between">
                         <div>
-                          <div className="flex items-center gap-1 mb-1">
-                            {[...Array(5)].map((_, i) => (
-                              <Star 
-                                key={i} 
-                                size={11} 
-                                className={`${i < Math.round(p.rating || 5) ? 'fill-amber-400 text-amber-400' : 'text-gray-300'}`} 
-                              />
-                            ))}
+                          {/* Star Icons + Numeric Rating */}
+                          <div className="flex items-center gap-1.5 mb-1">
+                            <div className="flex items-center gap-0.5">
+                              {[...Array(5)].map((_, i) => (
+                                <Star 
+                                  key={i} 
+                                  size={11} 
+                                  className={`${i < Math.round(p.rating || 5) ? 'fill-amber-400 text-amber-400' : 'text-gray-300'}`} 
+                                />
+                              ))}
+                            </div>
+                            <span className="text-[10px] font-bold text-gray-600">
+                              {productRating} {numReviews > 0 && <span className="text-gray-400 font-normal">({numReviews})</span>}
+                            </span>
                           </div>
+
                           <h3 className="font-extrabold text-gray-900 text-xs uppercase tracking-wide line-clamp-2 mb-1 min-h-[2.25rem]">
                             {productName}
                           </h3>

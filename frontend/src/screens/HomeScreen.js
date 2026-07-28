@@ -208,6 +208,10 @@ const ProductCard = ({ p, ribbon, onAddToCart }) => {
   const productPrice = p.price ? Number(p.price) : 0;
   const productStock = p.countInStock !== undefined ? p.countInStock : p.stock;
 
+  // Rating and review count extraction
+  const productRating = p.rating ? Number(p.rating).toFixed(1) : '5.0';
+  const numReviews = p.numReviews || 0;
+
   return (
     <div className="bg-white rounded-3xl p-4 border border-slate-200/80 hover:border-purple-300 shadow-sm hover:shadow-md transition-all duration-300 group relative flex flex-col justify-between">
       {/* Product Image Box */}
@@ -232,12 +236,25 @@ const ProductCard = ({ p, ribbon, onAddToCart }) => {
       {/* Details & Actions Under Image */}
       <div className="space-y-3 flex-1 flex flex-col justify-between">
         <div>
-          <div className="flex items-center gap-0.5 mb-1">
-            {[...Array(5)].map((_, i) => (
-              <Star key={i} size={10} className={`${i < Math.round(p.rating || 5) ? 'fill-amber-400 text-amber-400' : 'text-slate-200'}`} />
-            ))}
+          {/* Star Icons + Numeric Rating */}
+          <div className="flex items-center gap-1.5 mb-1">
+            <div className="flex items-center gap-0.5">
+              {[...Array(5)].map((_, i) => (
+                <Star 
+                  key={i} 
+                  size={10} 
+                  className={`${i < Math.round(p.rating || 5) ? 'fill-amber-400 text-amber-400' : 'text-slate-200'}`} 
+                />
+              ))}
+            </div>
+            <span className="text-[10px] font-bold text-slate-600">
+              {productRating} {numReviews > 0 && <span className="text-slate-400 font-normal">({numReviews})</span>}
+            </span>
           </div>
-          <h4 className="font-bold text-slate-800 text-xs uppercase tracking-wide line-clamp-2 mb-0.5 min-h-[2rem]">{productName}</h4>
+
+          <h4 className="font-bold text-slate-800 text-xs uppercase tracking-wide line-clamp-2 mb-0.5 min-h-[2rem]">
+            {productName}
+          </h4>
         </div>
 
         {/* Bottom Bar */}
@@ -523,12 +540,12 @@ const HomeScreenContent = () => {
         </section>
       </main>
 
-      {/* ================= FOOTER WITH CLEAN LOGO DISPLAY ================= */}
+      {/* FOOTER */}
       <footer className="bg-white border-t border-slate-200/80 mt-16">
         <div className="max-w-[1600px] mx-auto px-6 py-12">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8 pb-10 border-b border-slate-200">
             
-            {/* BRANDING BADGE WITH EMBEDDED LOGO */}
+            {/* BRANDING BADGE */}
             <div className="space-y-4 md:col-span-1">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 overflow-hidden">
