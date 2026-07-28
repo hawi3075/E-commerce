@@ -28,12 +28,14 @@ const SignupScreen = () => {
     setLoading(true);
 
     try {
-      const { data } = await axios.post('http://localhost:5000/api/users', { 
+      // ✅ Updated to match standard backend auth routes
+      const { data } = await axios.post('/api/auth/register', { 
         name, 
         email, 
         password 
       });
       
+      localStorage.setItem('userInfo', JSON.stringify(data));
       if (login) login(data);
       setIsSuccess(true);
       
@@ -54,8 +56,8 @@ const SignupScreen = () => {
   return (
     <div className="h-screen w-screen overflow-hidden grid grid-cols-1 md:grid-cols-2 font-sans text-slate-800 bg-white">
       
-      {/* Left Side: Full Height Video Section */}
-      <div className="relative hidden md:flex flex-col justify-between p-10 bg-black overflow-hidden h-full">
+      {/* Left Side: Video Section */}
+      <div className="relative hidden md:flex flex-col justify-between p-12 bg-black overflow-hidden h-full">
         <video
           autoPlay
           loop
@@ -66,32 +68,36 @@ const SignupScreen = () => {
           <source src={luuVideo} type="video/webm" />
         </video>
         
-        {/* Dark subtle overlay for contrast */}
         <div className="absolute inset-0 bg-black/20 z-0" />
         
-        <div className="relative z-10 flex items-center gap-2.5">
-          <img src={logoImg} alt="Logo" className="h-9 w-auto drop-shadow-md" />
-          <span className="text-white font-black italic tracking-wider text-base drop-shadow-md">LUUSAFETY</span>
+        <div className="relative z-10 flex items-center gap-4">
+          <img 
+            src={logoImg} 
+            alt="Logo" 
+            className="h-16 lg:h-20 w-auto object-contain drop-shadow-xl" 
+          />
+          <span className="text-white font-black italic tracking-wider text-2xl lg:text-3xl drop-shadow-lg">
+            LUUSAFETY
+          </span>
         </div>
 
         <div className="relative z-10 text-white max-w-lg">
-          <h3 className="text-2xl font-black uppercase italic tracking-wider leading-tight drop-shadow-md">
+          <h3 className="text-3xl font-black uppercase italic tracking-wider leading-tight drop-shadow-md">
             Safety Equipment & Gear Hub
           </h3>
-          <p className="text-xs text-slate-200 mt-1.5 font-medium tracking-wide drop-shadow-md">
+          <p className="text-sm text-slate-200 mt-2 font-medium tracking-wide drop-shadow-md">
             Join to access operator tools and catalog management.
           </p>
         </div>
       </div>
 
-      {/* Right Side: Full Height Form Section */}
+      {/* Right Side: Form Section */}
       <div className="h-full w-full p-6 sm:p-12 flex flex-col justify-center items-center bg-white">
         <div className="w-full max-w-sm">
           
-          {/* Logo header for small screens */}
-          <div className="flex items-center gap-2 mb-6 md:hidden">
-            <img src={logoImg} alt="Logo" className="h-8 w-auto" />
-            <span className="text-slate-900 font-black italic tracking-wider text-sm">LUUSAFETY</span>
+          <div className="flex items-center gap-3 mb-8 md:hidden justify-center">
+            <img src={logoImg} alt="Logo" className="h-14 w-auto" />
+            <span className="text-slate-900 font-black italic tracking-wider text-xl">LUUSAFETY</span>
           </div>
 
           {isSuccess ? (

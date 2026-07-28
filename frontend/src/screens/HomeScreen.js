@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 
 import headerVideo from '../components/luu.webm';
+import logoImg from '../components/logo.webp';
 
 const animationStyles = `
   @keyframes floatSlow {
@@ -74,7 +75,7 @@ const translations = {
     system: "System",
     marketplace: "Marketplace",
     contactHub: "Contact Hub",
-    address: "Addis Ababa",
+    address: "Addis Ababa, Ethiopia",
     rights: "© 2026 Luu Safety Systems • Efoy Engine"
   },
   OM: {
@@ -125,7 +126,7 @@ const translations = {
     system: "Sirna",
     marketplace: "Gabaa",
     contactHub: "Wiirtuu Quunnamtii",
-    address: "Finfinnee",
+    address: "Finfinnee, Itoophiyaa",
     rights: "© 2026 Sirna Nageenyaa Luu • Injiinii Efoy"
   },
   AM: {
@@ -176,7 +177,7 @@ const translations = {
     system: "ስርዓት",
     marketplace: "ገበያ",
     contactHub: "የግንኙነት ማዕከል",
-    address: "አዲስ አበባ",
+    address: "አዲስ አበባ፡ ኢትዮጵያ",
     rights: "© 2026 የሉ ደህንነት ስርዓት • ኤፎይ ኢንጂን"
   }
 };
@@ -196,7 +197,7 @@ export const LanguageProvider = ({ children }) => {
 
 export const useLanguage = () => useContext(LanguageContext);
 
-// --- 2. REUSABLE PRODUCT CARD COMPONENT (WITH ICONS BELOW IMAGE) ---
+// --- 2. REUSABLE PRODUCT CARD COMPONENT ---
 const ProductCard = ({ p, ribbon, onAddToCart }) => {
   const { t } = useLanguage();
   const [isLiked, setIsLiked] = useState(false);
@@ -239,7 +240,7 @@ const ProductCard = ({ p, ribbon, onAddToCart }) => {
           <h4 className="font-bold text-slate-800 text-xs uppercase tracking-wide line-clamp-2 mb-0.5 min-h-[2rem]">{productName}</h4>
         </div>
 
-        {/* Bottom Bar with Price on Left & Icons (Heart, View, Cart) Under Image */}
+        {/* Bottom Bar */}
         <div className="pt-2 border-t border-slate-100 flex items-center justify-between gap-2">
           <div>
             <span className="text-[9px] font-semibold text-slate-400 uppercase tracking-wider block">{t.assetValue}</span>
@@ -247,7 +248,6 @@ const ProductCard = ({ p, ribbon, onAddToCart }) => {
           </div>
 
           <div className="flex items-center gap-1.5">
-            {/* Like Icon Button */}
             <button 
               onClick={() => setIsLiked(!isLiked)}
               className="p-2 bg-slate-50 hover:bg-purple-50 border border-slate-200/80 hover:border-purple-200 rounded-xl text-slate-500 hover:text-purple-600 transition-colors"
@@ -256,7 +256,6 @@ const ProductCard = ({ p, ribbon, onAddToCart }) => {
               <Heart size={15} className={isLiked ? "fill-purple-600 text-purple-600" : ""} />
             </button>
 
-            {/* View Details Icon Button */}
             <Link 
               to={`/product/${productId}`} 
               className="p-2 bg-slate-50 hover:bg-purple-50 border border-slate-200/80 hover:border-purple-200 rounded-xl text-slate-500 hover:text-purple-600 transition-colors"
@@ -265,7 +264,6 @@ const ProductCard = ({ p, ribbon, onAddToCart }) => {
               <Eye size={15} />
             </Link>
 
-            {/* Add to Cart Button */}
             <button 
               onClick={() => onAddToCart(p)}
               className="bg-purple-600 hover:bg-purple-700 text-white p-2 rounded-xl transition-all shadow-md shadow-purple-600/10 flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-purple-500 ml-0.5"
@@ -504,7 +502,7 @@ const HomeScreenContent = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {suggestedForYou.map((item) => (
               <div key={item._id || item.id} className="bg-slate-50 border border-slate-200/60 rounded-2xl p-4 flex flex-col sm:flex-row items-center gap-4 shadow-sm">
-                <div className="w-24 h-24 bg-white rounded-xl overflow-hidden flex items-center justify-center shrink-0 relative">
+                <div className="w-24 h-24 bg-white rounded-xl overflow-hidden flex items-center justify-center shrink-0 relative border border-slate-200/60">
                   <img src={item.image || 'https://via.placeholder.com/500'} alt={item.name} className="w-full h-full object-cover" />
                 </div>
                 <div className="flex-1 space-y-3 text-left w-full">
@@ -525,32 +523,78 @@ const HomeScreenContent = () => {
         </section>
       </main>
 
-      {/* Footer */}
-      <footer className="p-4 bg-white border-t border-slate-200/80">
-        <div className="max-w-[1200px] mx-auto py-8 px-2">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-xs border-b border-slate-200/60 pb-8">
-            <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <div className="bg-purple-600 p-1.5 rounded-lg text-white"><Shield size={14} /></div>
-                <h2 className="font-black italic uppercase text-slate-900">LUU<span className="text-purple-600">SAFETY</span></h2>
+      {/* ================= FOOTER WITH CLEAN LOGO DISPLAY ================= */}
+      <footer className="bg-white border-t border-slate-200/80 mt-16">
+        <div className="max-w-[1600px] mx-auto px-6 py-12">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 pb-10 border-b border-slate-200">
+            
+            {/* BRANDING BADGE WITH EMBEDDED LOGO */}
+            <div className="space-y-4 md:col-span-1">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 overflow-hidden">
+                  <img 
+                    src={logoImg} 
+                    alt="Luu Safety Logo" 
+                    className="w-full h-full object-contain" 
+                    onError={(e) => {
+                      e.target.style.display = 'none';
+                      if (e.target.nextSibling) {
+                        e.target.nextSibling.style.display = 'block';
+                      }
+                    }}
+                  />
+                  <Shield size={20} className="text-purple-600 hidden" />
+                </div>
+                <h2 className="font-black italic uppercase text-slate-900 text-lg tracking-tight">
+                  LUU<span className="text-purple-600">SAFETY</span>
+                </h2>
               </div>
+              <p className="text-xs text-slate-500 font-medium leading-relaxed">
+                {t.heroSub}
+              </p>
             </div>
-            <div className="grid grid-cols-2 gap-4 md:col-span-2">
-              <div>
-                <h4 className="font-bold uppercase text-[10px] text-purple-600 mb-3">{t.system}</h4>
-                <ul className="space-y-1.5 text-[10px] font-semibold uppercase text-slate-500">
-                  <li><Link to="/shop" className="hover:text-purple-600">{t.marketplace}</Link></li>
-                  <li><Link to="/contact" className="hover:text-purple-600">{t.contactHub}</Link></li>
-                </ul>
-              </div>
-              <div>
-                <h4 className="font-bold uppercase text-[10px] text-purple-600 mb-3">Location</h4>
-                <p className="flex items-center gap-1.5 text-[10px] font-semibold text-slate-400 uppercase"><MapPin size={10} /> {t.address}</p>
-              </div>
+
+            {/* SYSTEM NAVIGATION */}
+            <div className="space-y-3">
+              <h4 className="font-extrabold uppercase text-xs text-purple-600 tracking-wider">{t.system}</h4>
+              <ul className="space-y-2 text-xs font-bold uppercase text-slate-600">
+                <li>
+                  <Link to="/shop" className="hover:text-purple-600 transition-colors flex items-center gap-1.5">
+                    <ArrowRight size={12} className="text-purple-600" /> {t.marketplace}
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/contact" className="hover:text-purple-600 transition-colors flex items-center gap-1.5">
+                    <ArrowRight size={12} className="text-purple-600" /> {t.contactHub}
+                  </Link>
+                </li>
+              </ul>
             </div>
+
+            {/* CATEGORY LIST */}
+            <div className="space-y-3">
+              <h4 className="font-extrabold uppercase text-xs text-purple-600 tracking-wider">{t.shopByCategory}</h4>
+              <ul className="space-y-2 text-xs font-bold uppercase text-slate-600">
+                <li><Link to="/shop?category=Headwear" className="hover:text-purple-600 transition-colors">{t.catHeadwear}</Link></li>
+                <li><Link to="/shop?category=Workwear" className="hover:text-purple-600 transition-colors">{t.catWorkwear}</Link></li>
+                <li><Link to="/shop?category=Footwear" className="hover:text-purple-600 transition-colors">{t.catFootwear}</Link></li>
+              </ul>
+            </div>
+
+            {/* LOCATION / CONTACT */}
+            <div className="space-y-3">
+              <h4 className="font-extrabold uppercase text-xs text-purple-600 tracking-wider">Location</h4>
+              <p className="flex items-center gap-2 text-xs font-bold text-slate-700 uppercase">
+                <MapPin size={14} className="text-purple-600" /> {t.address}
+              </p>
+            </div>
+
           </div>
-          <div className="pt-6 text-center">
-            <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{t.rights}</p>
+
+          <div className="pt-8 text-center">
+            <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">
+              {t.rights}
+            </p>
           </div>
         </div>
       </footer>

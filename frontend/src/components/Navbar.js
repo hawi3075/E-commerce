@@ -68,9 +68,12 @@ const Navbar = () => {
   // Cart Count State
   const [cartCount, setCartCount] = useState(0);
 
-  // Auth State
-  const rawUserInfo = localStorage.getItem('userInfo');
-  const userInfo = rawUserInfo ? JSON.parse(rawUserInfo) : null;
+  // Dynamic Auth State
+  const [userInfo, setUserInfo] = useState(() => {
+    const raw = localStorage.getItem('userInfo');
+    return raw ? JSON.parse(raw) : null;
+  });
+
   const isLoggedIn = !!userInfo;
 
   // Active translation dictionary
@@ -86,6 +89,22 @@ const Navbar = () => {
       localStorage.setItem('theme', 'light');
     }
   }, [darkMode]);
+
+  // Sync Auth State dynamically
+  useEffect(() => {
+    const syncAuth = () => {
+      const raw = localStorage.getItem('userInfo');
+      setUserInfo(raw ? JSON.parse(raw) : null);
+    };
+
+    window.addEventListener('storage', syncAuth);
+    window.addEventListener('userUpdated', syncAuth);
+
+    return () => {
+      window.removeEventListener('storage', syncAuth);
+      window.removeEventListener('userUpdated', syncAuth);
+    };
+  }, []);
 
   // Sync Cart Count from local storage and custom events
   useEffect(() => {
@@ -118,11 +137,14 @@ const Navbar = () => {
 
   const handleLogout = () => {
     localStorage.removeItem('userInfo');
+    setUserInfo(null);
+    window.dispatchEvent(new Event('userUpdated'));
     navigate('/login');
   };
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
+    setMobileMenuOpen(false);
     if (searchQuery.trim()) {
       navigate(`/shop?search=${encodeURIComponent(searchQuery.trim())}`);
     } else {
@@ -290,6 +312,7 @@ const Navbar = () => {
           <button 
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             className="lg:hidden p-2 text-slate-800 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl"
+            aria-label="Toggle Navigation Menu"
           >
             {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
           </button>

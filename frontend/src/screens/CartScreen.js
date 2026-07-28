@@ -6,14 +6,16 @@ const CartScreen = () => {
   const navigate = useNavigate();
   const [cartItems, setCartItems] = useState([]);
 
-  // 1. Load dynamic cart data from localStorage (No Mock Data)
+  // 1. Load dynamic cart data from localStorage & listen for local changes
   useEffect(() => {
     const loadCart = () => {
       const stored = localStorage.getItem('cartItems');
       if (stored) {
         try {
-          setCartItems(JSON.parse(stored));
+          const parsed = JSON.parse(stored);
+          setCartItems(Array.isArray(parsed) ? parsed : []);
         } catch (e) {
+          console.error("Failed to parse cart items:", e);
           setCartItems([]);
         }
       } else {
@@ -21,12 +23,20 @@ const CartScreen = () => {
       }
     };
 
+    // Load initial cart
     loadCart();
+
+    // Listen for changes from other tabs (storage) and same tab (cartUpdated)
     window.addEventListener('storage', loadCart);
-    return () => window.removeEventListener('storage', loadCart);
+    window.addEventListener('cartUpdated', loadCart);
+
+    return () => {
+      window.removeEventListener('storage', loadCart);
+      window.removeEventListener('cartUpdated', loadCart);
+    };
   }, []);
 
-  // Helper to persist updates and notify Navbar
+  // Helper to persist updates and notify Navbar and other components
   const updateStorageAndNotify = (updatedCart) => {
     setCartItems(updatedCart);
     localStorage.setItem('cartItems', JSON.stringify(updatedCart));
@@ -38,7 +48,8 @@ const CartScreen = () => {
     const updated = cartItems.map((item) => {
       const itemKey = item._id || item.id;
       if (itemKey === id) {
-        const newQty = Math.max(1, (Number(item.qty) || 1) + delta);
+        const currentQty = Number(item.qty) || 1;
+        const newQty = Math.max(1, currentQty + delta);
         return { ...item, qty: newQty };
       }
       return item;
@@ -112,8 +123,8 @@ const CartScreen = () => {
             
             {/* Cart Items List */}
             <div className="lg:col-span-7 space-y-4">
-              {cartItems.map((item) => {
-                const itemId = item._id || item.id;
+              {cartItems.map((item, index) => {
+                const itemId = item._id || item.id || `cart-item-${index}`;
                 const itemImage = item.image || item.imageUrl || '/placeholder.png';
                 const itemPrice = Number(item.price) || 0;
                 const itemQty = Number(item.qty) || 1;
@@ -128,7 +139,7 @@ const CartScreen = () => {
                       <div className="w-20 h-20 bg-slate-100 dark:bg-slate-800 rounded-xl overflow-hidden shrink-0 border border-slate-200 dark:border-slate-700">
                         <img 
                           src={itemImage} 
-                          alt={item.name} 
+                          alt={item.name || 'Product Image'} 
                           className="w-full h-full object-cover"
                           onError={(e) => {
                             e.target.onerror = null;
@@ -223,7 +234,7 @@ const CartScreen = () => {
                 <span className="text-2xl font-black text-slate-900 dark:text-white">${total.toFixed(2)}</span>
               </div>
 
-              {/* Yellow Proceed to Checkout Button */}
+              {/* Proceed to Checkout Button */}
               <button 
                 onClick={handleProceedToCheckout}
                 className="w-full bg-amber-400 hover:bg-amber-500 text-slate-950 font-black text-xs uppercase tracking-widest py-4 rounded-2xl shadow-md transition-all active:scale-[0.99] flex items-center justify-center gap-2 mt-2"

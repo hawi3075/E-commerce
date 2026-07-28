@@ -4,7 +4,7 @@ import axios from 'axios';
 import { 
   Star, ShoppingCart, Share2, ArrowLeft, CheckCircle2, 
   Package, Tag, Hash, ShoppingBag, MapPin, Phone, Mail, Loader2, AlertCircle,
-  Palette
+  Palette, Check, User
 } from 'lucide-react';
 
 import Navbar from '../components/Navbar';
@@ -38,7 +38,8 @@ const TRANSLATIONS = {
     noReviewsYet: 'No reviews yet',
     productNotFound: 'Product not found',
     errorFetching: 'Failed to load product details.',
-    color: 'Select Color'
+    color: 'Select Color',
+    linkCopied: 'Link Copied!'
   },
   am: {
     backToShop: 'ወደ ሱቅ ተመለስ',
@@ -67,7 +68,8 @@ const TRANSLATIONS = {
     noReviewsYet: 'አስተያየት አልተሰጠም',
     productNotFound: 'ምርቱ አልተገኘም',
     errorFetching: 'የምርቱን ዝርዝር መጫን አልተቻለም።',
-    color: 'ቀለም ይምረጡ'
+    color: 'ቀለም ይምረጡ',
+    linkCopied: 'ሊንኩ ተቀድቷል!'
   },
   om: {
     backToShop: 'Gara Dukaatti Deebi\'i',
@@ -96,11 +98,12 @@ const TRANSLATIONS = {
     noReviewsYet: 'Yaadni hin jiru',
     productNotFound: 'Meeshaan hin argamne',
     errorFetching: 'Odeeffannoo meeshaa fiduun hin danda\'amne.',
-    color: 'Halluu Filadhu'
+    color: 'Halluu Filadhu',
+    linkCopied: 'Liankiin kopy godhameera!'
   }
 };
 
-const AVAILABLE_COLORS = ['Yellow', 'Black', 'Red', 'Blue'];
+const DEFAULT_COLORS = ['Yellow', 'Black', 'Red', 'Blue'];
 
 const ProductScreen = () => {
   const { id } = useParams();
@@ -119,9 +122,12 @@ const ProductScreen = () => {
   const [related, setRelated] = useState([]);
   const [qty, setQty] = useState(1);
   const [selectedColor, setSelectedColor] = useState('Yellow');
+  const [selectedImage, setSelectedImage] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [copied, setCopied] = useState(false);
 
+  // Sync Language changes dynamically
   useEffect(() => {
     const syncLang = () => setLang(getCurrentLang());
     window.addEventListener('languageChange', syncLang);
@@ -134,15 +140,22 @@ const ProductScreen = () => {
 
   const t = TRANSLATIONS[lang] || TRANSLATIONS.en;
 
+  // Fetch product details & related items
   useEffect(() => {
     const fetchProductData = async () => {
       try {
         setIsLoading(true);
         setError(null);
         
-        // Fetch Main Product Data
         const { data } = await axios.get(`/api/products/${id}`);
         setProduct(data);
+
+        // Set initial selected image and color
+        const mainImg = data.images?.[0] || data.image || '/placeholder.png';
+        setSelectedImage(mainImg);
+
+        const colors = data.colors && data.colors.length > 0 ? data.colors : DEFAULT_COLORS;
+        setSelectedColor(colors[0]);
 
         // Fetch Related Products
         try {
@@ -155,7 +168,7 @@ const ProductScreen = () => {
         }
 
       } catch (err) {
-        setError(err.response?.data?.message || t.errorFetching);
+        setError(err.response?.data?.message || TRANSLATIONS[getCurrentLang()]?.errorFetching || 'Failed to load product details.');
       } finally {
         setIsLoading(false);
       }
@@ -164,7 +177,25 @@ const ProductScreen = () => {
     if (id) {
       fetchProductData();
     }
-  }, [id, t.errorFetching]);
+  }, [id]);
+
+  // Handle Share functionality
+  const handleShare = async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: product?.name || product?.product_name,
+          url: window.location.href,
+        });
+      } catch (err) {
+        // User canceled share
+      }
+    } else {
+      navigator.clipboard.writeText(window.location.href);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2500);
+    }
+  };
 
   // Handle Buy Now Click
   const handleBuyNow = () => {
@@ -176,9 +207,9 @@ const ProductScreen = () => {
           _id: product._id,
           name: product.name || product.product_name,
           price: product.price,
-          image: product.images?.[0] || product.image
+          image: selectedImage || product.images?.[0] || product.image
         },
-        qty: qty,
+        qty,
         color: selectedColor
       }
     });
@@ -227,7 +258,8 @@ const ProductScreen = () => {
   }
 
   const currentStock = product.countInStock ?? product.stock ?? 0;
-  const mainImage = product.images?.[0] || product.image || '/placeholder.png';
+  const productImages = product.images && product.images.length > 0 ? product.images : [product.image || '/placeholder.png'];
+  const availableColors = product.colors && product.colors.length > 0 ? product.colors : DEFAULT_COLORS;
 
   return (
     <div className="bg-gray-100 min-h-screen text-gray-800 font-sans antialiased flex flex-col justify-between">
@@ -251,24 +283,41 @@ const ProductScreen = () => {
           <div className="bg-white rounded-3xl p-6 lg:p-10 border border-gray-200 shadow-sm mb-12">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
               
-              {/* Product Image Section */}
-              <div className="lg:col-span-6 relative">
-                {currentStock > 0 ? (
-                  <span className="absolute top-4 left-4 z-10 px-4 py-1.5 bg-purple-50 text-purple-700 font-extrabold text-sm rounded-full border border-purple-200 shadow-sm">
-                    {t.inStock}
-                  </span>
-                ) : (
-                  <span className="absolute top-4 left-4 z-10 px-4 py-1.5 bg-red-50 text-red-700 font-extrabold text-sm rounded-full border border-red-200 shadow-sm">
-                    {t.outOfStock}
-                  </span>
-                )}
-                <div className="w-full h-[450px] lg:h-[520px] bg-gray-50 rounded-2xl overflow-hidden border border-gray-100 flex items-center justify-center">
+              {/* Product Gallery Section */}
+              <div className="lg:col-span-6 flex flex-col gap-4">
+                <div className="relative w-full h-[380px] sm:h-[450px] lg:h-[480px] bg-gray-50 rounded-2xl overflow-hidden border border-gray-100 flex items-center justify-center">
+                  {currentStock > 0 ? (
+                    <span className="absolute top-4 left-4 z-10 px-4 py-1.5 bg-purple-50 text-purple-700 font-extrabold text-sm rounded-full border border-purple-200 shadow-sm">
+                      {t.inStock}
+                    </span>
+                  ) : (
+                    <span className="absolute top-4 left-4 z-10 px-4 py-1.5 bg-red-50 text-red-700 font-extrabold text-sm rounded-full border border-red-200 shadow-sm">
+                      {t.outOfStock}
+                    </span>
+                  )}
                   <img 
-                    src={mainImage} 
+                    src={selectedImage} 
                     alt={product.name || product.product_name} 
-                    className="w-full h-full object-cover object-center"
+                    className="w-full h-full object-cover object-center transition-all duration-300"
                   />
                 </div>
+
+                {/* Thumbnails */}
+                {productImages.length > 1 && (
+                  <div className="flex items-center gap-3 overflow-x-auto pb-2">
+                    {productImages.map((imgUrl, idx) => (
+                      <button
+                        key={idx}
+                        onClick={() => setSelectedImage(imgUrl)}
+                        className={`w-20 h-20 rounded-xl overflow-hidden border-2 transition-all flex-shrink-0 ${
+                          selectedImage === imgUrl ? 'border-purple-700 scale-105 shadow-sm' : 'border-gray-200 hover:border-purple-300 opacity-70 hover:opacity-100'
+                        }`}
+                      >
+                        <img src={imgUrl} alt="" className="w-full h-full object-cover" />
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
 
               {/* Product Details & Actions */}
@@ -278,8 +327,17 @@ const ProductScreen = () => {
                     <span className="text-sm font-extrabold uppercase tracking-wider text-purple-700">
                       {product.category || 'Safety Equipment'}
                     </span>
-                    <button className="p-3 rounded-full border border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors">
-                      <Share2 size={20} />
+                    <button 
+                      onClick={handleShare}
+                      title="Share Product"
+                      className="relative p-3 rounded-full border border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors"
+                    >
+                      {copied ? <Check size={20} className="text-emerald-600" /> : <Share2 size={20} />}
+                      {copied && (
+                        <span className="absolute -bottom-8 right-0 bg-black text-white text-xs px-2.5 py-1 rounded-md whitespace-nowrap shadow-md">
+                          {t.linkCopied}
+                        </span>
+                      )}
                     </button>
                   </div>
 
@@ -294,7 +352,7 @@ const ProductScreen = () => {
                         <Star key={i} size={18} className={i < Math.round(product.rating || 0) ? "fill-amber-400 text-amber-400" : "text-gray-200"} />
                       ))}
                       <span className="font-extrabold text-gray-900 ml-1.5 text-base">{(product.rating || 0).toFixed(1)}</span>
-                      <span>({product.numReviews || 0} reviews)</span>
+                      <span>({product.numReviews || product.reviews?.length || 0} reviews)</span>
                     </div>
                     {product.sku && (
                       <>
@@ -325,7 +383,7 @@ const ProductScreen = () => {
                       {t.color}: <span className="text-purple-700 font-extrabold">{selectedColor}</span>
                     </label>
                     <div className="flex flex-wrap gap-2.5">
-                      {AVAILABLE_COLORS.map((clr) => (
+                      {availableColors.map((clr) => (
                         <button
                           key={clr}
                           type="button"
@@ -365,7 +423,7 @@ const ProductScreen = () => {
                         <CheckCircle2 size={16} />
                         <span className="text-xs font-bold">{t.variants}</span>
                       </div>
-                      <p className="text-sm font-black text-gray-900">{AVAILABLE_COLORS.length} Colors</p>
+                      <p className="text-sm font-black text-gray-900">{availableColors.length} Colors</p>
                     </div>
                   </div>
                 </div>
@@ -544,18 +602,50 @@ const ProductScreen = () => {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-              <div className="lg:col-span-5 bg-gray-50 p-6 rounded-2xl border border-gray-100">
-                <h3 className="text-sm font-black text-gray-900 mb-2">{t.writeReview}</h3>
-                <p className="text-sm text-gray-600 font-medium">
-                  Please <Link to="/login" className="text-purple-700 font-extrabold underline">log in</Link> to leave a review.
-                </p>
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+              <div className="lg:col-span-4 bg-gray-50 p-6 rounded-2xl border border-gray-100 flex flex-col justify-between">
+                <div>
+                  <h3 className="text-base font-black text-gray-900 mb-2">{t.writeReview}</h3>
+                  <p className="text-sm text-gray-600 font-medium mb-4">
+                    {t.pleaseLogin.split('log in')[0]} 
+                    <Link to="/login" className="text-purple-700 font-extrabold underline">log in</Link> 
+                    {t.pleaseLogin.split('log in')[1]}
+                  </p>
+                </div>
+                <button 
+                  onClick={() => navigate('/login')}
+                  className="w-full py-3 bg-purple-700 text-white rounded-xl text-xs font-bold uppercase tracking-wider hover:bg-purple-800 transition-all shadow-sm"
+                >
+                  Log In
+                </button>
               </div>
 
-              <div className="lg:col-span-7 bg-gray-50 p-6 rounded-2xl border border-gray-100 flex items-center justify-center">
-                <p className="text-sm text-gray-600 font-semibold">
-                  {product.reviews && product.reviews.length > 0 ? `${product.reviews.length} reviews available.` : t.noReviews}
-                </p>
+              <div className="lg:col-span-8 space-y-4">
+                {product.reviews && product.reviews.length > 0 ? (
+                  product.reviews.map((rev, idx) => (
+                    <div key={rev._id || idx} className="bg-gray-50 p-5 rounded-2xl border border-gray-100">
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-2.5">
+                          <div className="w-8 h-8 rounded-full bg-purple-100 text-purple-700 flex items-center justify-center font-bold">
+                            <User size={16} />
+                          </div>
+                          <span className="text-sm font-bold text-gray-900">{rev.name || 'Anonymous User'}</span>
+                        </div>
+                        <div className="flex items-center">
+                          {[...Array(5)].map((_, i) => (
+                            <Star key={i} size={14} className={i < rev.rating ? "fill-amber-400 text-amber-400" : "text-gray-200"} />
+                          ))}
+                        </div>
+                      </div>
+                      <p className="text-xs text-gray-400 mb-2">{rev.createdAt ? new Date(rev.createdAt).toLocaleDateString() : ''}</p>
+                      <p className="text-sm text-gray-700 font-medium">{rev.comment}</p>
+                    </div>
+                  ))
+                ) : (
+                  <div className="bg-gray-50 p-8 rounded-2xl border border-gray-100 text-center">
+                    <p className="text-sm text-gray-600 font-semibold">{t.noReviews}</p>
+                  </div>
+                )}
               </div>
             </div>
           </div>

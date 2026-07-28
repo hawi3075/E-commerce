@@ -11,6 +11,9 @@ const {
 const { protect, isAdmin } = require('../middleware/authMiddleware');
 
 // Public routes
+// Mounted at /api/users:
+// POST /api/users OR POST /api/users/register will now both register the user
+router.post('/', registerUser);
 router.post('/register', registerUser);
 router.post('/login', loginUser);
 
