@@ -27,6 +27,12 @@ import UploadProduct from './screens/admin/UploadProduct';
 import ManageUsers from './screens/admin/ManageUsers';
 import Orders from './screens/admin/Orders';
 
+// New Admin Screens Imports
+import Messages from './screens/admin/Messages';
+import Customers from './screens/admin/Customers';
+import Performance from './screens/admin/Performance';
+import AdminTeam from './screens/admin/AdminTeam';
+
 // Auth Provider & Context
 import { AuthProvider, AuthContext } from './context/AuthContext';
 
@@ -41,7 +47,7 @@ const ProtectedRoute = ({ children, adminOnly = false }) => {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  if (adminOnly && !(activeUser.isAdmin || activeUser.role === 'admin')) {
+  if (adminOnly && !(activeUser.isAdmin || activeUser.role === 'admin' || activeUser.role === 'SUPER_ADMIN')) {
     return <Navigate to="/" replace />;
   }
 
@@ -123,6 +129,40 @@ function App() {
               element={
                 <ProtectedRoute adminOnly={true}>
                   <div className="flex"><AdminSidebar /><ManageUsers /></div>
+                </ProtectedRoute>
+              } 
+            />
+
+            {/* Added Routes corresponding to Admin Sidebar items */}
+            <Route 
+              path="/admin/messages" 
+              element={
+                <ProtectedRoute adminOnly={true}>
+                  <div className="flex"><AdminSidebar /><Messages /></div>
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/admin/customers" 
+              element={
+                <ProtectedRoute adminOnly={true}>
+                  <div className="flex"><AdminSidebar /><Customers /></div>
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/admin/performance" 
+              element={
+                <ProtectedRoute adminOnly={true}>
+                  <div className="flex"><AdminSidebar /><Performance /></div>
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/admin/team" 
+              element={
+                <ProtectedRoute adminOnly={true}>
+                  <div className="flex"><AdminSidebar /><AdminTeam /></div>
                 </ProtectedRoute>
               } 
             />
