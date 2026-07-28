@@ -13,6 +13,9 @@ import {
 } from 'lucide-react';
 import { AuthContext } from '../context/AuthContext';
 
+// Import logo directly from src/components/logo.webp
+import logoImg from './logo.webp';
+
 const AdminSidebar = () => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -52,11 +55,11 @@ const AdminSidebar = () => {
   return (
     <aside className="w-64 h-screen bg-white text-slate-700 p-5 flex flex-col justify-between sticky top-0 border-r border-slate-200/80 shrink-0 font-sans overflow-hidden">
       <div>
-        {/* Brand Header with logo.webp */}
+        {/* Brand Header */}
         <div className="flex items-center gap-3 px-2 py-2 mb-5">
           <img 
-            src="/logo.webp" 
-            alt="Logo" 
+            src={logoImg} 
+            alt="Efoy Gabeya Logo" 
             className="w-11 h-11 object-contain rounded-xl shadow-sm" 
           />
           <div>
@@ -100,7 +103,7 @@ const AdminSidebar = () => {
         </div>
       </div>
 
-      {/* Stable Bottom Bar */}
+      {/* Footer / Version & Logout */}
       <div className="pt-4 border-t border-slate-100 flex flex-col items-center gap-2">
         <button
           onClick={handleLogout}
