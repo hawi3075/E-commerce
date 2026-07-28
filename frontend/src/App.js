@@ -8,7 +8,7 @@ import HomeScreen from './screens/HomeScreen';
 import LoginScreen from './screens/LoginScreen';
 import SignupScreen from './screens/SignupScreen';
 import OrderScreen from './screens/OrderScreen';
-import CheckoutScreen from './screens/CheckoutScreen'; // 1. IMPORT YOUR CHECKOUT SCREEN HERE
+import CheckoutScreen from './screens/CheckoutScreen';
 import PaymentScreen from './screens/PaymentScreen';
 
 import ShopScreen from './screens/ShopScreen';
@@ -16,6 +16,10 @@ import ProductScreen from './screens/ProductScreen';
 
 import AboutScreen from './screens/About'; 
 import ContactScreen from './screens/Contact';
+
+// 1. ADD CART & PROFILE IMPORTS HERE
+import CartScreen from './screens/CartScreen';
+import ProfileScreen from './screens/ProfileScreen';
 
 // Admin Screen Imports
 import Dashboard from './screens/admin/Dashboard'; 
@@ -71,12 +75,13 @@ function App() {
             <Route path="/shop" element={<ShopScreen />} />
             <Route path="/product/:id" element={<ProductScreen />} />
             
+            {/* 2. ADDED /cart & /profile ROUTES BELOW */}
+            <Route path="/cart" element={<CartScreen />} />
+            <Route path="/profile" element={<ProtectedRoute><ProfileScreen /></ProtectedRoute>} />
+            
             {/* User Protected Routes */}
             <Route path="/orders" element={<ProtectedRoute><OrderScreen /></ProtectedRoute>} />
-            
-            {/* 2. FIXED ROUTE: MAP /checkout TO CheckoutScreen */}
             <Route path="/checkout" element={<ProtectedRoute><CheckoutScreen /></ProtectedRoute>} />
-            
             <Route path="/payment" element={<ProtectedRoute><PaymentScreen /></ProtectedRoute>} />
 
             {/* Admin Protected Section */}

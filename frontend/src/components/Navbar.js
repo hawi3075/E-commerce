@@ -87,7 +87,7 @@ const Navbar = () => {
     }
   }, [darkMode]);
 
-  // Sync Cart Count from local storage
+  // Sync Cart Count from local storage and custom events
   useEffect(() => {
     const updateCartCount = () => {
       const storedCart = localStorage.getItem('cartItems');
@@ -105,8 +105,15 @@ const Navbar = () => {
     };
 
     updateCartCount();
+
+    // Listen for storage changes across tabs or custom dispatch events
     window.addEventListener('storage', updateCartCount);
-    return () => window.removeEventListener('storage', updateCartCount);
+    window.addEventListener('cartUpdated', updateCartCount);
+
+    return () => {
+      window.removeEventListener('storage', updateCartCount);
+      window.removeEventListener('cartUpdated', updateCartCount);
+    };
   }, [location]);
 
   const handleLogout = () => {
@@ -228,9 +235,9 @@ const Navbar = () => {
             {darkMode ? <Sun size={20} className="text-amber-500" /> : <Moon size={20} />}
           </button>
 
-          {/* DYNAMIC PROFILE / SIGN IN ICON */}
+          {/* DYNAMIC PROFILE REDIRECTION */}
           {isLoggedIn ? (
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
               <Link 
                 to="/profile" 
                 className="flex items-center gap-2 bg-purple-50 dark:bg-purple-950/40 border border-purple-200 dark:border-purple-800/60 hover:bg-purple-100 dark:hover:bg-purple-900/50 text-purple-900 dark:text-purple-200 px-3 py-1.5 rounded-full transition-all"
@@ -262,16 +269,19 @@ const Navbar = () => {
             </Link>
           )}
 
-          {/* CART ICON */}
+          {/* CART ICON WITH RED BADGE NOTIFICATION & REDIRECTION */}
           <Link 
             to="/cart" 
-            className="flex flex-col items-center text-slate-800 dark:text-slate-200 hover:text-purple-600 transition-colors relative p-1"
+            className="flex flex-col items-center text-slate-800 dark:text-slate-200 hover:text-purple-600 transition-colors relative p-1.5"
+            title="View Shopping Cart"
           >
-            <ShoppingCart size={22} />
-            <span className="text-[10px] font-bold uppercase tracking-wider">{t.cart}</span>
+            <ShoppingCart size={24} />
+            <span className="text-[10px] font-bold uppercase tracking-wider hidden sm:block">{t.cart}</span>
+            
+            {/* Red Small Notification Badge */}
             {cartCount > 0 && (
-              <span className="absolute -top-1 -right-1 bg-purple-600 text-white text-[10px] w-5 h-5 flex items-center justify-center rounded-full border-2 border-white dark:border-slate-900 font-extrabold animate-pulse">
-                {cartCount}
+              <span className="absolute -top-1 -right-1.5 bg-red-600 text-white text-[10px] w-5 h-5 flex items-center justify-center rounded-full border-2 border-white dark:border-slate-900 font-extrabold shadow-sm animate-pulse">
+                {cartCount > 99 ? '99+' : cartCount}
               </span>
             )}
           </Link>
@@ -308,6 +318,9 @@ const Navbar = () => {
             <Link to="/shop" onClick={() => setMobileMenuOpen(false)} className="text-slate-800 dark:text-slate-200 hover:text-purple-600">{t.shop}</Link>
             <Link to="/about" onClick={() => setMobileMenuOpen(false)} className="text-slate-800 dark:text-slate-200 hover:text-purple-600">{t.about}</Link>
             <Link to="/contact" onClick={() => setMobileMenuOpen(false)} className="text-slate-800 dark:text-slate-200 hover:text-purple-600">{t.contact}</Link>
+            {isLoggedIn && (
+              <Link to="/profile" onClick={() => setMobileMenuOpen(false)} className="text-purple-600 dark:text-purple-400 font-bold">{t.profile}</Link>
+            )}
           </div>
 
           <div className="pt-4 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between">

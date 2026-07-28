@@ -4,41 +4,50 @@ const cors = require('cors');
 const path = require('path');
 const connectDB = require('./config/db'); 
 
-// Initialize Environment
 dotenv.config();
-
-// Connect to MongoDB Atlas
 connectDB();
 
 const app = express();
 
 // Middleware
 app.use(cors({
-  origin: ['http://localhost:3000', 'http://localhost:5173'], // Allow React dev server
+  origin: ['http://localhost:3000', 'http://localhost:5173'],
   credentials: true
 }));
 
-// Payload size limit for image uploads
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 // Serve static uploaded files
 app.use('/uploads', express.static(path.join(__dirname, '/uploads')));
 
-// Routes
+// Helper to safely inspect and mount routes
+const safeMount = (routePath, routeModule, fileName) => {
+  if (typeof routeModule === 'function' || (routeModule && typeof routeModule.use === 'function')) {
+    app.use(routePath, routeModule);
+    console.log(`✅ Loaded route [${routePath}] from ${fileName}`);
+  } else {
+    console.error(`❌ ERROR in ${fileName}: Export is ${typeof routeModule}. Did you forget 'module.exports = router'?`);
+  }
+};
+
+// Route Imports
 const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
 const productRoutes = require('./routes/productRoutes');
 const orderRoutes = require('./routes/orderRoutes');
 const paymentRoutes = require('./routes/paymentRoutes');
+const contactRoutes = require('./routes/contactRoutes'); // 👈 Added contact route import
 
-app.use('/api/auth', authRoutes); 
-app.use('/api/users', userRoutes);
-app.use('/api/products', productRoutes);
-app.use('/api/orders', orderRoutes);
-app.use('/api/payments', paymentRoutes);
+// Safely mount each route
+safeMount('/api/auth', authRoutes, './routes/authRoutes.js');
+safeMount('/api/users', userRoutes, './routes/userRoutes.js');
+safeMount('/api/products', productRoutes, './routes/productRoutes.js');
+safeMount('/api/orders', orderRoutes, './routes/orderRoutes.js');
+safeMount('/api/payments', paymentRoutes, './routes/paymentRoutes.js');
+safeMount('/api/contact', contactRoutes, './routes/contactRoutes.js'); // 👈 Mounted /api/contact
 
-// Basic Health Check
+// Health Check
 app.get('/', (req, res) => {
     res.send('Luu Safety API is running with MongoDB...');
 });
