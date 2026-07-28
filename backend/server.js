@@ -37,7 +37,8 @@ const userRoutes = require('./routes/userRoutes');
 const productRoutes = require('./routes/productRoutes');
 const orderRoutes = require('./routes/orderRoutes');
 const paymentRoutes = require('./routes/paymentRoutes');
-const contactRoutes = require('./routes/contactRoutes'); // 👈 Added contact route import
+const contactRoutes = require('./routes/contactRoutes');
+const adminRoutes = require('./routes/adminRoutes'); // 👈 ADDED ADMIN ROUTE IMPORT
 
 // Safely mount each route
 safeMount('/api/auth', authRoutes, './routes/authRoutes.js');
@@ -45,7 +46,8 @@ safeMount('/api/users', userRoutes, './routes/userRoutes.js');
 safeMount('/api/products', productRoutes, './routes/productRoutes.js');
 safeMount('/api/orders', orderRoutes, './routes/orderRoutes.js');
 safeMount('/api/payments', paymentRoutes, './routes/paymentRoutes.js');
-safeMount('/api/contact', contactRoutes, './routes/contactRoutes.js'); // 👈 Mounted /api/contact
+safeMount('/api/contact', contactRoutes, './routes/contactRoutes.js');
+safeMount('/api/admin', adminRoutes, './routes/adminRoutes.js'); // 👈 MOUNTED /api/admin
 
 // Health Check
 app.get('/', (req, res) => {
