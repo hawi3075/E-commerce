@@ -17,7 +17,7 @@ import ProductScreen from './screens/ProductScreen';
 import AboutScreen from './screens/About'; 
 import ContactScreen from './screens/Contact';
 
-// 1. ADD CART & PROFILE IMPORTS HERE
+// Cart & Profile
 import CartScreen from './screens/CartScreen';
 import ProfileScreen from './screens/ProfileScreen';
 
@@ -25,6 +25,7 @@ import ProfileScreen from './screens/ProfileScreen';
 import Dashboard from './screens/admin/Dashboard'; 
 import UploadProduct from './screens/admin/UploadProduct';
 import ManageUsers from './screens/admin/ManageUsers';
+import Orders from './screens/admin/Orders';
 
 // Auth Provider & Context
 import { AuthProvider, AuthContext } from './context/AuthContext';
@@ -75,7 +76,7 @@ function App() {
             <Route path="/shop" element={<ShopScreen />} />
             <Route path="/product/:id" element={<ProductScreen />} />
             
-            {/* 2. ADDED /cart & /profile ROUTES BELOW */}
+            {/* Cart & Profile Routes */}
             <Route path="/cart" element={<CartScreen />} />
             <Route path="/profile" element={<ProtectedRoute><ProfileScreen /></ProtectedRoute>} />
             
@@ -90,6 +91,22 @@ function App() {
               element={
                 <ProtectedRoute adminOnly={true}>
                   <div className="flex"><AdminSidebar /><Dashboard /></div>
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/admin/inventory" 
+              element={
+                <ProtectedRoute adminOnly={true}>
+                  <div className="flex"><AdminSidebar /><UploadProduct /></div>
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/admin/orders" 
+              element={
+                <ProtectedRoute adminOnly={true}>
+                  <div className="flex"><AdminSidebar /><Orders /></div>
                 </ProtectedRoute>
               } 
             />

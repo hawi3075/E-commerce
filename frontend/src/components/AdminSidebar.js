@@ -4,7 +4,7 @@ import {
   LayoutDashboard, 
   Package, 
   Users, 
-  CreditCard, 
+  ShoppingBag, 
   LogOut, 
   ExternalLink, 
   BarChart3, 
@@ -27,7 +27,7 @@ const AdminSidebar = () => {
       items: [
         { name: 'Dashboard', path: '/admin', icon: <LayoutDashboard size={20} /> },
         { name: 'Inventory', path: '/admin/upload', icon: <Package size={20} /> },
-        { name: 'Orders', path: '/admin/payments', icon: <CreditCard size={20} /> },
+        { name: 'Orders', path: '/admin/orders', icon: <ShoppingBag size={20} /> }, // Fixed: Updated path to /admin/orders
       ]
     },
     {
@@ -65,7 +65,6 @@ const AdminSidebar = () => {
           <div>
             <h2 className="text-base font-black text-slate-900 tracking-tight leading-tight">
               LUU SAFTY
-
             </h2>
             <p className="text-[11px] font-black text-purple-600 uppercase tracking-widest mt-0.5">
               ADMIN CONSOLE
