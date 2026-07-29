@@ -27,6 +27,7 @@ const registerUser = async (req, res) => {
         name: user.name,
         email: user.email,
         isAdmin: user.isAdmin || false,
+        status: user.status || 'ACTIVE',
         token: generateToken(user._id),
       });
     } else {
@@ -52,6 +53,7 @@ const loginUser = async (req, res) => {
         name: user.name,
         email: user.email,
         isAdmin: user.isAdmin || false,
+        status: user.status || 'ACTIVE',
         token: generateToken(user._id),
       });
     } else {
@@ -63,19 +65,42 @@ const loginUser = async (req, res) => {
 };
 
 // @desc    Get all users (for admin route)
-// @route   GET /api/users
+// @route   GET /api/users or /api/admin/users
 // @access  Private/Admin
 const getUsers = async (req, res) => {
   try {
-    const users = await User.find({});
+    const users = await User.find({}).select('-password');
     res.json(users);
   } catch (error) {
     res.status(500).json({ message: error.message || 'Server error fetching users' });
   }
 };
 
+// @desc    Update user status (ACTIVE / BANNED)
+// @route   PUT /api/admin/users/:id/status
+// @access  Private/Admin
+const updateUserStatus = async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+    if (user) {
+      user.status = req.body.status || user.status;
+      const updatedUser = await user.save();
+      res.json({
+        _id: updatedUser._id,
+        name: updatedUser.name,
+        email: updatedUser.email,
+        status: updatedUser.status,
+      });
+    } else {
+      res.status(404).json({ message: 'User not found' });
+    }
+  } catch (error) {
+    res.status(500).json({ message: error.message || 'Server error updating status' });
+  }
+};
+
 // @desc    Delete user
-// @route   DELETE /api/users/:id
+// @route   DELETE /api/users/:id or /api/admin/users/:id
 // @access  Private/Admin
 const deleteUser = async (req, res) => {
   try {
@@ -95,5 +120,6 @@ module.exports = {
   registerUser,
   loginUser,
   getUsers,
+  updateUserStatus,
   deleteUser,
 };

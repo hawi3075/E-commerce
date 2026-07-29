@@ -1,21 +1,22 @@
-// routes/contactRoutes.js
+// backend/routes/contactRoutes.js
 const express = require('express');
 const router = express.Router();
+const Message = require('../models/messageModel');
 
-router.post('/', (req, res) => {
-  const { name, email, subject, message } = req.body;
-
-  if (!name || !email || !subject || !message) {
-    return res.status(400).json({ message: 'Please fill in all fields.' });
+// @desc    Submit new message (Contact Form)
+// @route   POST /api/contact
+// @access  Public
+router.post('/', async (req, res) => {
+  try {
+    const { name, email, message } = req.body;
+    if (!name || !email || !message) {
+      return res.status(400).json({ message: 'Please fill in all fields' });
+    }
+    const newMessage = await Message.create({ name, email, message });
+    res.status(201).json(newMessage);
+  } catch (error) {
+    res.status(500).json({ message: error.message || 'Error saving message' });
   }
-
-  console.log('📥 New Contact Inquiry:', { name, email, subject, message });
-
-  // Return success response
-  res.status(200).json({
-    success: true,
-    message: 'Transmission complete. Message logged successfully.',
-  });
 });
 
 module.exports = router;

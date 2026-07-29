@@ -19,7 +19,7 @@ const getAdminStats = async (req, res) => {
       console.log('Revenue aggregation fallback:', e.message);
     }
 
-    // 2. Count Active Orders (or total if isDelivered check varies)
+    // 2. Count Active Orders
     let activeOrdersCount = 0;
     try {
       activeOrdersCount = await Order.countDocuments({ isDelivered: false });
@@ -55,6 +55,83 @@ const getAdminStats = async (req, res) => {
   }
 };
 
+// @desc    Get performance analytics (category breakdown & customer mix)
+// @route   GET /api/admin/performance
+// @access  Private/Admin
+const getPerformanceStats = async (req, res) => {
+  try {
+    // 1. Group paid orders by product category
+    const categoryStats = await Order.aggregate([
+      { $match: { isPaid: true } },
+      { $unwind: '$orderItems' },
+      {
+        $lookup: {
+          from: 'products',
+          localField: 'orderItems.product',
+          foreignField: '_id',
+          as: 'productDetails',
+        },
+      },
+      { $unwind: '$productDetails' },
+      {
+        $group: {
+          _id: { $toUpper: '$productDetails.category' },
+          totalSales: { $sum: { $multiply: ['$orderItems.price', '$orderItems.qty'] } },
+        },
+      },
+      { $sort: { totalSales: -1 } },
+    ]);
+
+    let categories = categoryStats.map((item) => ({
+      name: item._id || 'UNCATEGORIZED',
+      value: item.totalSales,
+    }));
+
+    // 2. Fallback: Aggregate directly from Product catalog if no paid order history exists yet
+    if (categories.length === 0) {
+      const inventoryByCategory = await Product.aggregate([
+        {
+          $group: {
+            _id: { $toUpper: '$category' },
+            count: { $sum: 1 },
+          },
+        },
+      ]);
+
+      categories = inventoryByCategory.map((item) => ({
+        name: item._id || 'GEAR',
+        value: item.count,
+      }));
+    }
+
+    // 3. Fallback defaults matching Luu Safety store categories
+    if (categories.length === 0) {
+      categories = [
+        { name: 'HEADWEAR', value: 0 },
+        { name: 'WORKWEAR', value: 0 },
+        { name: 'FOOTWEAR', value: 0 },
+      ];
+    }
+
+    // 4. Calculate Customer Mix (Users who ordered vs non-ordering registered users)
+    const totalUsers = await User.countDocuments({ isAdmin: { $ne: true } });
+    const orderingUsers = await Order.distinct('user');
+    const returningCount = Math.max(0, orderingUsers.length);
+    const newCount = Math.max(0, totalUsers - returningCount);
+
+    res.json({
+      categories,
+      customerMix: {
+        returning: returningCount,
+        newCustomers: newCount,
+      },
+    });
+  } catch (error) {
+    console.error('Error in getPerformanceStats:', error);
+    res.status(500).json({ message: 'Error calculating performance stats', error: error.message });
+  }
+};
+
 // @desc    Get recent orders for dashboard list
 // @route   GET /api/admin/orders
 // @access  Private/Admin
@@ -65,8 +142,7 @@ const getAdminOrders = async (req, res) => {
       .populate('user', 'name email')
       .sort({ createdAt: -1 })
       .limit(limit);
-      
-    // Send direct array
+
     res.json(orders);
   } catch (error) {
     console.error('Error in getAdminOrders:', error);
@@ -84,7 +160,6 @@ const getAdminProducts = async (req, res) => {
       .sort({ createdAt: -1 })
       .limit(limit);
 
-    // Send direct array
     res.json(products);
   } catch (error) {
     console.error('Error in getAdminProducts:', error);
@@ -94,6 +169,7 @@ const getAdminProducts = async (req, res) => {
 
 module.exports = {
   getAdminStats,
+  getPerformanceStats,
   getAdminOrders,
   getAdminProducts
 };
