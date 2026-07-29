@@ -6,8 +6,6 @@ import {
   SlidersHorizontal, Eye, Heart, Loader2, RotateCcw, Briefcase, User, Layers, Search
 } from 'lucide-react';
 
-import Navbar from '../components/Navbar';
-
 // TRANSLATIONS DICTIONARY
 const TRANSLATIONS = {
   en: {
@@ -162,35 +160,6 @@ const TRANSLATIONS = {
   }
 };
 
-const MOCK_PRODUCTS = [
-  { 
-    _id: 'p1', 
-    product_name: 'Vanguard Hard Hat Helmet', 
-    price: 89.99, 
-    stock: 18, 
-    category: 'Headwear',
-    gender: 'Male',
-    rawProduct: 'Steel/Polymer',
-    workCategory: 'Construction',
-    rating: 5,
-    numReviews: 12,
-    image: 'https://images.unsplash.com/photo-1590483736622-39da8caf3ef8?auto=format&fit=crop&q=80&w=500' 
-  },
-  { 
-    _id: 'p2', 
-    product_name: 'Aegis High-Vis Safety Vest', 
-    price: 24.99, 
-    stock: 0, 
-    category: 'Workwear',
-    gender: 'Female',
-    rawProduct: 'Cotton/Polyester',
-    workCategory: 'Farmer',
-    rating: 4.8,
-    numReviews: 8,
-    image: 'https://images.unsplash.com/photo-1578328819058-b69f3a3b0f6b?auto=format&fit=crop&q=80&w=500' 
-  }
-];
-
 const categoriesList = ['All', 'Headwear', 'Workwear', 'Footwear'];
 const genderList = ['All', 'Male', 'Female'];
 const workCategoriesList = ['All', 'Farmer', 'Construction', 'Mining', 'Welding', 'Electrical'];
@@ -253,8 +222,8 @@ const ShopScreen = () => {
 
   const normalizeCategory = useCallback((catParam) => {
     if (!catParam) return 'All';
-    const lower = catParam.toLowerCase();
-    if (lower.includes('head') || lower.includes('helmet')) return 'Headwear';
+    const lower = String(catParam).toLowerCase();
+    if (lower.includes('head') || lower.includes('helmet') || lower.includes('shoe') === false && lower.includes('hat')) return 'Headwear';
     if (lower.includes('vis') || lower.includes('work') || lower.includes('high') || lower.includes('tuta') || lower.includes('apparel')) return 'Workwear';
     if (lower.includes('shoe') || lower.includes('foot') || lower.includes('boot')) return 'Footwear';
     
@@ -269,23 +238,24 @@ const ShopScreen = () => {
     }
   }, [searchParams, normalizeCategory]);
 
+  // Robust API Fetching
   useEffect(() => {
+    let isMounted = true;
     const fetchProducts = async () => {
       try {
         setIsLoading(true);
         const { data } = await axios.get('/api/products');
-        if (data && data.length > 0) {
-          setProducts(data);
-        } else {
-          setProducts(MOCK_PRODUCTS);
-        }
+        const productList = Array.isArray(data) ? data : (data?.products || []);
+        if (isMounted) setProducts(productList);
       } catch (error) {
-        setProducts(MOCK_PRODUCTS);
+        console.error('Error fetching products:', error);
+        if (isMounted) setProducts([]);
       } finally {
-        setIsLoading(false);
+        if (isMounted) setIsLoading(false);
       }
     };
     fetchProducts();
+    return () => { isMounted = false; };
   }, []);
 
   const addToCart = (product) => {
@@ -310,7 +280,7 @@ const ShopScreen = () => {
     window.dispatchEvent(new Event('cartUpdated'));
   };
 
-  // Filtering Logic
+  // Safe Filtering Logic mapped directly to MongoDB Document fields
   const filteredProducts = useMemo(() => {
     const query = searchQuery.toLowerCase().trim();
     const selCat = selectedCategory.toLowerCase();
@@ -319,36 +289,46 @@ const ShopScreen = () => {
     const selRaw = selectedRawProduct.toLowerCase();
 
     return products.filter((p) => {
+      // Direct extraction with database key fallbacks
+      const pName = String(p.product_name || p.name || '').toLowerCase();
+      const pCat = String(p.product_category || p.category || p.productCategory || '').toLowerCase();
+      const pGender = String(p.target_gender || p.gender || p.targetGender || '').toLowerCase();
+      const pWork = String(p.work_field || p.workCategory || p.workSector || p.sector || '').toLowerCase();
+      const pRaw = String(p.raw_material || p.rawProduct || p.rawMaterial || p.material || '').toLowerCase();
+
       // 1. Search Query Match
-      const pName = (p.product_name || p.name || '').toLowerCase();
       const matchSearch = !query || 
         pName.includes(query) || 
-        (p.category || '').toLowerCase().includes(query) ||
-        (p.workCategory || p.workSector || '').toLowerCase().includes(query);
+        pCat.includes(query) ||
+        pWork.includes(query);
 
       // 2. Category Match
-      const pCat = (p.category || '').toLowerCase();
       const matchCat = selectedCategory === 'All' || 
+                       selCat === 'all' || 
                        pCat === selCat || 
                        pCat.includes(selCat) ||
                        normalizeCategory(pCat) === selectedCategory;
 
-      // 3. Gender Target Match
-      const pGender = (p.gender || p.targetGender || '').toLowerCase();
+      // 3. Target Gender Match
       const matchGender = selectedGender === 'All' || 
+                          selGender === 'all' || 
+                          !pGender || 
                           pGender === 'all' || 
                           pGender.includes('all') || 
-                          pGender === selGender;
+                          pGender === selGender ||
+                          pGender.includes(selGender);
 
       // 4. Work Sector Match
-      const pWork = (p.workCategory || p.workSector || '').toLowerCase();
       const matchWork = selectedWorkCategory === 'All' || 
+                        selWork === 'all' || 
+                        !pWork || 
                         pWork === selWork || 
                         pWork.includes(selWork);
 
       // 5. Raw Material Match
-      const pRaw = (p.rawProduct || p.rawMaterial || '').toLowerCase();
       const matchRaw = selectedRawProduct === 'All' || 
+                       selRaw === 'all' || 
+                       !pRaw || 
                        pRaw.includes(selRaw) || 
                        selRaw.includes(pRaw);
 
@@ -386,8 +366,6 @@ const ShopScreen = () => {
   return (
     <div className="bg-gray-200 min-h-screen font-sans antialiased text-gray-800">
       
-      <Navbar />
-
       <main className="max-w-[1600px] mx-auto px-6 pb-12">
         <div className="flex flex-col lg:flex-row gap-8 items-start relative">
           
@@ -585,7 +563,9 @@ const ShopScreen = () => {
                         )}
 
                         <span className="absolute top-3 left-3 bg-purple-600 text-white text-[9px] font-extrabold px-2 py-0.5 rounded-md uppercase tracking-widest z-10 shadow-sm">
-                          {translateKey('workSectors', p.workCategory) || translateKey('categories', p.category) || p.workCategory || p.category || t.gear}
+                          {translateKey('workSectors', p.work_field || p.workCategory || p.workSector) || 
+                           translateKey('categories', p.product_category || p.category) || 
+                           p.work_field || p.workCategory || p.product_category || p.category || t.gear}
                         </span>
                       </div>
 
