@@ -1,11 +1,43 @@
 const Product = require('../models/productModel');
 
-// @desc    Get all products
+// @desc    Get all products (with optional query filter support)
 // @route   GET /api/products
 // @access  Public
 const getProducts = async (req, res) => {
   try {
-    const products = await Product.find({});
+    const { category, target_gender, work_field, raw_material, search } = req.query;
+
+    let query = {};
+
+    // Filter by Category
+    if (category && category !== 'ALL CATEGORIES' && category !== 'ALL') {
+      query.product_category = { $regex: new RegExp(`^${category.trim()}$`, 'i') };
+    }
+
+    // Filter by Target Gender
+    if (target_gender && target_gender !== 'ALL GENDERS' && target_gender !== 'ALL') {
+      query.target_gender = { $regex: new RegExp(`^${target_gender.trim()}$`, 'i') };
+    }
+
+    // Filter by Work Field / Sector
+    if (work_field && work_field !== 'ALL WORK SECTORS' && work_field !== 'ALL') {
+      query.work_field = { $regex: new RegExp(`^${work_field.trim()}$`, 'i') };
+    }
+
+    // Filter by Raw Material
+    if (raw_material && raw_material !== 'ALL MATERIALS' && raw_material !== 'ALL') {
+      query.raw_material = { $regex: new RegExp(`^${raw_material.trim()}$`, 'i') };
+    }
+
+    // Keyword Search (by name or SKU/code)
+    if (search) {
+      query.$or = [
+        { product_name: { $regex: search, $options: 'i' } },
+        { product_code: { $regex: search, $options: 'i' } },
+      ];
+    }
+
+    const products = await Product.find(query);
     res.json(products);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -41,6 +73,9 @@ const createProduct = async (req, res) => {
       product_code,
       category,
       product_category,
+      work_field,
+      target_gender,
+      raw_material,
       size,
       countInStock,
       color,
@@ -55,6 +90,9 @@ const createProduct = async (req, res) => {
       price,
       product_code,
       product_category: product_category || category,
+      work_field: work_field || 'GENERAL',
+      target_gender: target_gender || 'ALL GENDERS',
+      raw_material: raw_material || 'Standard',
       size,
       countInStock,
       color,
@@ -82,6 +120,9 @@ const updateProduct = async (req, res) => {
       product.price = req.body.price ?? product.price;
       product.product_code = req.body.product_code || product.product_code;
       product.product_category = req.body.product_category || req.body.category || product.product_category;
+      product.work_field = req.body.work_field || product.work_field;
+      product.target_gender = req.body.target_gender || product.target_gender;
+      product.raw_material = req.body.raw_material || product.raw_material;
       product.size = req.body.size || product.size;
       product.countInStock = req.body.countInStock ?? product.countInStock;
       product.color = req.body.color || product.color;

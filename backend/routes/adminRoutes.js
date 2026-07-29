@@ -18,6 +18,7 @@ const {
 
 const { 
   getMessages, 
+  getNotifications,
   markMessageAsRead, 
   deleteMessage 
 } = require('../controllers/messageController');
@@ -73,8 +74,13 @@ if (typeof deleteUser === 'function') {
 }
 
 // -------------------------------------------------------------
-// Message Routes (Customer Messages Page)
+// Message Routes (Customer Messages Page & Top Nav Notifications)
 // -------------------------------------------------------------
+
+// GET /api/admin/messages/notifications
+if (typeof getNotifications === 'function') {
+  router.get('/messages/notifications', auth, adminAuth, getNotifications);
+}
 
 // GET /api/admin/messages
 if (typeof getMessages === 'function') {

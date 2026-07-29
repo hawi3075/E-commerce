@@ -4,8 +4,50 @@
 
 @layer base {
   body {
-    @apply antialiased text-slate-900;
+    @apply antialiased text-slate-900 bg-white dark:bg-slate-950 dark:text-slate-100 transition-colors duration-200;
     font-family: 'Inter', system-ui, sans-serif;
+  }
+
+  /* Automatically adapt cards & backgrounds when 'dark' class is present on <html> */
+  html.dark {
+    color-scheme: dark;
+    background-color: #020617; /* Tailwind slate-950 */
+  }
+
+  html.dark body {
+    background-color: #020617;
+    color: #f8fafc;
+  }
+
+  /* Converts white content blocks, cards, and panels into dark surfaces */
+  html.dark .bg-white {
+    background-color: #0f172a !important; /* Tailwind slate-900 */
+    color: #f8fafc !important;
+    border-color: #1e293b !important; /* Tailwind slate-800 */
+  }
+
+  /* Converts light gray background panels across screens */
+  html.dark .bg-slate-50,
+  html.dark .bg-gray-50,
+  html.dark .bg-gray-100,
+  html.dark .bg-gray-200 {
+    background-color: #020617 !important;
+    color: #f8fafc !important;
+  }
+
+  /* Text color overrides for light text on dark backgrounds */
+  html.dark .text-slate-800,
+  html.dark .text-slate-900,
+  html.dark .text-gray-900,
+  html.dark .text-gray-800 {
+    color: #f8fafc !important;
+  }
+
+  html.dark .text-slate-600,
+  html.dark .text-slate-500,
+  html.dark .text-gray-600,
+  html.dark .text-gray-500 {
+    color: #94a3b8 !important; /* Tailwind slate-400 */
   }
 }
 

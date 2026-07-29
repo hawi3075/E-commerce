@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 
-// 1. Destructure both middlewares cleanly from authMiddleware
+// 1. Destructure middleware components
 const { protect, isAdmin } = require('../middleware/authMiddleware');
 
 // 2. Import product controller methods
@@ -14,16 +14,20 @@ const {
   createProductReview,
 } = require('../controllers/productController');
 
-// Public routes
-router.get('/', getProducts);
-router.get('/:id', getProductById);
+// Root Route: GET all products (with filters) & POST create new product
+router
+  .route('/')
+  .get(getProducts)
+  .post(protect, isAdmin, createProduct);
 
-// Protected user routes
-router.post('/:id/reviews', protect, createProductReview);
+// Specific ID Routes: GET single product, PUT update product, DELETE product
+router
+  .route('/:id')
+  .get(getProductById)
+  .put(protect, isAdmin, updateProduct)
+  .delete(protect, isAdmin, deleteProduct);
 
-// Admin-only routes (protected by authMiddleware)
-router.post('/', protect, isAdmin, createProduct);
-router.put('/:id', protect, isAdmin, updateProduct);
-router.delete('/:id', protect, isAdmin, deleteProduct);
+// Product Review Route
+router.route('/:id/reviews').post(protect, createProductReview);
 
 module.exports = router;

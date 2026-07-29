@@ -13,6 +13,22 @@ const getMessages = async (req, res) => {
   }
 };
 
+// @desc    Get unread notifications for admin top navbar
+// @route   GET /api/admin/messages/notifications
+// @access  Private/Admin
+const getNotifications = async (req, res) => {
+  try {
+    const unreadCount = await Message.countDocuments({ status: 'NEW' });
+    const notifications = await Message.find({ status: 'NEW' })
+      .sort({ createdAt: -1 })
+      .limit(5);
+
+    res.json({ unreadCount, notifications });
+  } catch (error) {
+    res.status(500).json({ message: error.message || 'Error fetching notifications' });
+  }
+};
+
 // @desc    Mark message as read
 // @route   PUT /api/admin/messages/:id/read
 // @access  Private/Admin
@@ -50,6 +66,7 @@ const deleteMessage = async (req, res) => {
 
 module.exports = {
   getMessages,
+  getNotifications,
   markMessageAsRead,
   deleteMessage,
 };

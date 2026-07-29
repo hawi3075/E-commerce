@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import axios from 'axios';
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { 
@@ -8,7 +8,7 @@ import {
 
 import Navbar from '../components/Navbar';
 
-// COMPLETE TRANSLATIONS DICTIONARY
+// TRANSLATIONS DICTIONARY
 const TRANSLATIONS = {
   en: {
     filterEngine: 'Filter Engine',
@@ -191,28 +191,33 @@ const MOCK_PRODUCTS = [
   }
 ];
 
+const categoriesList = ['All', 'Headwear', 'Workwear', 'Footwear'];
+const genderList = ['All', 'Male', 'Female'];
+const workCategoriesList = ['All', 'Farmer', 'Construction', 'Mining', 'Welding', 'Electrical'];
+const rawProductsList = ['All', 'Cotton/Polyester', 'Steel/Polymer', 'Leather', 'Kevlar', 'Rubber'];
+
 const ShopScreen = () => {
   const [products, setProducts] = useState([]);
 
   // Helper to safely fetch target language key
-  const getCurrentLang = () => {
+  const getCurrentLang = useCallback(() => {
     const raw = localStorage.getItem('lang') || localStorage.getItem('language') || localStorage.getItem('appLang') || 'en';
     const lower = raw.toLowerCase();
     if (lower.includes('am') || lower.includes('አማ')) return 'am';
     if (lower.includes('om') || lower.includes('or')) return 'om';
     return 'en';
-  };
+  }, []);
 
   const [lang, setLang] = useState(getCurrentLang());
 
-  // Sync language selection
+  // Sync language selection across component tree / local storage
   useEffect(() => {
     const syncLang = () => {
       const current = getCurrentLang();
       setLang((prev) => (prev !== current ? current : prev));
     };
 
-    const interval = setInterval(syncLang, 150);
+    const interval = setInterval(syncLang, 300);
     window.addEventListener('languageChange', syncLang);
     window.addEventListener('storage', syncLang);
 
@@ -221,14 +226,14 @@ const ShopScreen = () => {
       window.removeEventListener('languageChange', syncLang);
       window.removeEventListener('storage', syncLang);
     };
-  }, []);
+  }, [getCurrentLang]);
 
-  const t = TRANSLATIONS[lang] || TRANSLATIONS.en;
+  const t = useMemo(() => TRANSLATIONS[lang] || TRANSLATIONS.en, [lang]);
 
-  const translateKey = (group, key) => {
+  const translateKey = useCallback((group, key) => {
     if (!key) return '';
     return t[group]?.[key] || TRANSLATIONS.en[group]?.[key] || key;
-  };
+  }, [t]);
 
   // Filter States
   const [selectedCategory, setSelectedCategory] = useState('All');
@@ -246,29 +251,23 @@ const ShopScreen = () => {
   // Search Query Param
   const searchQuery = searchParams.get('search') || '';
 
-  // Filter Lists
-  const categoriesList = ['All', 'Headwear', 'Workwear', 'Footwear'];
-  const genderList = ['All', 'Male', 'Female'];
-  const workCategoriesList = ['All', 'Farmer', 'Construction', 'Mining', 'Welding', 'Electrical'];
-  const rawProductsList = ['All', 'Cotton/Polyester', 'Steel/Polymer', 'Leather', 'Kevlar', 'Rubber'];
-
-  const normalizeCategory = (catParam) => {
+  const normalizeCategory = useCallback((catParam) => {
     if (!catParam) return 'All';
     const lower = catParam.toLowerCase();
     if (lower.includes('head') || lower.includes('helmet')) return 'Headwear';
-    if (lower.includes('vis') || lower.includes('work') || lower.includes('high')) return 'Workwear';
+    if (lower.includes('vis') || lower.includes('work') || lower.includes('high') || lower.includes('tuta') || lower.includes('apparel')) return 'Workwear';
     if (lower.includes('shoe') || lower.includes('foot') || lower.includes('boot')) return 'Footwear';
     
     const found = categoriesList.find(c => c.toLowerCase() === lower);
     return found || 'All';
-  };
+  }, []);
 
   useEffect(() => {
     const queryCategory = searchParams.get('category');
     if (queryCategory) {
       setSelectedCategory(normalizeCategory(queryCategory));
     }
-  }, [searchParams]);
+  }, [searchParams, normalizeCategory]);
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -311,32 +310,51 @@ const ShopScreen = () => {
     window.dispatchEvent(new Event('cartUpdated'));
   };
 
-  // Multi-Filter Matching Logic
+  // Filtering Logic
   const filteredProducts = useMemo(() => {
-    return products.filter((p) => {
-      const pName = (p.product_name || p.name || '').toLowerCase();
-      const matchSearch = !searchQuery.trim() || 
-        pName.includes(searchQuery.toLowerCase().trim()) || 
-        (p.category || '').toLowerCase().includes(searchQuery.toLowerCase().trim()) ||
-        (p.workCategory || '').toLowerCase().includes(searchQuery.toLowerCase().trim());
+    const query = searchQuery.toLowerCase().trim();
+    const selCat = selectedCategory.toLowerCase();
+    const selGender = selectedGender.toLowerCase();
+    const selWork = selectedWorkCategory.toLowerCase();
+    const selRaw = selectedRawProduct.toLowerCase();
 
+    return products.filter((p) => {
+      // 1. Search Query Match
+      const pName = (p.product_name || p.name || '').toLowerCase();
+      const matchSearch = !query || 
+        pName.includes(query) || 
+        (p.category || '').toLowerCase().includes(query) ||
+        (p.workCategory || p.workSector || '').toLowerCase().includes(query);
+
+      // 2. Category Match
       const pCat = (p.category || '').toLowerCase();
       const matchCat = selectedCategory === 'All' || 
-                       pCat === selectedCategory.toLowerCase() || 
+                       pCat === selCat || 
+                       pCat.includes(selCat) ||
                        normalizeCategory(pCat) === selectedCategory;
 
-      const pGender = (p.gender || '').toLowerCase();
-      const matchGender = selectedGender === 'All' || pGender === selectedGender.toLowerCase();
+      // 3. Gender Target Match
+      const pGender = (p.gender || p.targetGender || '').toLowerCase();
+      const matchGender = selectedGender === 'All' || 
+                          pGender === 'all' || 
+                          pGender.includes('all') || 
+                          pGender === selGender;
 
-      const pWork = (p.workCategory || '').toLowerCase();
-      const matchWork = selectedWorkCategory === 'All' || pWork === selectedWorkCategory.toLowerCase();
+      // 4. Work Sector Match
+      const pWork = (p.workCategory || p.workSector || '').toLowerCase();
+      const matchWork = selectedWorkCategory === 'All' || 
+                        pWork === selWork || 
+                        pWork.includes(selWork);
 
-      const pRaw = (p.rawProduct || '').toLowerCase();
-      const matchRaw = selectedRawProduct === 'All' || pRaw.includes(selectedRawProduct.toLowerCase());
+      // 5. Raw Material Match
+      const pRaw = (p.rawProduct || p.rawMaterial || '').toLowerCase();
+      const matchRaw = selectedRawProduct === 'All' || 
+                       pRaw.includes(selRaw) || 
+                       selRaw.includes(pRaw);
 
       return matchSearch && matchCat && matchGender && matchWork && matchRaw;
     });
-  }, [searchQuery, selectedCategory, selectedGender, selectedWorkCategory, selectedRawProduct, products]);
+  }, [searchQuery, selectedCategory, selectedGender, selectedWorkCategory, selectedRawProduct, products, normalizeCategory]);
 
   // Sorting Logic
   const sortedProducts = useMemo(() => {
@@ -366,121 +384,122 @@ const ShopScreen = () => {
   };
 
   return (
-    /* MAIN WRAPPER - FORCED LIGHT GRAY BACKGROUND */
     <div className="bg-gray-200 min-h-screen font-sans antialiased text-gray-800">
       
       <Navbar />
 
-      {/* Main Container */}
-      <main className="max-w-[1600px] mx-auto px-6 pt-28 pb-12">
+      <main className="max-w-[1600px] mx-auto px-6 pb-12">
         <div className="flex flex-col lg:flex-row gap-8 items-start relative">
           
-          {/* ================= SIDEBAR FILTERS ================= */}
-          <aside className="w-full lg:w-72 shrink-0 space-y-6 lg:sticky lg:top-24 lg:max-h-[calc(100vh-7rem)] lg:overflow-y-auto bg-white p-6 rounded-3xl border border-gray-300 shadow-sm">
-            
-            <div className="flex items-center justify-between pb-4 border-b border-gray-200 sticky top-0 bg-white z-10 pt-1">
-              <div className="flex items-center gap-2">
-                <SlidersHorizontal size={18} className="text-purple-600" />
-                <h2 className="text-base font-black uppercase tracking-wide text-gray-900">{t.filterEngine}</h2>
-              </div>
-              <button 
-                onClick={resetFilters} 
-                className="text-[11px] font-extrabold uppercase text-purple-600 hover:text-purple-800 flex items-center gap-1 transition-colors"
-              >
-                <RotateCcw size={12} /> {t.reset}
-              </button>
-            </div>
-            
-            {/* 1. CATEGORY FILTER */}
-            <div className="space-y-2">
-              <label className="text-xs font-extrabold uppercase text-gray-900 flex items-center gap-1.5">
-                <Grid size={13} className="text-purple-600" /> {t.productCategory}
-              </label>
-              <div className="flex flex-wrap gap-1.5 pt-1">
-                {categoriesList.map((cat) => (
-                  <button
-                    key={cat}
-                    onClick={() => setSelectedCategory(cat)}
-                    className={`px-3 py-2 rounded-xl text-xs font-extrabold uppercase tracking-wide transition-all ${
-                      selectedCategory === cat 
-                        ? 'bg-purple-600 text-white shadow-md shadow-purple-600/20' 
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-200'
-                    }`}
-                  >
-                    {translateKey('categories', cat)}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* 2. WORK CATEGORY / FIELD FILTER */}
-            <div className="space-y-2 pt-3 border-t border-gray-200">
-              <label className="text-xs font-extrabold uppercase text-gray-900 flex items-center gap-1.5">
-                <Briefcase size={13} className="text-purple-600" /> {t.workSector}
-              </label>
-              <div className="relative">
-                <select 
-                  value={selectedWorkCategory}
-                  onChange={(e) => setSelectedWorkCategory(e.target.value)}
-                  className="w-full bg-gray-50 border border-gray-300 rounded-xl px-3 py-2.5 text-xs font-bold text-gray-800 uppercase appearance-none focus:outline-none focus:border-purple-500 cursor-pointer"
+          {/* ================= STICKY SIDEBAR FILTERS ================= */}
+          <aside className="w-full lg:w-72 shrink-0 pt-6 lg:sticky lg:top-20 lg:self-start">
+            <div className="bg-white p-6 rounded-3xl border border-gray-300 shadow-sm lg:max-h-[calc(100vh-7rem)] lg:overflow-y-auto space-y-6 relative">
+              
+              {/* STICKY HEADER INSIDE SIDEBAR */}
+              <div className="flex items-center justify-between pb-4 border-b border-gray-200 sticky top-0 bg-white z-20 -mx-6 px-6 pt-2 -mt-2">
+                <div className="flex items-center gap-2">
+                  <SlidersHorizontal size={18} className="text-purple-600" />
+                  <h2 className="text-base font-black uppercase tracking-wide text-gray-900">{t.filterEngine}</h2>
+                </div>
+                <button 
+                  onClick={resetFilters} 
+                  className="text-[11px] font-extrabold uppercase text-purple-600 hover:text-purple-800 flex items-center gap-1 transition-colors"
                 >
-                  {workCategoriesList.map(w => (
-                    <option key={w} value={w} className="bg-white">
-                      {translateKey('workSectors', w)}
-                    </option>
-                  ))}
-                </select>
-                <ChevronDown size={14} className="absolute right-3 top-3 text-gray-500 pointer-events-none" />
+                  <RotateCcw size={12} /> {t.reset}
+                </button>
               </div>
-            </div>
+              
+              {/* 1. CATEGORY FILTER */}
+              <div className="space-y-2">
+                <label className="text-xs font-extrabold uppercase text-gray-900 flex items-center gap-1.5">
+                  <Grid size={13} className="text-purple-600" /> {t.productCategory}
+                </label>
+                <div className="flex flex-wrap gap-1.5 pt-1">
+                  {categoriesList.map((cat) => (
+                    <button
+                      key={cat}
+                      onClick={() => setSelectedCategory(cat)}
+                      className={`px-3 py-2 rounded-xl text-xs font-extrabold uppercase tracking-wide transition-all ${
+                        selectedCategory === cat 
+                          ? 'bg-purple-600 text-white shadow-md shadow-purple-600/20' 
+                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-200'
+                      }`}
+                    >
+                      {translateKey('categories', cat)}
+                    </button>
+                  ))}
+                </div>
+              </div>
 
-            {/* 3. GENDER TARGET */}
-            <div className="space-y-2 pt-3 border-t border-gray-200">
-              <label className="text-xs font-extrabold uppercase text-gray-900 flex items-center gap-1.5">
-                <User size={13} className="text-purple-600" /> {t.targetGender}
-              </label>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-1.5">
-                {genderList.map((g) => (
-                  <button
-                    key={g}
-                    onClick={() => setSelectedGender(g)}
-                    className={`px-2 py-2 rounded-xl text-xs font-extrabold uppercase tracking-wide transition-all text-center ${
-                      selectedGender === g 
-                        ? 'bg-purple-600 text-white shadow-md shadow-purple-600/20' 
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-200'
-                    }`}
+              {/* 2. WORK CATEGORY / FIELD FILTER */}
+              <div className="space-y-2 pt-3 border-t border-gray-200">
+                <label className="text-xs font-extrabold uppercase text-gray-900 flex items-center gap-1.5">
+                  <Briefcase size={13} className="text-purple-600" /> {t.workSector}
+                </label>
+                <div className="relative">
+                  <select 
+                    value={selectedWorkCategory}
+                    onChange={(e) => setSelectedWorkCategory(e.target.value)}
+                    className="w-full bg-gray-50 border border-gray-300 rounded-xl px-3 py-2.5 text-xs font-bold text-gray-800 uppercase appearance-none focus:outline-none focus:border-purple-500 cursor-pointer"
                   >
-                    {translateKey('genders', g)}
-                  </button>
-                ))}
+                    {workCategoriesList.map(w => (
+                      <option key={w} value={w} className="bg-white">
+                        {translateKey('workSectors', w)}
+                      </option>
+                    ))}
+                  </select>
+                  <ChevronDown size={14} className="absolute right-3 top-3 text-gray-500 pointer-events-none" />
+                </div>
               </div>
-            </div>
 
-            {/* 4. RAW PRODUCT / MATERIAL */}
-            <div className="space-y-2 pt-3 border-t border-gray-200">
-              <label className="text-xs font-extrabold uppercase text-gray-900 flex items-center gap-1.5">
-                <Layers size={13} className="text-purple-600" /> {t.rawMaterial}
-              </label>
-              <div className="relative">
-                <select 
-                  value={selectedRawProduct}
-                  onChange={(e) => setSelectedRawProduct(e.target.value)}
-                  className="w-full bg-gray-50 border border-gray-300 rounded-xl px-3 py-2.5 text-xs font-bold text-gray-800 uppercase appearance-none focus:outline-none focus:border-purple-500 cursor-pointer"
-                >
-                  {rawProductsList.map(mat => (
-                    <option key={mat} value={mat} className="bg-white">
-                      {translateKey('materials', mat)}
-                    </option>
+              {/* 3. GENDER TARGET */}
+              <div className="space-y-2 pt-3 border-t border-gray-200">
+                <label className="text-xs font-extrabold uppercase text-gray-900 flex items-center gap-1.5">
+                  <User size={13} className="text-purple-600" /> {t.targetGender}
+                </label>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-1.5">
+                  {genderList.map((g) => (
+                    <button
+                      key={g}
+                      onClick={() => setSelectedGender(g)}
+                      className={`px-2 py-2 rounded-xl text-xs font-extrabold uppercase tracking-wide transition-all text-center ${
+                        selectedGender === g 
+                          ? 'bg-purple-600 text-white shadow-md shadow-purple-600/20' 
+                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-200'
+                      }`}
+                    >
+                      {translateKey('genders', g)}
+                    </button>
                   ))}
-                </select>
-                <ChevronDown size={14} className="absolute right-3 top-3 text-gray-500 pointer-events-none" />
+                </div>
               </div>
-            </div>
 
+              {/* 4. RAW PRODUCT / MATERIAL */}
+              <div className="space-y-2 pt-3 border-t border-gray-200">
+                <label className="text-xs font-extrabold uppercase text-gray-900 flex items-center gap-1.5">
+                  <Layers size={13} className="text-purple-600" /> {t.rawMaterial}
+                </label>
+                <div className="relative">
+                  <select 
+                    value={selectedRawProduct}
+                    onChange={(e) => setSelectedRawProduct(e.target.value)}
+                    className="w-full bg-gray-50 border border-gray-300 rounded-xl px-3 py-2.5 text-xs font-bold text-gray-800 uppercase appearance-none focus:outline-none focus:border-purple-500 cursor-pointer"
+                  >
+                    {rawProductsList.map(mat => (
+                      <option key={mat} value={mat} className="bg-white">
+                        {translateKey('materials', mat)}
+                      </option>
+                    ))}
+                  </select>
+                  <ChevronDown size={14} className="absolute right-3 top-3 text-gray-500 pointer-events-none" />
+                </div>
+              </div>
+
+            </div>
           </aside>
 
           {/* ================= PRODUCTS GRID ================= */}
-          <section className="flex-1 w-full space-y-6">
+          <section className="flex-1 w-full space-y-6 pt-6">
             
             {/* Toolbar Summary & Sorting */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white border border-gray-300 p-4 rounded-3xl shadow-sm">
@@ -538,7 +557,6 @@ const ShopScreen = () => {
                   const imageUrl = p.image || 'https://via.placeholder.com/500';
                   const isLiked = !!likedItems[productId];
 
-                  // Rating and review count extraction
                   const productRating = p.rating ? Number(p.rating).toFixed(1) : '5.0';
                   const numReviews = p.numReviews || 0;
 
@@ -574,7 +592,7 @@ const ShopScreen = () => {
                       {/* Details & Actions Under Image */}
                       <div className="space-y-3 flex-1 flex flex-col justify-between">
                         <div>
-                          {/* Star Icons + Numeric Rating */}
+                          {/* Rating */}
                           <div className="flex items-center gap-1.5 mb-1">
                             <div className="flex items-center gap-0.5">
                               {[...Array(5)].map((_, i) => (

@@ -2,7 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { 
   Search, Plus, X, Upload, Link as LinkIcon, Image as ImageIcon, 
-  Tag, Hash, DollarSign, Box, Palette, Layers, Loader2, Shield, Edit, Trash2 
+  Tag, Hash, DollarSign, Box, Palette, Layers, Loader2, Shield, Edit, Trash2,
+  Briefcase, Users, Component
 } from 'lucide-react';
 
 const Inventory = () => {
@@ -10,18 +11,28 @@ const Inventory = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [showModal, setShowModal] = useState(false);
-
-  // Edit Mode State
   const [editingId, setEditingId] = useState(null);
 
-  // Form States
   const fileInputRef = useRef(null);
   const [imageMode, setImageMode] = useState('file');
   const [name, setName] = useState('');
   const [productType, setProductType] = useState('');
   const [price, setPrice] = useState('');
   const [productCode, setProductCode] = useState('');
-  const [category, setCategory] = useState('Shoes');
+  
+  // Dropdown States + Custom "Other" Input States
+  const [category, setCategory] = useState('FOOTWEAR');
+  const [customCategory, setCustomCategory] = useState('');
+  
+  const [workField, setWorkField] = useState('FARMER');
+  const [customWorkField, setCustomWorkField] = useState('');
+
+  const [targetGender, setTargetGender] = useState('ALL GENDERS');
+  const [customTargetGender, setCustomTargetGender] = useState('');
+
+  const [rawMaterial, setRawMaterial] = useState('Leather');
+  const [customRawMaterial, setCustomRawMaterial] = useState('');
+
   const [size, setSize] = useState('');
   const [amount, setAmount] = useState('1');
   const [color, setColor] = useState('');
@@ -30,7 +41,11 @@ const Inventory = () => {
   const [imagePreview, setImagePreview] = useState(null);
   const [submitting, setSubmitting] = useState(false);
 
-  // Fetch Products
+  const defaultCategories = ['FOOTWEAR', 'WORKWEAR', 'HEADWEAR'];
+  const defaultWorkFields = ['FARMER', 'CONSTRUCTION', 'MINING', 'MEDICAL', 'ELECTRICAL'];
+  const defaultGenders = ['ALL GENDERS', 'MALE', 'FEMALE'];
+  const defaultMaterials = ['Leather', 'Rubber', 'Cotton', 'Steel', 'Polyester'];
+
   const fetchProducts = async () => {
     setLoading(true);
     try {
@@ -47,7 +62,6 @@ const Inventory = () => {
     fetchProducts();
   }, []);
 
-  // Helper function for Auth Headers
   const getAuthHeader = () => {
     const rawUserInfo = localStorage.getItem('userInfo');
     const userInfo = rawUserInfo ? JSON.parse(rawUserInfo) : {};
@@ -60,21 +74,59 @@ const Inventory = () => {
     };
   };
 
-  // Open Modal for Adding New Product
   const handleOpenAddModal = () => {
     resetForm();
     setEditingId(null);
     setShowModal(true);
   };
 
-  // Open Modal for Editing Existing Product
   const handleEdit = (product) => {
     setEditingId(product._id);
     setName(product.product_name || product.name || '');
     setProductType(product.product_type || '');
     setPrice(product.price || '');
     setProductCode(product.product_code || '');
-    setCategory(product.product_category || product.category || 'Shoes');
+
+    // Handle Category Edit
+    const prodCat = product.product_category || product.category || 'FOOTWEAR';
+    if (defaultCategories.includes(prodCat)) {
+      setCategory(prodCat);
+      setCustomCategory('');
+    } else {
+      setCategory('OTHER');
+      setCustomCategory(prodCat);
+    }
+
+    // Handle WorkField Edit
+    const prodWF = product.work_field || product.workField || 'FARMER';
+    if (defaultWorkFields.includes(prodWF)) {
+      setWorkField(prodWF);
+      setCustomWorkField('');
+    } else {
+      setWorkField('OTHER');
+      setCustomWorkField(prodWF);
+    }
+
+    // Handle Gender Edit
+    const prodGender = product.target_gender || product.targetGender || 'ALL GENDERS';
+    if (defaultGenders.includes(prodGender)) {
+      setTargetGender(prodGender);
+      setCustomTargetGender('');
+    } else {
+      setTargetGender('OTHER');
+      setCustomTargetGender(prodGender);
+    }
+
+    // Handle Material Edit
+    const prodMat = product.raw_material || product.rawMaterial || 'Leather';
+    if (defaultMaterials.includes(prodMat)) {
+      setRawMaterial(prodMat);
+      setCustomRawMaterial('');
+    } else {
+      setRawMaterial('OTHER');
+      setCustomRawMaterial(prodMat);
+    }
+
     setSize(product.size || '');
     setAmount(product.countInStock ?? product.stock ?? '1');
     setColor(product.color || '');
@@ -94,10 +146,8 @@ const Inventory = () => {
     setShowModal(true);
   };
 
-  // Delete Product Handler
   const handleDelete = async (id) => {
     if (!window.confirm('Are you sure you want to delete this product?')) return;
-
     try {
       await axios.delete(`/api/products/${id}`, getAuthHeader());
       fetchProducts();
@@ -107,7 +157,6 @@ const Inventory = () => {
     }
   };
 
-  // File Handler
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -119,7 +168,6 @@ const Inventory = () => {
 
   const activeImage = imageMode === 'file' ? imagePreview : imageUrl;
 
-  // Submit Handler (Create or Update)
   const submitHandler = async (e) => {
     e.preventDefault();
     if (!activeImage) {
@@ -135,7 +183,10 @@ const Inventory = () => {
         product_type: productType,
         price: Number(price),
         product_code: productCode,
-        product_category: category,
+        product_category: category === 'OTHER' ? customCategory : category,
+        work_field: workField === 'OTHER' ? customWorkField : workField,
+        target_gender: targetGender === 'OTHER' ? customTargetGender : targetGender,
+        raw_material: rawMaterial === 'OTHER' ? customRawMaterial : rawMaterial,
         size,
         countInStock: Number(amount),
         color,
@@ -144,10 +195,8 @@ const Inventory = () => {
       };
 
       if (editingId) {
-        // Update existing product
         await axios.put(`/api/products/${editingId}`, productData, config);
       } else {
-        // Create new product
         await axios.post('/api/products', productData, config);
       }
       
@@ -168,7 +217,14 @@ const Inventory = () => {
     setProductType('');
     setPrice('');
     setProductCode('');
-    setCategory('Shoes');
+    setCategory('FOOTWEAR');
+    setCustomCategory('');
+    setWorkField('FARMER');
+    setCustomWorkField('');
+    setTargetGender('ALL GENDERS');
+    setCustomTargetGender('');
+    setRawMaterial('Leather');
+    setCustomRawMaterial('');
     setSize('');
     setAmount('1');
     setColor('');
@@ -184,8 +240,6 @@ const Inventory = () => {
 
   return (
     <div className="flex-1 p-8 md:p-10 bg-slate-50/60 min-h-screen text-slate-700 font-sans relative">
-      
-      {/* Header Bar */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
         <div>
           <h1 className="text-3xl font-black text-slate-900 tracking-tight">Products</h1>
@@ -271,7 +325,7 @@ const Inventory = () => {
                       </td>
                       <td className="py-4 px-6">
                         <span className="bg-emerald-50 text-emerald-700 font-black text-[10px] uppercase px-3 py-1 rounded-full tracking-wider">
-                          {product.category || product.product_category || 'CLOTHING'}
+                          {product.category || product.product_category || 'FOOTWEAR'}
                         </span>
                       </td>
                       <td className="py-4 px-6 font-extrabold text-slate-900 text-sm">
@@ -326,7 +380,6 @@ const Inventory = () => {
         <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto">
           <div className="bg-white rounded-[2.5rem] w-full max-w-4xl p-6 md:p-8 shadow-2xl relative max-h-[90vh] overflow-y-auto">
             
-            {/* Modal Header */}
             <div className="flex items-center justify-between pb-4 border-b border-slate-100 mb-6">
               <div className="flex items-center gap-2">
                 <span className="p-1.5 bg-purple-100 text-purple-600 rounded-lg">
@@ -348,10 +401,8 @@ const Inventory = () => {
               {editingId ? 'Edit' : 'Register New'} <span className="text-purple-600">Product</span>
             </h2>
 
-            {/* Form */}
             <form onSubmit={submitHandler} className="space-y-6">
-              
-              {/* Image Input Section */}
+              {/* Image Input */}
               <div>
                 <div className="flex items-center justify-between mb-2">
                   <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
@@ -409,7 +460,7 @@ const Inventory = () => {
                 )}
               </div>
 
-              {/* Input Grid */}
+              {/* Form Input Grid */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="space-y-1">
                   <label className="text-[10px] font-black text-slate-400 uppercase tracking-wider flex items-center gap-1">
@@ -432,18 +483,100 @@ const Inventory = () => {
                   <input type="text" value={productCode} onChange={(e) => setProductCode(e.target.value)} required placeholder="LUU-SHO-001" className="w-full bg-slate-50 border border-slate-100 rounded-xl p-3 text-xs font-semibold outline-none" />
                 </div>
 
+                {/* Category Selection */}
                 <div className="space-y-1">
                   <label className="text-[10px] font-black text-slate-400 uppercase tracking-wider flex items-center gap-1">
                     <Layers size={12} className="text-purple-600" /> Category
                   </label>
                   <select value={category} onChange={(e) => setCategory(e.target.value)} className="w-full bg-slate-50 border border-slate-100 rounded-xl p-3 text-xs font-semibold outline-none cursor-pointer">
-                    <option value="Shoes">Shoes</option>
-                    <option value="Jackets">Jackets</option>
-                    <option value="Uniforms">Uniforms</option>
-                    <option value="Gloves">Gloves</option>
-                    <option value="Helmets">Helmets</option>
-                    <option value="Work Clothes">Work Clothes</option>
+                    <option value="FOOTWEAR">FOOTWEAR</option>
+                    <option value="WORKWEAR">WORKWEAR</option>
+                    <option value="HEADWEAR">HEADWEAR</option>
+                    <option value="OTHER">OTHER (Specify)</option>
                   </select>
+                  {category === 'OTHER' && (
+                    <input
+                      type="text"
+                      value={customCategory}
+                      onChange={(e) => setCustomCategory(e.target.value)}
+                      required
+                      placeholder="Enter custom category"
+                      className="w-full mt-2 bg-purple-50/50 border border-purple-200 rounded-xl p-3 text-xs font-semibold outline-none"
+                    />
+                  )}
+                </div>
+
+                {/* Work Field Selection */}
+                <div className="space-y-1">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-wider flex items-center gap-1">
+                    <Briefcase size={12} className="text-purple-600" /> Work Field / Sector
+                  </label>
+                  <select value={workField} onChange={(e) => setWorkField(e.target.value)} className="w-full bg-slate-50 border border-slate-100 rounded-xl p-3 text-xs font-semibold outline-none cursor-pointer">
+                    <option value="FARMER">FARMER</option>
+                    <option value="CONSTRUCTION">CONSTRUCTION</option>
+                    <option value="MINING">MINING</option>
+                    <option value="MEDICAL">MEDICAL</option>
+                    <option value="ELECTRICAL">ELECTRICAL</option>
+                    <option value="OTHER">OTHER (Specify)</option>
+                  </select>
+                  {workField === 'OTHER' && (
+                    <input
+                      type="text"
+                      value={customWorkField}
+                      onChange={(e) => setCustomWorkField(e.target.value)}
+                      required
+                      placeholder="Enter custom work field"
+                      className="w-full mt-2 bg-purple-50/50 border border-purple-200 rounded-xl p-3 text-xs font-semibold outline-none"
+                    />
+                  )}
+                </div>
+
+                {/* Target Gender Selection */}
+                <div className="space-y-1">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-wider flex items-center gap-1">
+                    <Users size={12} className="text-purple-600" /> Target Gender
+                  </label>
+                  <select value={targetGender} onChange={(e) => setTargetGender(e.target.value)} className="w-full bg-slate-50 border border-slate-100 rounded-xl p-3 text-xs font-semibold outline-none cursor-pointer">
+                    <option value="ALL GENDERS">ALL GENDERS</option>
+                    <option value="MALE">MALE</option>
+                    <option value="FEMALE">FEMALE</option>
+                    <option value="OTHER">OTHER (Specify)</option>
+                  </select>
+                  {targetGender === 'OTHER' && (
+                    <input
+                      type="text"
+                      value={customTargetGender}
+                      onChange={(e) => setCustomTargetGender(e.target.value)}
+                      required
+                      placeholder="Enter custom gender classification"
+                      className="w-full mt-2 bg-purple-50/50 border border-purple-200 rounded-xl p-3 text-xs font-semibold outline-none"
+                    />
+                  )}
+                </div>
+
+                {/* Raw Material Selection */}
+                <div className="space-y-1">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-wider flex items-center gap-1">
+                    <Component size={12} className="text-purple-600" /> Raw Material
+                  </label>
+                  <select value={rawMaterial} onChange={(e) => setRawMaterial(e.target.value)} className="w-full bg-slate-50 border border-slate-100 rounded-xl p-3 text-xs font-semibold outline-none cursor-pointer">
+                    <option value="Leather">Leather</option>
+                    <option value="Rubber">Rubber</option>
+                    <option value="Cotton">Cotton</option>
+                    <option value="Steel">Steel</option>
+                    <option value="Polyester">Polyester</option>
+                    <option value="OTHER">OTHER (Specify)</option>
+                  </select>
+                  {rawMaterial === 'OTHER' && (
+                    <input
+                      type="text"
+                      value={customRawMaterial}
+                      onChange={(e) => setCustomRawMaterial(e.target.value)}
+                      required
+                      placeholder="Enter custom material"
+                      className="w-full mt-2 bg-purple-50/50 border border-purple-200 rounded-xl p-3 text-xs font-semibold outline-none"
+                    />
+                  )}
                 </div>
 
                 <div className="space-y-1">
@@ -481,7 +614,6 @@ const Inventory = () => {
                 <textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={3} required placeholder="Specify construction materials..." className="w-full bg-slate-50 border border-slate-100 rounded-xl p-3 text-xs font-medium outline-none resize-none" />
               </div>
 
-              {/* Submit Button */}
               <button
                 type="submit"
                 disabled={submitting}

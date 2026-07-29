@@ -26,11 +26,31 @@ const productSchema = mongoose.Schema(
     product_name: { type: String, required: true },
     product_type: { type: String, required: true },
     product_code: { type: String, required: true, unique: true },
+    
+    // Updated category: String without rigid enum restrictions to allow custom "Other" categories
     product_category: {
       type: String,
       required: true,
-      enum: ['Shoes', 'Jackets', 'Uniforms', 'Gloves', 'Helmets', 'Work Clothes'],
+      trim: true,
     },
+
+    // New Fields matching your frontend forms
+    work_field: {
+      type: String,
+      trim: true,
+      default: 'GENERAL',
+    },
+    target_gender: {
+      type: String,
+      trim: true,
+      default: 'ALL GENDERS',
+    },
+    raw_material: {
+      type: String,
+      trim: true,
+      default: 'Standard',
+    },
+
     price: { type: Number, required: true, default: 0 },
     countInStock: { type: Number, required: true, default: 0 },
     size: { type: String, required: true },
@@ -38,7 +58,7 @@ const productSchema = mongoose.Schema(
     description: { type: String, required: true },
     image: { type: String, required: true },
 
-    // Added fields for reviews and ratings
+    // Reviews and ratings tracking
     reviews: [reviewSchema],
     rating: { type: Number, required: true, default: 0 },
     numReviews: { type: Number, required: true, default: 0 },
