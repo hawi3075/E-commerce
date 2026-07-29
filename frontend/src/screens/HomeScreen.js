@@ -47,8 +47,8 @@ const translations = {
     shopByCategory: "Shop By Category",
     structuralSorting: "Structural Sorting",
     exploreCategory: "Explore Category",
-    catHeadwear: "Headwear",
-    catWorkwear: "Workwear",
+    catHelmet: "Helmet",
+    catJacket: "Jacket",
     catFootwear: "Footwear",
 
     bestSellers: "Best Sellers",
@@ -98,8 +98,8 @@ const translations = {
     shopByCategory: "Gosaan Bitadhu",
     structuralSorting: "Gurraandhina Caasaa",
     exploreCategory: "Gosa Caffee Ilaali",
-    catHeadwear: "Eegumsa Mataa",
-    catWorkwear: "Uffata Hojii",
+    catHelmet: "Helmeti",
+    catJacket: "Jaaketa",
     catFootwear: "Kophee Hojii",
 
     bestSellers: "Gurguramaa Hunda Caalu",
@@ -149,8 +149,8 @@ const translations = {
     shopByCategory: "በምድብ ይግዙ",
     structuralSorting: "በምድብ የመለየት ሂደት",
     exploreCategory: "ምድቡን ይመልከቱ",
-    catHeadwear: "የራስ ደህንነት",
-    catWorkwear: "የስራ አልባሳት",
+    catHelmet: "ሄልሜት (የራስ ቁር)",
+    catJacket: "ጃኬት",
     catFootwear: "የስራ ጫማዎች",
 
     bestSellers: "በብዛት የተሸጡ",
@@ -208,13 +208,11 @@ const ProductCard = ({ p, ribbon, onAddToCart }) => {
   const productPrice = p.price ? Number(p.price) : 0;
   const productStock = p.countInStock !== undefined ? p.countInStock : p.stock;
 
-  // Rating and review count extraction
   const productRating = p.rating ? Number(p.rating).toFixed(1) : '5.0';
   const numReviews = p.numReviews || 0;
 
   return (
     <div className="bg-white rounded-3xl p-4 border border-slate-200/80 hover:border-purple-300 shadow-sm hover:shadow-md transition-all duration-300 group relative flex flex-col justify-between">
-      {/* Product Image Box */}
       <div className="relative h-48 bg-slate-50 rounded-2xl mb-4 overflow-hidden flex items-center justify-center border border-slate-100">
         <img 
           src={imageUrl} 
@@ -233,10 +231,8 @@ const ProductCard = ({ p, ribbon, onAddToCart }) => {
         </span>
       </div>
 
-      {/* Details & Actions Under Image */}
       <div className="space-y-3 flex-1 flex flex-col justify-between">
         <div>
-          {/* Star Icons + Numeric Rating */}
           <div className="flex items-center gap-1.5 mb-1">
             <div className="flex items-center gap-0.5">
               {[...Array(5)].map((_, i) => (
@@ -257,7 +253,6 @@ const ProductCard = ({ p, ribbon, onAddToCart }) => {
           </h4>
         </div>
 
-        {/* Bottom Bar */}
         <div className="pt-2 border-t border-slate-100 flex items-center justify-between gap-2">
           <div>
             <span className="text-[9px] font-semibold text-slate-400 uppercase tracking-wider block">{t.assetValue}</span>
@@ -319,22 +314,33 @@ const HomeScreenContent = () => {
     fetchProducts();
   }, []);
 
-  const categories = [
-    { id: 'Head Protection', name: t.catHeadwear, count: 14, image: 'https://images.unsplash.com/photo-1590483736622-39da8caf3ef8?auto=format&fit=crop&q=80&w=200' },
-    { id: 'High-Visibility', name: t.catWorkwear, count: 28, image: 'https://images.unsplash.com/photo-1578328819058-b69f3a3b0f6b?auto=format&fit=crop&q=80&w=200' },
-    { id: 'Safety Shoes', name: t.catFootwear, count: 19, image: 'https://images.unsplash.com/photo-1608256246200-53e635b5b65f?auto=format&fit=crop&q=80&w=200' },
-  ];
+  const productsSource = apiProducts;
 
-  const staticProducts = [
-    { id: '1', name: 'Vanguard Industrial Hard Hat', price: 25.00, rating: 5.0, likes: 320, sold: 1240, stock: 18, image: 'https://images.unsplash.com/photo-1590483736622-39da8caf3ef8?auto=format&fit=crop&q=80&w=500' },
-    { id: '2', name: 'Aegis High-Vis Safety Vest', price: 12.99, rating: 4.9, likes: 290, sold: 890, stock: 46, image: 'https://images.unsplash.com/photo-1578328819058-b69f3a3b0f6b?auto=format&fit=crop&q=80&w=500' },
-    { id: '3', name: 'Titan Steel Toe Work Boots', price: 85.00, rating: 4.8, likes: 210, sold: 745, stock: 12, image: 'https://images.unsplash.com/photo-1608256246200-53e635b5b65f?auto=format&fit=crop&q=80&w=500' },
-    { id: '4', name: 'Anti-Fog Ballistic Goggles', price: 15.00, rating: 4.7, likes: 180, sold: 610, stock: 51, image: 'https://images.unsplash.com/photo-1551150431-993b1139ecc5?auto=format&fit=crop&q=80&w=500' },
-    { id: '5', name: 'Mantis Thermal Shield Gloves', price: 19.50, rating: 5.0, likes: 450, sold: 34, stock: 8, image: 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&q=80&w=500' }, 
-    { id: '6', name: 'Pro Arc Welding Face Shield', price: 42.00, rating: 4.9, likes: 380, sold: 12, stock: 15, image: 'https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?auto=format&fit=crop&q=80&w=500' },
-  ];
+  // --- CATEGORY SAMPLES LOGIC (Updated to Helmet & Jacket) ---
+  const categoryKeys = ['Helmet', 'Jacket', 'Footwear'];
+  const categorySamples = categoryKeys.map((catKey) => {
+    const found = productsSource.find(p => {
+      const cat = (p.category || '').toLowerCase();
+      const name = (p.product_name || p.name || '').toLowerCase();
+      return cat.includes(catKey.toLowerCase()) || name.includes(catKey.toLowerCase());
+    });
+    
+    const defaultImages = {
+      Helmet: 'https://images.unsplash.com/photo-1590483736622-39da8caf3ef8?auto=format&fit=crop&q=80&w=500',
+      Jacket: 'https://images.unsplash.com/photo-1578328819058-b69f3a3b0f6b?auto=format&fit=crop&q=80&w=500',
+      Footwear: 'https://images.unsplash.com/photo-1608256246200-53e635b5b65f?auto=format&fit=crop&q=80&w=500'
+    };
 
-  const productsSource = apiProducts.length > 0 ? apiProducts : staticProducts;
+    const target = found || productsSource[0];
+
+    return {
+      id: catKey,
+      name: catKey === 'Helmet' ? t.catHelmet : catKey === 'Jacket' ? t.catJacket : t.catFootwear,
+      image: found ? (found.image || 'https://via.placeholder.com/500') : defaultImages[catKey],
+      stock: target ? (target.countInStock !== undefined ? target.countInStock : target.stock) : 25
+    };
+  });
+
   const bestSellers = productsSource.slice(0, 4);
   const newArrivals = productsSource.length > 4 ? productsSource.slice(4, 8) : productsSource.slice(0, 4);
 
@@ -427,22 +433,47 @@ const HomeScreenContent = () => {
           </div>
           <h2 className="text-xl font-bold text-slate-900 uppercase tracking-tight">{t.shopByCategory}</h2>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {categories.map((cat) => (
-            <Link to={`/shop?category=${encodeURIComponent(cat.id)}`} key={cat.id} className="p-4 rounded-2xl border border-slate-200/80 bg-white hover:border-purple-300 transition-all flex flex-col justify-between h-48 shadow-sm">
-              <div className="flex items-start justify-between w-full">
-                <div>
-                  <h3 className="text-xs font-bold uppercase text-slate-800">{cat.name}</h3>
-                  <span className="text-[10px] text-slate-400 font-medium">{cat.count} {t.items}</span>
+        {loading ? (
+          <div className="flex justify-center py-10"><Loader2 className="animate-spin text-purple-600" size={24} /></div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {categorySamples.map((cat, idx) => (
+              <Link 
+                to={`/shop?category=${encodeURIComponent(cat.id)}`} 
+                key={idx} 
+                className="bg-white rounded-3xl p-4 border border-slate-200/80 hover:border-purple-300 shadow-sm hover:shadow-md transition-all duration-300 group relative flex flex-col justify-between"
+              >
+                <div className="relative h-48 bg-slate-50 rounded-2xl mb-4 overflow-hidden flex items-center justify-center border border-slate-100">
+                  <img 
+                    src={cat.image} 
+                    alt={cat.name} 
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" 
+                  />
+                  <span className="absolute top-3 left-3 bg-purple-600 text-white text-[9px] font-bold px-2 py-0.5 rounded-full uppercase tracking-widest shadow-sm z-10">
+                    {t.topValue}
+                  </span>
+                  <span className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm text-slate-700 border border-slate-100 text-[9px] font-bold px-2 py-0.5 rounded-md uppercase z-10">
+                    {cat.stock !== undefined ? `${cat.stock} ${t.units}` : t.inStock}
+                  </span>
                 </div>
-                <img src={cat.image} alt={cat.name} className="w-12 h-12 rounded-xl object-cover" />
-              </div>
-              <div className="flex items-center gap-1 text-[10px] font-bold uppercase text-purple-600 pt-4 border-t border-slate-100">
-                {t.exploreCategory} <ArrowRight size={10} />
-              </div>
-            </Link>
-          ))}
-        </div>
+
+                <div className="space-y-3 flex-1 flex flex-col justify-between">
+                  <div>
+                    <h4 className="font-bold text-slate-800 text-xs uppercase tracking-wide line-clamp-1 mb-1">
+                      {cat.name}
+                    </h4>
+                  </div>
+
+                  <div className="pt-3 border-t border-slate-100 flex items-center justify-between">
+                    <span className="text-[10px] font-bold uppercase text-purple-600 tracking-wider flex items-center gap-1 group-hover:translate-x-1 transition-transform">
+                      {t.exploreCategory} <ArrowRight size={12} />
+                    </span>
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+        )}
       </section>
 
       <main className="max-w-[1200px] mx-auto px-6 py-16 space-y-16">
@@ -516,27 +547,31 @@ const HomeScreenContent = () => {
             </div>
             <h2 className="text-xl font-bold text-slate-900 uppercase tracking-tight">{t.suggestedForYou}</h2>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {suggestedForYou.map((item) => (
-              <div key={item._id || item.id} className="bg-slate-50 border border-slate-200/60 rounded-2xl p-4 flex flex-col sm:flex-row items-center gap-4 shadow-sm">
-                <div className="w-24 h-24 bg-white rounded-xl overflow-hidden flex items-center justify-center shrink-0 relative border border-slate-200/60">
-                  <img src={item.image || 'https://via.placeholder.com/500'} alt={item.name} className="w-full h-full object-cover" />
-                </div>
-                <div className="flex-1 space-y-3 text-left w-full">
-                  <div>
-                    <h3 className="text-slate-800 font-bold text-xs uppercase">{item.product_name || item.name}</h3>
-                    <p className="text-slate-400 text-[9px] uppercase font-bold mt-0.5">{t.topRanked}</p>
+          {loading ? (
+            <div className="flex justify-center py-10"><Loader2 className="animate-spin text-purple-600" size={24} /></div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {suggestedForYou.map((item) => (
+                <div key={item._id || item.id} className="bg-slate-50 border border-slate-200/60 rounded-2xl p-4 flex flex-col sm:flex-row items-center gap-4 shadow-sm">
+                  <div className="w-24 h-24 bg-white rounded-xl overflow-hidden flex items-center justify-center shrink-0 relative border border-slate-200/60">
+                    <img src={item.image || 'https://via.placeholder.com/500'} alt={item.name} className="w-full h-full object-cover" />
                   </div>
-                  <div className="flex items-center justify-between pt-2 border-t border-slate-200/60">
-                    <p className="text-slate-950 font-black text-base">${Number(item.price || 0).toFixed(2)}</p>
-                    <Link to={`/product/${item._id || item.id}`} className="text-purple-600 text-[10px] font-bold uppercase flex items-center gap-0.5">
-                      {t.configure} <ArrowRight size={10} />
-                    </Link>
+                  <div className="flex-1 space-y-3 text-left w-full">
+                    <div>
+                      <h3 className="text-slate-800 font-bold text-xs uppercase">{item.product_name || item.name}</h3>
+                      <p className="text-slate-400 text-[9px] uppercase font-bold mt-0.5">{t.topRanked}</p>
+                    </div>
+                    <div className="flex items-center justify-between pt-2 border-t border-slate-200/60">
+                      <p className="text-slate-950 font-black text-base">${Number(item.price || 0).toFixed(2)}</p>
+                      <Link to={`/product/${item._id || item.id}`} className="text-purple-600 text-[10px] font-bold uppercase flex items-center gap-0.5">
+                        {t.configure} <ArrowRight size={10} />
+                      </Link>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </section>
       </main>
 
@@ -592,8 +627,8 @@ const HomeScreenContent = () => {
             <div className="space-y-3">
               <h4 className="font-extrabold uppercase text-xs text-purple-600 tracking-wider">{t.shopByCategory}</h4>
               <ul className="space-y-2 text-xs font-bold uppercase text-slate-600">
-                <li><Link to="/shop?category=Headwear" className="hover:text-purple-600 transition-colors">{t.catHeadwear}</Link></li>
-                <li><Link to="/shop?category=Workwear" className="hover:text-purple-600 transition-colors">{t.catWorkwear}</Link></li>
+                <li><Link to="/shop?category=Helmet" className="hover:text-purple-600 transition-colors">{t.catHelmet}</Link></li>
+                <li><Link to="/shop?category=Jacket" className="hover:text-purple-600 transition-colors">{t.catJacket}</Link></li>
                 <li><Link to="/shop?category=Footwear" className="hover:text-purple-600 transition-colors">{t.catFootwear}</Link></li>
               </ul>
             </div>
