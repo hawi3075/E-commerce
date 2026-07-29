@@ -259,8 +259,15 @@ const ShopScreen = () => {
   }, []);
 
   const addToCart = (product) => {
+    // 1. Get current user ID to match the Navbar's key structure
+    const rawUser = localStorage.getItem('userInfo');
+    const currentUser = rawUser ? JSON.parse(rawUser) : {};
+    const userId = currentUser._id || currentUser.id || currentUser.email || 'guest';
+    const cartKey = `cartItems_${userId}`;
+
+    // 2. Fetch existing items using the user-specific key
     const productId = product._id || product.id;
-    const existingCart = JSON.parse(localStorage.getItem('cartItems') || '[]');
+    const existingCart = JSON.parse(localStorage.getItem(cartKey) || '[]');
     const itemIndex = existingCart.findIndex((item) => (item._id || item.id) === productId);
 
     if (itemIndex > -1) {
@@ -276,7 +283,8 @@ const ShopScreen = () => {
       });
     }
 
-    localStorage.setItem('cartItems', JSON.stringify(existingCart));
+    // 3. Save back to the correct user key and notify the Navbar drawer
+    localStorage.setItem(cartKey, JSON.stringify(existingCart));
     window.dispatchEvent(new Event('cartUpdated'));
   };
 
