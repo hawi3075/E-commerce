@@ -62,8 +62,8 @@ const CheckoutScreen = () => {
         const isValidEmail = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(rawEmail);
         const safeEmail = isValidEmail ? rawEmail : 'customer@gmail.com';
 
-        // Send request to backend to initialize Telebirr payment via Chapa API
-        const response = await fetch('http://localhost:5000/api/payments/telebirr', {
+        // Updated with the correct payment route endpoint on your Render backend
+        const response = await fetch('https://luusafety-backend.onrender.com/api/payment/initialize', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -83,7 +83,6 @@ const CheckoutScreen = () => {
           localStorage.removeItem('checkout_product');
           window.location.href = data.checkoutUrl;
         } else {
-          // Format message cleanly if backend returns error details
           const errorMessage = typeof data?.message === 'object' 
             ? JSON.stringify(data.message) 
             : (data?.message || data?.error || 'Payment initiation failed.');
@@ -94,7 +93,7 @@ const CheckoutScreen = () => {
         }
       } catch (error) {
         console.error('Telebirr Connection Error:', error);
-        alert('Could not connect to payment backend (http://localhost:5000). Check if your backend server is running.');
+        alert('Could not connect to payment backend. Check if your backend server routes are properly configured.');
         setIsSubmitting(false);
       }
     } else {

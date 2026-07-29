@@ -19,8 +19,8 @@ const ContactScreen = () => {
     setErrorMessage('');
 
     try {
-      // Points directly to Express server on port 5000
-      const response = await axios.post('http://localhost:5000/api/contact', formData);
+      // Updated with the correct endpoint path on your Render backend
+      const response = await axios.post('https://luusafety-backend.onrender.com/api/contact', formData);
 
       if (response.status === 200 || response.data.success) {
         setIsSubmitting(false);
@@ -31,7 +31,7 @@ const ContactScreen = () => {
       console.error('Contact submit error:', error);
       setIsSubmitting(false);
       setErrorMessage(
-        error.response?.data?.message || 'Server endpoint not found. Please verify backend is running on port 5000.'
+        error.response?.data?.message || 'Server endpoint not found. Please verify backend route path.'
       );
     }
   };

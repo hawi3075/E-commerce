@@ -11,7 +11,11 @@ const app = express();
 
 // Middleware
 app.use(cors({
-  origin: ['http://localhost:3000', 'http://localhost:5173'],
+  origin: [
+    'http://localhost:3000', 
+    'http://localhost:5173', 
+    process.env.FRONTEND_URL
+  ],
   credentials: true
 }));
 
@@ -38,7 +42,7 @@ const productRoutes = require('./routes/productRoutes');
 const orderRoutes = require('./routes/orderRoutes');
 const paymentRoutes = require('./routes/paymentRoutes');
 const contactRoutes = require('./routes/contactRoutes');
-const adminRoutes = require('./routes/adminRoutes'); // 👈 ADDED ADMIN ROUTE IMPORT
+const adminRoutes = require('./routes/adminRoutes');
 
 // Safely mount each route
 safeMount('/api/auth', authRoutes, './routes/authRoutes.js');
@@ -47,7 +51,7 @@ safeMount('/api/products', productRoutes, './routes/productRoutes.js');
 safeMount('/api/orders', orderRoutes, './routes/orderRoutes.js');
 safeMount('/api/payments', paymentRoutes, './routes/paymentRoutes.js');
 safeMount('/api/contact', contactRoutes, './routes/contactRoutes.js');
-safeMount('/api/admin', adminRoutes, './routes/adminRoutes.js'); // 👈 MOUNTED /api/admin
+safeMount('/api/admin', adminRoutes, './routes/adminRoutes.js');
 
 // Health Check
 app.get('/', (req, res) => {

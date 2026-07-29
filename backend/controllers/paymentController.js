@@ -33,6 +33,9 @@ exports.initializeTelebirrPayment = async (req, res) => {
     const parsedAmount = parseFloat(amount);
     const finalAmount = (!isNaN(parsedAmount) && parsedAmount > 0) ? parsedAmount.toFixed(2) : '100.00';
 
+    // Dynamic Frontend URL for return redirect (falls back to localhost for local testing)
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+
     const chapaPayload = {
       amount: finalAmount,
       currency: 'ETB',
@@ -42,8 +45,8 @@ exports.initializeTelebirrPayment = async (req, res) => {
       phone_number: cleanPhone,
       tx_ref: `luu-${orderId || 'order'}-${Date.now()}`,
       callback_url: 'https://webhook.site/test',
-      // Appended ?payment=success so the frontend displays the success toast
-      return_url: 'http://localhost:3000/orders?payment=success',
+      // Dynamically points to production frontend or localhost
+      return_url: `${frontendUrl}/orders?payment=success`,
       customizations: {
         title: 'Luu Safety Purchase',
         description: 'Payment for safety equipment',
