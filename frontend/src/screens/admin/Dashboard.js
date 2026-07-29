@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { 
   DollarSign, ShoppingBag, Users, Package, 
-  Clock, MapPin, AlertCircle
+  Clock, MapPin, AlertCircle 
 } from 'lucide-react';
 
 const Dashboard = () => {
@@ -23,7 +23,6 @@ const Dashboard = () => {
     setError('');
 
     try {
-      // Retrieve JWT token from local storage
       const rawUserInfo = localStorage.getItem('userInfo');
       const userInfo = rawUserInfo ? JSON.parse(rawUserInfo) : {};
       const token = userInfo.token || localStorage.getItem('token');
@@ -34,19 +33,28 @@ const Dashboard = () => {
         }
       };
 
-      // Use Promise.allSettled so individual failing requests don't crash the whole page
+      // Fetch all three endpoints safely
       const [statsRes, ordersRes, productsRes] = await Promise.allSettled([
         axios.get('/api/admin/stats', config),
         axios.get('/api/admin/orders?limit=4', config),
         axios.get('/api/admin/products?limit=3', config)
       ]);
 
-      // Extract fulfilled responses safely
+      // Extract raw data from settled promises
       const statsData = statsRes.status === 'fulfilled' ? statsRes.value.data : {};
-      const ordersData = ordersRes.status === 'fulfilled' ? ordersRes.value.data : [];
-      const productsData = productsRes.status === 'fulfilled' ? productsRes.value.data : [];
+      const ordersRaw = ordersRes.status === 'fulfilled' ? ordersRes.value.data : [];
+      const productsRaw = productsRes.status === 'fulfilled' ? productsRes.value.data : [];
 
-      // Check if ALL requests failed to trigger a general warning
+      // Unpack arrays safely regardless of backend return structure
+      const ordersList = Array.isArray(ordersRaw) 
+        ? ordersRaw 
+        : (ordersRaw.orders || ordersRaw.data || []);
+
+      const productsList = Array.isArray(productsRaw) 
+        ? productsRaw 
+        : (productsRaw.products || productsRaw.data || []);
+
+      // If all three fail, display alert banner
       if (
         statsRes.status === 'rejected' && 
         ordersRes.status === 'rejected' && 
@@ -61,13 +69,13 @@ const Dashboard = () => {
         activeOrdersCount: statsData.activeOrdersCount || 0,
         totalCustomersCount: statsData.totalCustomersCount || 0,
         inventoryItemsCount: statsData.inventoryItemsCount || 0,
-        recentOrders: Array.isArray(ordersData) ? ordersData : ordersData.orders || [],
-        recentProducts: Array.isArray(productsData) ? productsData : productsData.products || []
+        recentOrders: ordersList,
+        recentProducts: productsList
       });
 
       setLastUpdated(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }));
     } catch (err) {
-      console.error('Error fetching database metrics:', err);
+      console.error('Error fetching dashboard metrics:', err);
       setError('Unexpected error loading dashboard data.');
     } finally {
       setLoading(false);
@@ -257,7 +265,7 @@ const Dashboard = () => {
                   className="flex items-center gap-4 p-3 rounded-xl border border-slate-100 bg-slate-50/50 hover:bg-slate-50 transition-colors"
                 >
                   <img 
-                    src={product.image || (product.images && product.images[0]) || '/placeholder.png'} 
+                    src={product.image || (product.images && product.images[0]) || 'https://via.placeholder.com/150'} 
                     alt={product.name} 
                     className="w-14 h-14 object-cover rounded-lg bg-white border border-slate-200"
                   />
@@ -267,7 +275,7 @@ const Dashboard = () => {
                     </h4>
                     <div className="flex items-center gap-2 mt-1">
                       <span className="text-xs font-extrabold text-slate-800">
-                        ${Number(product.price).toFixed(2)}
+                        ${Number(product.price || 0).toFixed(2)}
                       </span>
                       <span className={`text-xs font-bold ${(product.countInStock ?? product.stock ?? 0) > 0 ? 'text-emerald-600' : 'text-rose-500'}`}>
                         {product.countInStock ?? product.stock ?? 0} in stock

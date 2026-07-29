@@ -1,19 +1,47 @@
-// backend/controllers/adminController.js
 const Order = require('../models/orderModel');
 const User = require('../models/userModel');
 const Product = require('../models/productModel');
 
+// @desc    Get dashboard metrics (revenue, order counts, customer counts, inventory counts)
+// @route   GET /api/admin/stats
+// @access  Private/Admin
 const getAdminStats = async (req, res) => {
   try {
-    const revenueResult = await Order.aggregate([
-      { $match: { isPaid: true } },
-      { $group: { _id: null, total: { $sum: '$totalPrice' } } }
-    ]);
-    const totalRevenue = revenueResult.length > 0 ? revenueResult[0].total : 0;
+    // 1. Calculate Revenue
+    let totalRevenue = 0;
+    try {
+      const revenueResult = await Order.aggregate([
+        { $match: { isPaid: true } },
+        { $group: { _id: null, total: { $sum: '$totalPrice' } } }
+      ]);
+      totalRevenue = revenueResult.length > 0 ? revenueResult[0].total : 0;
+    } catch (e) {
+      console.log('Revenue aggregation fallback:', e.message);
+    }
 
-    const activeOrdersCount = await Order.countDocuments({ isDelivered: false });
-    const totalCustomersCount = await User.countDocuments({ isAdmin: false });
-    const inventoryItemsCount = await Product.countDocuments({});
+    // 2. Count Active Orders (or total if isDelivered check varies)
+    let activeOrdersCount = 0;
+    try {
+      activeOrdersCount = await Order.countDocuments({ isDelivered: false });
+    } catch (e) {
+      activeOrdersCount = await Order.countDocuments({});
+    }
+
+    // 3. Count Customers (excluding admins)
+    let totalCustomersCount = 0;
+    try {
+      totalCustomersCount = await User.countDocuments({ isAdmin: { $ne: true } });
+    } catch (e) {
+      totalCustomersCount = await User.countDocuments({});
+    }
+
+    // 4. Count Inventory Items
+    let inventoryItemsCount = 0;
+    try {
+      inventoryItemsCount = await Product.countDocuments({});
+    } catch (e) {
+      inventoryItemsCount = 0;
+    }
 
     res.json({
       totalRevenue,
@@ -22,8 +50,50 @@ const getAdminStats = async (req, res) => {
       inventoryItemsCount
     });
   } catch (error) {
-    res.status(500).json({ message: 'Server error loading admin stats', error: error.message });
+    console.error('Error in getAdminStats:', error);
+    res.status(500).json({ message: 'Error calculating stats', error: error.message });
   }
 };
 
-module.exports = { getAdminStats };
+// @desc    Get recent orders for dashboard list
+// @route   GET /api/admin/orders
+// @access  Private/Admin
+const getAdminOrders = async (req, res) => {
+  try {
+    const limit = Number(req.query.limit) || 5;
+    const orders = await Order.find({})
+      .populate('user', 'name email')
+      .sort({ createdAt: -1 })
+      .limit(limit);
+      
+    // Send direct array
+    res.json(orders);
+  } catch (error) {
+    console.error('Error in getAdminOrders:', error);
+    res.status(500).json({ message: 'Error fetching recent orders', error: error.message });
+  }
+};
+
+// @desc    Get recent products for inventory stream
+// @route   GET /api/admin/products
+// @access  Private/Admin
+const getAdminProducts = async (req, res) => {
+  try {
+    const limit = Number(req.query.limit) || 5;
+    const products = await Product.find({})
+      .sort({ createdAt: -1 })
+      .limit(limit);
+
+    // Send direct array
+    res.json(products);
+  } catch (error) {
+    console.error('Error in getAdminProducts:', error);
+    res.status(500).json({ message: 'Error fetching products', error: error.message });
+  }
+};
+
+module.exports = {
+  getAdminStats,
+  getAdminOrders,
+  getAdminProducts
+};
