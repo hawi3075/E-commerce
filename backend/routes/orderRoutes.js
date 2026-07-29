@@ -1,8 +1,7 @@
 const express = require('express');
 const router = express.Router();
 
-// Import your order controllers
-// (Adjust controller names/paths if yours are slightly different)
+// Import order controllers
 const {
   addOrderItems,
   getOrderById,
@@ -11,29 +10,24 @@ const {
   getOrders,
 } = require('../controllers/orderController');
 
-// Import authentication middleware if you use them
+// Import auth middleware
 const { protect, admin } = require('../middleware/authMiddleware');
 
-// Define Order Routes
-if (typeof addOrderItems === 'function') {
-  router.post('/', protect || ((req, res, next) => next()), addOrderItems);
-}
+// Fallback middleware if protect or admin aren't exported properly
+const passThrough = (req, res, next) => next();
+const auth = typeof protect === 'function' ? protect : passThrough;
+const adminAuth = typeof admin === 'function' ? admin : passThrough;
 
-if (typeof getMyOrders === 'function') {
-  router.get('/myorders', protect || ((req, res, next) => next()), getMyOrders);
-}
+// 1. Root Routes: GET all orders (Admin) & POST create order
+router.route('/')
+  .get(auth, adminAuth, getOrders)
+  .post(auth, addOrderItems);
 
-if (typeof getOrderById === 'function') {
-  router.get('/:id', protect || ((req, res, next) => next()), getOrderById);
-}
+// 2. Specific Named Routes (Must come BEFORE dynamic /:id parameter)
+router.get('/myorders', auth, getMyOrders);
 
-if (typeof updateOrderToPaid === 'function') {
-  router.put('/:id/pay', protect || ((req, res, next) => next()), updateOrderToPaid);
-}
+// 3. Dynamic ID Routes (Must come LAST)
+router.get('/:id', auth, getOrderById);
+router.put('/:id/pay', auth, updateOrderToPaid);
 
-if (typeof getOrders === 'function') {
-  router.get('/', protect || ((req, res, next) => next()), admin || ((req, res, next) => next()), getOrders);
-}
-
-// ⚠️ CRITICAL: MUST BE module.exports = router
 module.exports = router;

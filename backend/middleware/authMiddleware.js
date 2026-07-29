@@ -20,14 +20,14 @@ const protect = async (req, res, next) => {
 
       const decoded = jwt.verify(token, secret);
 
-      // 🔴 IMPORTANT: Fetch full user document without password, ensuring isAdmin is returned
-      req.user = await User.findById(decoded.id).select('-password');
+      // Fetch user without password
+      req.user = await User.findById(decoded.id || decoded._id).select('-password');
 
       if (!req.user) {
         return res.status(401).json({ message: 'User not found in database' });
       }
 
-      next();
+      return next();
     } catch (error) {
       console.error('Token verification error:', error);
       return res.status(401).json({ message: 'Not authorized, token failed' });
@@ -39,15 +39,19 @@ const protect = async (req, res, next) => {
   }
 };
 
-const isAdmin = (req, res, next) => {
-  // Add console.log here to debug what req.user actually contains!
+const admin = (req, res, next) => {
   console.log('User attached to request:', req.user);
 
-  if (req.user && req.user.isAdmin) {
-    next();
+  if (req.user && (req.user.isAdmin || req.user.role === 'admin')) {
+    return next();
   } else {
-    res.status(403).json({ message: 'Access denied (Admin only)' });
+    return res.status(403).json({ message: 'Access denied (Admin only)' });
   }
 };
 
-module.exports = { protect, isAdmin };
+// Export aliases so both { protect, admin } and { protect, isAdmin } work
+module.exports = { 
+  protect, 
+  admin, 
+  isAdmin: admin 
+};

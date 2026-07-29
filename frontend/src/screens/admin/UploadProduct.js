@@ -11,6 +11,9 @@ const Inventory = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [showModal, setShowModal] = useState(false);
 
+  // Edit Mode State
+  const [editingId, setEditingId] = useState(null);
+
   // Form States
   const fileInputRef = useRef(null);
   const [imageMode, setImageMode] = useState('file');
@@ -44,6 +47,66 @@ const Inventory = () => {
     fetchProducts();
   }, []);
 
+  // Helper function for Auth Headers
+  const getAuthHeader = () => {
+    const rawUserInfo = localStorage.getItem('userInfo');
+    const userInfo = rawUserInfo ? JSON.parse(rawUserInfo) : {};
+    const token = userInfo.token || localStorage.getItem('token');
+    return {
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+    };
+  };
+
+  // Open Modal for Adding New Product
+  const handleOpenAddModal = () => {
+    resetForm();
+    setEditingId(null);
+    setShowModal(true);
+  };
+
+  // Open Modal for Editing Existing Product
+  const handleEdit = (product) => {
+    setEditingId(product._id);
+    setName(product.product_name || product.name || '');
+    setProductType(product.product_type || '');
+    setPrice(product.price || '');
+    setProductCode(product.product_code || '');
+    setCategory(product.product_category || product.category || 'Shoes');
+    setSize(product.size || '');
+    setAmount(product.countInStock ?? product.stock ?? '1');
+    setColor(product.color || '');
+    setDescription(product.description || '');
+
+    const img = product.image || product.images?.[0] || '';
+    if (img.startsWith('data:image')) {
+      setImageMode('file');
+      setImagePreview(img);
+      setImageUrl('');
+    } else {
+      setImageMode('url');
+      setImageUrl(img);
+      setImagePreview(null);
+    }
+
+    setShowModal(true);
+  };
+
+  // Delete Product Handler
+  const handleDelete = async (id) => {
+    if (!window.confirm('Are you sure you want to delete this product?')) return;
+
+    try {
+      await axios.delete(`/api/products/${id}`, getAuthHeader());
+      fetchProducts();
+    } catch (error) {
+      console.error('Delete Error:', error);
+      alert(error.response?.data?.message || 'Failed to delete product');
+    }
+  };
+
   // File Handler
   const handleFileChange = (e) => {
     const file = e.target.files[0];
@@ -56,7 +119,7 @@ const Inventory = () => {
 
   const activeImage = imageMode === 'file' ? imagePreview : imageUrl;
 
-  // Submit Handler
+  // Submit Handler (Create or Update)
   const submitHandler = async (e) => {
     e.preventDefault();
     if (!activeImage) {
@@ -66,17 +129,7 @@ const Inventory = () => {
 
     setSubmitting(true);
     try {
-      const rawUserInfo = localStorage.getItem('userInfo');
-      const userInfo = rawUserInfo ? JSON.parse(rawUserInfo) : {};
-      const token = userInfo.token || localStorage.getItem('token');
-
-      const config = {
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-      };
-
+      const config = getAuthHeader();
       const productData = {
         product_name: name,
         product_type: productType,
@@ -90,21 +143,27 @@ const Inventory = () => {
         image: activeImage,
       };
 
-      await axios.post('/api/products', productData, config);
+      if (editingId) {
+        // Update existing product
+        await axios.put(`/api/products/${editingId}`, productData, config);
+      } else {
+        // Create new product
+        await axios.post('/api/products', productData, config);
+      }
       
-      // Reset Form & Close Modal
       setShowModal(false);
       resetForm();
       fetchProducts();
     } catch (error) {
-      console.error('Upload Error:', error);
-      alert(error.response?.data?.message || 'Failed to add product');
+      console.error('Submission Error:', error);
+      alert(error.response?.data?.message || 'Failed to save product');
     } finally {
       setSubmitting(false);
     }
   };
 
   const resetForm = () => {
+    setEditingId(null);
     setName('');
     setProductType('');
     setPrice('');
@@ -133,9 +192,8 @@ const Inventory = () => {
           <p className="text-xs font-bold text-slate-400 mt-1">Manage your product catalog and inventory.</p>
         </div>
 
-        {/* UPDATED: Purple New Product Button */}
         <button 
-          onClick={() => setShowModal(true)}
+          onClick={handleOpenAddModal}
           className="flex items-center gap-2 bg-purple-600 hover:bg-purple-700 text-white font-extrabold px-5 py-3 rounded-2xl shadow-lg shadow-purple-600/20 transition-all text-xs active:scale-[0.98] self-start md:self-auto"
         >
           <Plus size={18} strokeWidth={2.5} /> New Product
@@ -233,10 +291,18 @@ const Inventory = () => {
                         </div>
                       </td>
                       <td className="py-4 px-6 text-right space-x-2">
-                        <button className="p-2 border border-slate-200 rounded-xl hover:bg-slate-50 text-slate-600 transition-colors">
+                        <button 
+                          onClick={() => handleEdit(product)}
+                          className="p-2 border border-slate-200 rounded-xl hover:bg-slate-50 text-slate-600 transition-colors"
+                          title="Edit Product"
+                        >
                           <Edit size={14} />
                         </button>
-                        <button className="p-2 border border-slate-200 rounded-xl hover:bg-rose-50 text-rose-600 transition-colors">
+                        <button 
+                          onClick={() => handleDelete(product._id)}
+                          className="p-2 border border-slate-200 rounded-xl hover:bg-rose-50 text-rose-600 transition-colors"
+                          title="Delete Product"
+                        >
                           <Trash2 size={14} />
                         </button>
                       </td>
@@ -255,7 +321,7 @@ const Inventory = () => {
         </div>
       </div>
 
-      {/* POPUP MODAL: REGISTER NEW PRODUCT */}
+      {/* POPUP MODAL: REGISTER / EDIT PRODUCT */}
       {showModal && (
         <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto">
           <div className="bg-white rounded-[2.5rem] w-full max-w-4xl p-6 md:p-8 shadow-2xl relative max-h-[90vh] overflow-y-auto">
@@ -279,7 +345,7 @@ const Inventory = () => {
             </div>
 
             <h2 className="text-2xl font-black text-slate-900 uppercase tracking-tight italic mb-6">
-              Register New <span className="text-purple-600">Product</span>
+              {editingId ? 'Edit' : 'Register New'} <span className="text-purple-600">Product</span>
             </h2>
 
             {/* Form */}
@@ -421,7 +487,11 @@ const Inventory = () => {
                 disabled={submitting}
                 className="w-full bg-purple-600 hover:bg-purple-700 text-white py-3.5 rounded-xl font-black text-xs uppercase tracking-widest shadow-lg shadow-purple-600/10 transition-all flex items-center justify-center gap-2 active:scale-[0.99]"
               >
-                {submitting ? <Loader2 className="animate-spin" size={18} /> : <><Plus size={18} /> Add Product to System</>}
+                {submitting ? (
+                  <Loader2 className="animate-spin" size={18} />
+                ) : (
+                  <>{editingId ? <Edit size={18} /> : <Plus size={18} />} {editingId ? 'Update Product Details' : 'Add Product to System'}</>
+                )}
               </button>
             </form>
           </div>
