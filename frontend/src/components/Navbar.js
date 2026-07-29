@@ -106,10 +106,15 @@ const Navbar = () => {
     };
   }, []);
 
-  // Sync Cart Count from local storage and custom events
+  // Sync Cart Count using user-specific local storage key
   useEffect(() => {
     const updateCartCount = () => {
-      const storedCart = localStorage.getItem('cartItems');
+      const rawUser = localStorage.getItem('userInfo');
+      const currentUser = rawUser ? JSON.parse(rawUser) : {};
+      const userId = currentUser._id || currentUser.id || currentUser.email || 'guest';
+      const cartKey = `cartItems_${userId}`;
+
+      const storedCart = localStorage.getItem(cartKey);
       if (storedCart) {
         try {
           const items = JSON.parse(storedCart);
@@ -128,12 +133,14 @@ const Navbar = () => {
     // Listen for storage changes across tabs or custom dispatch events
     window.addEventListener('storage', updateCartCount);
     window.addEventListener('cartUpdated', updateCartCount);
+    window.addEventListener('userUpdated', updateCartCount);
 
     return () => {
       window.removeEventListener('storage', updateCartCount);
       window.removeEventListener('cartUpdated', updateCartCount);
+      window.removeEventListener('userUpdated', updateCartCount);
     };
-  }, [location]);
+  }, [location, userInfo]);
 
   const handleLogout = () => {
     localStorage.removeItem('userInfo');
