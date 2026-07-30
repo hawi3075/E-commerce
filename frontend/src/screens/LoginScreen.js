@@ -4,7 +4,7 @@ import {
   Mail, Lock, ArrowRight, AlertCircle, 
   Eye, EyeOff, CheckCircle2, Loader2 
 } from 'lucide-react';
-import axios from 'axios';
+import API from '../api'; // 1. Use your custom configured API instance instead of plain axios
 import { AuthContext } from '../context/AuthContext';
 
 import logoImg from '../components/logo.webp';
@@ -27,7 +27,8 @@ const LoginScreen = () => {
     setLoading(true);
 
     try {
-      const { data } = await axios.post('/api/auth/login', { email, password });
+      // 2. Use API.post and '/auth/login' (omitting duplicate '/api' prefix)
+      const { data } = await API.post('/auth/login', { email, password });
       
       localStorage.setItem('userInfo', JSON.stringify(data));
       if (login) login(data);
