@@ -4,7 +4,7 @@ import {
   Mail, Lock, ArrowRight, AlertCircle, 
   Eye, EyeOff, CheckCircle2, Loader2 
 } from 'lucide-react';
-import API from '../api'; // 1. Use your custom configured API instance instead of plain axios
+import API from '../utils/api';// 1. Use your custom configured API instance instead of plain axios
 import { AuthContext } from '../context/AuthContext';
 
 import logoImg from '../components/logo.webp';
