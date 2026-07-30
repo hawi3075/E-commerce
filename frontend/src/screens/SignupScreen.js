@@ -4,7 +4,7 @@ import {
   User, Mail, Lock, ArrowRight, AlertCircle, 
   Eye, EyeOff, CheckCircle2, Loader2 
 } from 'lucide-react';
-import axios from 'axios';
+import API from '../utils/api'; // 1. Use your custom configured API instance
 import { AuthContext } from '../context/AuthContext';
 
 import logoImg from '../components/logo.webp';
@@ -28,8 +28,8 @@ const SignupScreen = () => {
     setLoading(true);
 
     try {
-      // ✅ Updated to match standard backend auth routes
-      const { data } = await axios.post('/api/auth/register', { 
+      // 2. Use API.post and '/auth/register' (no duplicate '/api' prefix)
+      const { data } = await API.post('/auth/register', { 
         name, 
         email, 
         password 
