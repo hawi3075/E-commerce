@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import API from '../utils/api';
+import API from '../../utils/api';
 import { Search, ShieldAlert, Trash2, Loader2, User } from 'lucide-react';
 
 const Customers = () => {
