@@ -5,6 +5,7 @@ import {
   ChevronDown, Grid, ShoppingCart, Star, 
   SlidersHorizontal, Eye, Heart, Loader2, RotateCcw, Briefcase, User, Layers, Search
 } from 'lucide-react';
+import Navbar from '../components/Navbar';
 
 // TRANSLATIONS DICTIONARY
 const TRANSLATIONS = {
@@ -223,7 +224,7 @@ const ShopScreen = () => {
   const normalizeCategory = useCallback((catParam) => {
     if (!catParam) return 'All';
     const lower = String(catParam).toLowerCase();
-    if (lower.includes('head') || lower.includes('helmet') || lower.includes('shoe') === false && lower.includes('hat')) return 'Headwear';
+    if (lower.includes('head') || lower.includes('helmet') || (lower.includes('shoe') === false && lower.includes('hat'))) return 'Headwear';
     if (lower.includes('vis') || lower.includes('work') || lower.includes('high') || lower.includes('tuta') || lower.includes('apparel')) return 'Workwear';
     if (lower.includes('shoe') || lower.includes('foot') || lower.includes('boot')) return 'Footwear';
     
@@ -372,289 +373,305 @@ const ShopScreen = () => {
   };
 
   return (
-    <div className="bg-gray-200 min-h-screen font-sans antialiased text-gray-800">
-      
-      <main className="max-w-[1600px] mx-auto px-6 pb-12">
-        <div className="flex flex-col lg:flex-row gap-8 items-start relative">
-          
-          {/* ================= STICKY SIDEBAR FILTERS ================= */}
-          <aside className="w-full lg:w-72 shrink-0 pt-6 lg:sticky lg:top-20 lg:self-start">
-            <div className="bg-white p-6 rounded-3xl border border-gray-300 shadow-sm lg:max-h-[calc(100vh-7rem)] lg:overflow-y-auto space-y-6 relative">
-              
-              {/* STICKY HEADER INSIDE SIDEBAR */}
-              <div className="flex items-center justify-between pb-4 border-b border-gray-200 sticky top-0 bg-white z-20 -mx-6 px-6 pt-2 -mt-2">
-                <div className="flex items-center gap-2">
-                  <SlidersHorizontal size={18} className="text-purple-600" />
-                  <h2 className="text-base font-black uppercase tracking-wide text-gray-900">{t.filterEngine}</h2>
-                </div>
-                <button 
-                  onClick={resetFilters} 
-                  className="text-[11px] font-extrabold uppercase text-purple-600 hover:text-purple-800 flex items-center gap-1 transition-colors"
-                >
-                  <RotateCcw size={12} /> {t.reset}
-                </button>
-              </div>
-              
-              {/* 1. CATEGORY FILTER */}
-              <div className="space-y-2">
-                <label className="text-xs font-extrabold uppercase text-gray-900 flex items-center gap-1.5">
-                  <Grid size={13} className="text-purple-600" /> {t.productCategory}
-                </label>
-                <div className="flex flex-wrap gap-1.5 pt-1">
-                  {categoriesList.map((cat) => (
-                    <button
-                      key={cat}
-                      onClick={() => setSelectedCategory(cat)}
-                      className={`px-3 py-2 rounded-xl text-xs font-extrabold uppercase tracking-wide transition-all ${
-                        selectedCategory === cat 
-                          ? 'bg-purple-600 text-white shadow-md shadow-purple-600/20' 
-                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-200'
-                      }`}
-                    >
-                      {translateKey('categories', cat)}
-                    </button>
-                  ))}
-                </div>
-              </div>
+    <div className="bg-gray-200 min-h-screen font-sans antialiased text-gray-800 flex flex-col justify-between">
+      <div>
+        <Navbar />
 
-              {/* 2. WORK CATEGORY / FIELD FILTER */}
-              <div className="space-y-2 pt-3 border-t border-gray-200">
-                <label className="text-xs font-extrabold uppercase text-gray-900 flex items-center gap-1.5">
-                  <Briefcase size={13} className="text-purple-600" /> {t.workSector}
-                </label>
-                <div className="relative">
-                  <select 
-                    value={selectedWorkCategory}
-                    onChange={(e) => setSelectedWorkCategory(e.target.value)}
-                    className="w-full bg-gray-50 border border-gray-300 rounded-xl px-3 py-2.5 text-xs font-bold text-gray-800 uppercase appearance-none focus:outline-none focus:border-purple-500 cursor-pointer"
-                  >
-                    {workCategoriesList.map(w => (
-                      <option key={w} value={w} className="bg-white">
-                        {translateKey('workSectors', w)}
-                      </option>
-                    ))}
-                  </select>
-                  <ChevronDown size={14} className="absolute right-3 top-3 text-gray-500 pointer-events-none" />
-                </div>
-              </div>
-
-              {/* 3. GENDER TARGET */}
-              <div className="space-y-2 pt-3 border-t border-gray-200">
-                <label className="text-xs font-extrabold uppercase text-gray-900 flex items-center gap-1.5">
-                  <User size={13} className="text-purple-600" /> {t.targetGender}
-                </label>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-1.5">
-                  {genderList.map((g) => (
-                    <button
-                      key={g}
-                      onClick={() => setSelectedGender(g)}
-                      className={`px-2 py-2 rounded-xl text-xs font-extrabold uppercase tracking-wide transition-all text-center ${
-                        selectedGender === g 
-                          ? 'bg-purple-600 text-white shadow-md shadow-purple-600/20' 
-                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-200'
-                      }`}
-                    >
-                      {translateKey('genders', g)}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* 4. RAW PRODUCT / MATERIAL */}
-              <div className="space-y-2 pt-3 border-t border-gray-200">
-                <label className="text-xs font-extrabold uppercase text-gray-900 flex items-center gap-1.5">
-                  <Layers size={13} className="text-purple-600" /> {t.rawMaterial}
-                </label>
-                <div className="relative">
-                  <select 
-                    value={selectedRawProduct}
-                    onChange={(e) => setSelectedRawProduct(e.target.value)}
-                    className="w-full bg-gray-50 border border-gray-300 rounded-xl px-3 py-2.5 text-xs font-bold text-gray-800 uppercase appearance-none focus:outline-none focus:border-purple-500 cursor-pointer"
-                  >
-                    {rawProductsList.map(mat => (
-                      <option key={mat} value={mat} className="bg-white">
-                        {translateKey('materials', mat)}
-                      </option>
-                    ))}
-                  </select>
-                  <ChevronDown size={14} className="absolute right-3 top-3 text-gray-500 pointer-events-none" />
-                </div>
-              </div>
-
-            </div>
-          </aside>
-
-          {/* ================= PRODUCTS GRID ================= */}
-          <section className="flex-1 w-full space-y-6 pt-6">
+        <main className="max-w-[1600px] mx-auto px-6 pt-24 pb-12">
+          <div className="flex flex-col lg:flex-row gap-8 items-start relative">
             
-            {/* Toolbar Summary & Sorting */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white border border-gray-300 p-4 rounded-3xl shadow-sm">
-              <div className="flex items-center gap-2">
-                <p className="text-xs text-gray-600 font-extrabold uppercase tracking-wider">
-                  {t.showing} <span className="text-purple-600 font-black text-sm">{sortedProducts.length}</span> {t.safetyAssets}
-                </p>
-                {searchQuery && (
-                  <span className="bg-purple-100 text-purple-800 text-xs font-bold px-2.5 py-1 rounded-full flex items-center gap-1 border border-purple-200">
-                    <Search size={12} /> "{searchQuery}"
-                  </span>
-                )}
-              </div>
-              
-              <div className="relative flex items-center gap-2 bg-gray-50 border border-gray-300 rounded-xl px-3 py-2 text-xs font-bold text-gray-800 cursor-pointer">
-                <select 
-                  value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value)}
-                  className="bg-transparent pr-6 appearance-none cursor-pointer focus:outline-none text-xs font-extrabold uppercase tracking-wider text-gray-800"
-                >
-                  <option value="newest" className="bg-white">{t.newest}</option>
-                  <option value="low-to-high" className="bg-white">{t.lowToHigh}</option>
-                  <option value="high-to-low" className="bg-white">{t.highToLow}</option>
-                </select>
-                <ChevronDown size={14} className="text-gray-500 absolute right-3 pointer-events-none" />
-              </div>
-            </div>
+            {/* ================= STICKY SIDEBAR FILTERS ================= */}
+            <aside className="w-full lg:w-72 shrink-0 pt-2 lg:sticky lg:top-20 lg:self-start">
+              <div className="bg-white p-6 rounded-3xl border border-gray-300 shadow-sm lg:max-h-[calc(100vh-7rem)] lg:overflow-y-auto space-y-6 relative">
+                
+                {/* STICKY HEADER INSIDE SIDEBAR */}
+                <div className="flex items-center justify-between pb-4 border-b border-gray-200 sticky top-0 bg-white z-20 -mx-6 px-6 pt-2 -mt-2">
+                  <div className="flex items-center gap-2">
+                    <SlidersHorizontal size={18} className="text-purple-600" />
+                    <h2 className="text-base font-black uppercase tracking-wide text-gray-900">{t.filterEngine}</h2>
+                  </div>
+                  <button 
+                    onClick={resetFilters} 
+                    className="text-[11px] font-extrabold uppercase text-purple-600 hover:text-purple-800 flex items-center gap-1 transition-colors"
+                  >
+                    <RotateCcw size={12} /> {t.reset}
+                  </button>
+                </div>
+                
+                {/* 1. CATEGORY FILTER */}
+                <div className="space-y-2">
+                  <label className="text-xs font-extrabold uppercase text-gray-900 flex items-center gap-1.5">
+                    <Grid size={13} className="text-purple-600" /> {t.productCategory}
+                  </label>
+                  <div className="flex flex-wrap gap-1.5 pt-1">
+                    {categoriesList.map((cat) => (
+                      <button
+                        key={cat}
+                        onClick={() => setSelectedCategory(cat)}
+                        className={`px-3 py-2 rounded-xl text-xs font-extrabold uppercase tracking-wide transition-all ${
+                          selectedCategory === cat 
+                            ? 'bg-purple-600 text-white shadow-md shadow-purple-600/20' 
+                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-200'
+                        }`}
+                      >
+                        {translateKey('categories', cat)}
+                      </button>
+                    ))}
+                  </div>
+                </div>
 
-            {/* Content States */}
-            {isLoading ? (
-              <div className="text-center py-24 bg-white rounded-3xl border border-dashed border-gray-300 flex flex-col items-center justify-center gap-3">
-                <Loader2 className="animate-spin text-purple-600" size={32} />
-                <p className="text-gray-500 font-extrabold uppercase tracking-widest text-xs">{t.scanning}</p>
-              </div>
-            ) : sortedProducts.length === 0 ? (
-              <div className="text-center py-20 bg-white rounded-3xl border border-dashed border-gray-300 space-y-3 p-6">
-                <Grid size={40} className="text-gray-400 mx-auto" />
-                <p className="text-gray-900 font-black uppercase tracking-wide text-base">{t.noGear}</p>
-                <p className="text-gray-500 text-xs font-medium max-w-md mx-auto">{t.noGearDesc}</p>
-                <button 
-                  onClick={resetFilters} 
-                  className="bg-purple-600 text-white px-5 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider inline-flex items-center gap-1.5 mt-2 shadow-md shadow-purple-600/20"
-                >
-                  <RotateCcw size={12} /> {t.clearFilters}
-                </button>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-                {sortedProducts.map((p) => {
-                  const productId = p._id || p.id;
-                  const productName = p.product_name || p.name;
-                  const productPrice = Number(p.price) || 0;
-                  const productStock = p.countInStock !== undefined ? p.countInStock : p.stock;
-                  const isSoldOut = productStock === 0;
-                  const imageUrl = p.image || 'https://via.placeholder.com/500';
-                  const isLiked = !!likedItems[productId];
-
-                  const productRating = p.rating ? Number(p.rating).toFixed(1) : '5.0';
-                  const numReviews = p.numReviews || 0;
-
-                  return (
-                    <div 
-                      key={productId}
-                      className="bg-white rounded-3xl p-4 border border-gray-300 hover:border-purple-400 shadow-sm hover:shadow-md transition-all duration-300 group relative flex flex-col justify-between"
+                {/* 2. WORK CATEGORY / FIELD FILTER */}
+                <div className="space-y-2 pt-3 border-t border-gray-200">
+                  <label className="text-xs font-extrabold uppercase text-gray-900 flex items-center gap-1.5">
+                    <Briefcase size={13} className="text-purple-600" /> {t.workSector}
+                  </label>
+                  <div className="relative">
+                    <select 
+                      value={selectedWorkCategory}
+                      onChange={(e) => setSelectedWorkCategory(e.target.value)}
+                      className="w-full bg-gray-50 border border-gray-300 rounded-xl px-3 py-2.5 text-xs font-bold text-gray-800 uppercase appearance-none focus:outline-none focus:border-purple-500 cursor-pointer"
                     >
-                      {/* Product Image Container */}
-                      <div className="relative h-48 bg-gray-100 rounded-2xl mb-4 overflow-hidden flex items-center justify-center border border-gray-200">
-                        <img 
-                          src={imageUrl} 
-                          alt={productName} 
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" 
-                          loading="lazy"
-                        />
-                        
-                        {isSoldOut ? (
-                          <span className="absolute top-3 right-3 bg-red-100 text-red-600 border border-red-200 text-[9px] font-black px-2 py-0.5 rounded-md uppercase tracking-wider z-10">
-                            {t.soldOut}
-                          </span>
-                        ) : (
-                          <span className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm text-gray-800 border border-gray-200 text-[9px] font-bold px-2 py-0.5 rounded-md uppercase z-10">
-                            {productStock !== undefined ? `${productStock} ${t.units}` : t.inStock}
-                          </span>
-                        )}
+                      {workCategoriesList.map(w => (
+                        <option key={w} value={w} className="bg-white">
+                          {translateKey('workSectors', w)}
+                        </option>
+                      ))}
+                    </select>
+                    <ChevronDown size={14} className="absolute right-3 top-3 text-gray-500 pointer-events-none" />
+                  </div>
+                </div>
 
-                        <span className="absolute top-3 left-3 bg-purple-600 text-white text-[9px] font-extrabold px-2 py-0.5 rounded-md uppercase tracking-widest z-10 shadow-sm">
-                          {translateKey('workSectors', p.work_field || p.workCategory || p.workSector) || 
-                           translateKey('categories', p.product_category || p.category) || 
-                           p.work_field || p.workCategory || p.product_category || p.category || t.gear}
-                        </span>
-                      </div>
+                {/* 3. GENDER TARGET */}
+                <div className="space-y-2 pt-3 border-t border-gray-200">
+                  <label className="text-xs font-extrabold uppercase text-gray-900 flex items-center gap-1.5">
+                    <User size={13} className="text-purple-600" /> {t.targetGender}
+                  </label>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-1.5">
+                    {genderList.map((g) => (
+                      <button
+                        key={g}
+                        onClick={() => setSelectedGender(g)}
+                        className={`px-2 py-2 rounded-xl text-xs font-extrabold uppercase tracking-wide transition-all text-center ${
+                          selectedGender === g 
+                            ? 'bg-purple-600 text-white shadow-md shadow-purple-600/20' 
+                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-200'
+                        }`}
+                      >
+                        {translateKey('genders', g)}
+                      </button>
+                    ))}
+                  </div>
+                </div>
 
-                      {/* Details & Actions Under Image */}
-                      <div className="space-y-3 flex-1 flex flex-col justify-between">
-                        <div>
-                          {/* Rating */}
-                          <div className="flex items-center gap-1.5 mb-1">
-                            <div className="flex items-center gap-0.5">
-                              {[...Array(5)].map((_, i) => (
-                                <Star 
-                                  key={i} 
-                                  size={11} 
-                                  className={`${i < Math.round(p.rating || 5) ? 'fill-amber-400 text-amber-400' : 'text-gray-300'}`} 
-                                />
-                              ))}
-                            </div>
-                            <span className="text-[10px] font-bold text-gray-600">
-                              {productRating} {numReviews > 0 && <span className="text-gray-400 font-normal">({numReviews})</span>}
-                            </span>
-                          </div>
+                {/* 4. RAW PRODUCT / MATERIAL */}
+                <div className="space-y-2 pt-3 border-t border-gray-200">
+                  <label className="text-xs font-extrabold uppercase text-gray-900 flex items-center gap-1.5">
+                    <Layers size={13} className="text-purple-600" /> {t.rawMaterial}
+                  </label>
+                  <div className="relative">
+                    <select 
+                      value={selectedRawProduct}
+                      onChange={(e) => setSelectedRawProduct(e.target.value)}
+                      className="w-full bg-gray-50 border border-gray-300 rounded-xl px-3 py-2.5 text-xs font-bold text-gray-800 uppercase appearance-none focus:outline-none focus:border-purple-500 cursor-pointer"
+                    >
+                      {rawProductsList.map(mat => (
+                        <option key={mat} value={mat} className="bg-white">
+                          {translateKey('materials', mat)}
+                        </option>
+                      ))}
+                    </select>
+                    <ChevronDown size={14} className="absolute right-3 top-3 text-gray-500 pointer-events-none" />
+                  </div>
+                </div>
 
-                          <h3 className="font-extrabold text-gray-900 text-xs uppercase tracking-wide line-clamp-2 mb-1 min-h-[2.25rem]">
-                            {productName}
-                          </h3>
-                        </div>
-
-                        {/* Bottom Bar */}
-                        <div className="pt-3 border-t border-gray-200 flex items-center justify-between gap-2">
-                          <div>
-                            <span className="text-[9px] font-bold text-gray-500 uppercase tracking-wider block">{t.assetValue}</span>
-                            <p className="text-gray-900 font-black text-base">${productPrice.toFixed(2)}</p>
-                          </div>
-
-                          <div className="flex items-center gap-1.5">
-                            <button 
-                              onClick={() => toggleLike(productId)}
-                              className="p-2 bg-gray-50 hover:bg-purple-50 border border-gray-300 hover:border-purple-300 rounded-xl text-gray-600 hover:text-purple-600 transition-colors"
-                              title="Favorite"
-                            >
-                              <Heart size={15} className={isLiked ? "fill-purple-600 text-purple-600" : ""} />
-                            </button>
-
-                            <Link 
-                              to={`/product/${productId}`} 
-                              className="p-2 bg-gray-50 hover:bg-purple-50 border border-gray-300 hover:border-purple-300 rounded-xl text-gray-600 hover:text-purple-600 transition-colors"
-                              title="View Details"
-                            >
-                              <Eye size={15} />
-                            </Link>
-
-                            {isSoldOut ? (
-                              <button 
-                                disabled
-                                className="bg-gray-200 text-gray-400 p-2 rounded-xl text-[10px] font-bold uppercase cursor-not-allowed"
-                              >
-                                Off
-                              </button>
-                            ) : (
-                              <button 
-                                onClick={() => addToCart(p)}
-                                className="bg-purple-600 hover:bg-purple-700 text-white p-2 rounded-xl transition-all shadow-md shadow-purple-600/20 flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-purple-500 active:scale-95"
-                                title="Add to Cart"
-                              >
-                                <ShoppingCart size={15} />
-                              </button>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-
-                    </div>
-                  );
-                })}
               </div>
-            )}
+            </aside>
 
-          </section>
+            {/* ================= PRODUCTS GRID ================= */}
+            <section className="flex-1 w-full space-y-6 pt-2">
+              
+              {/* Toolbar Summary & Sorting */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white border border-gray-300 p-4 rounded-3xl shadow-sm">
+                <div className="flex items-center gap-2">
+                  <p className="text-xs text-gray-600 font-extrabold uppercase tracking-wider">
+                    {t.showing} <span className="text-purple-600 font-black text-sm">{sortedProducts.length}</span> {t.safetyAssets}
+                  </p>
+                  {searchQuery && (
+                    <span className="bg-purple-100 text-purple-800 text-xs font-bold px-2.5 py-1 rounded-full flex items-center gap-1 border border-purple-200">
+                      <Search size={12} /> "{searchQuery}"
+                    </span>
+                  )}
+                </div>
+                
+                <div className="relative flex items-center gap-2 bg-gray-50 border border-gray-300 rounded-xl px-3 py-2 text-xs font-bold text-gray-800 cursor-pointer">
+                  <select 
+                    value={sortBy}
+                    onChange={(e) => setSortBy(e.target.value)}
+                    className="bg-transparent pr-6 appearance-none cursor-pointer focus:outline-none text-xs font-extrabold uppercase tracking-wider text-gray-800"
+                  >
+                    <option value="newest" className="bg-white">{t.newest}</option>
+                    <option value="low-to-high" className="bg-white">{t.lowToHigh}</option>
+                    <option value="high-to-low" className="bg-white">{t.highToLow}</option>
+                  </select>
+                  <ChevronDown size={14} className="text-gray-500 absolute right-3 pointer-events-none" />
+                </div>
+              </div>
 
+              {/* Content States */}
+              {isLoading ? (
+                <div className="text-center py-24 bg-white rounded-3xl border border-dashed border-gray-300 flex flex-col items-center justify-center gap-3">
+                  <Loader2 className="animate-spin text-purple-600" size={32} />
+                  <p className="text-gray-500 font-extrabold uppercase tracking-widest text-xs">{t.scanning}</p>
+                </div>
+              ) : sortedProducts.length === 0 ? (
+                <div className="text-center py-20 bg-white rounded-3xl border border-dashed border-gray-300 space-y-3 p-6">
+                  <Grid size={40} className="text-gray-400 mx-auto" />
+                  <p className="text-gray-900 font-black uppercase tracking-wide text-base">{t.noGear}</p>
+                  <p className="text-gray-500 text-xs font-medium max-w-md mx-auto">{t.noGearDesc}</p>
+                  <button 
+                    onClick={resetFilters} 
+                    className="bg-purple-600 text-white px-5 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider inline-flex items-center gap-1.5 mt-2 shadow-md shadow-purple-600/20"
+                  >
+                    <RotateCcw size={12} /> {t.clearFilters}
+                  </button>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                  {sortedProducts.map((p) => {
+                    const productId = p._id || p.id;
+                    const productName = p.product_name || p.name;
+                    const productPrice = Number(p.price) || 0;
+                    const productStock = p.countInStock !== undefined ? p.countInStock : p.stock;
+                    const isSoldOut = productStock === 0;
+                    const imageUrl = p.image || 'https://via.placeholder.com/500';
+                    const isLiked = !!likedItems[productId];
+
+                    const productRating = p.rating ? Number(p.rating).toFixed(1) : '5.0';
+                    const numReviews = p.numReviews || 0;
+
+                    return (
+                      <div 
+                        key={productId}
+                        className="bg-white rounded-3xl p-4 border border-gray-300 hover:border-purple-400 shadow-sm hover:shadow-md transition-all duration-300 group relative flex flex-col justify-between"
+                      >
+                        {/* Product Image Container */}
+                        <div className="relative h-48 bg-gray-100 rounded-2xl mb-4 overflow-hidden flex items-center justify-center border border-gray-200">
+                          <img 
+                            src={imageUrl} 
+                            alt={productName} 
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" 
+                            loading="lazy"
+                          />
+                          
+                          {isSoldOut ? (
+                            <span className="absolute top-3 right-3 bg-red-100 text-red-600 border border-red-200 text-[9px] font-black px-2 py-0.5 rounded-md uppercase tracking-wider z-10">
+                              {t.soldOut}
+                            </span>
+                          ) : (
+                            <span className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm text-gray-800 border border-gray-200 text-[9px] font-bold px-2 py-0.5 rounded-md uppercase z-10">
+                              {productStock !== undefined ? `${productStock} ${t.units}` : t.inStock}
+                            </span>
+                          )}
+
+                          <span className="absolute top-3 left-3 bg-purple-600 text-white text-[9px] font-extrabold px-2 py-0.5 rounded-md uppercase tracking-widest z-10 shadow-sm">
+                            {translateKey('workSectors', p.work_field || p.workCategory || p.workSector) || 
+                             translateKey('categories', p.product_category || p.category) || 
+                             p.work_field || p.workCategory || p.product_category || p.category || t.gear}
+                          </span>
+                        </div>
+
+                        {/* Details & Actions Under Image */}
+                        <div className="space-y-3 flex-1 flex flex-col justify-between">
+                          <div>
+                            {/* Rating */}
+                            <div className="flex items-center gap-1.5 mb-1">
+                              <div className="flex items-center gap-0.5">
+                                {[...Array(5)].map((_, i) => (
+                                  <Star 
+                                    key={i} 
+                                    size={11} 
+                                    className={`${i < Math.round(p.rating || 5) ? 'fill-amber-400 text-amber-400' : 'text-gray-300'}`} 
+                                  />
+                                ))}
+                              </div>
+                              <span className="text-[10px] font-bold text-gray-600">
+                                {productRating} {numReviews > 0 && <span className="text-gray-400 font-normal">({numReviews})</span>}
+                              </span>
+                            </div>
+
+                            <h3 className="font-extrabold text-gray-900 text-xs uppercase tracking-wide line-clamp-2 mb-1 min-h-[2.25rem]">
+                              {productName}
+                            </h3>
+                          </div>
+
+                          {/* Bottom Bar */}
+                          <div className="pt-3 border-t border-gray-200 flex items-center justify-between gap-2">
+                            <div>
+                              <span className="text-[9px] font-bold text-gray-500 uppercase tracking-wider block">{t.assetValue}</span>
+                              <p className="text-gray-900 font-black text-base">${productPrice.toFixed(2)}</p>
+                            </div>
+
+                            <div className="flex items-center gap-1.5">
+                              <button 
+                                onClick={() => toggleLike(productId)}
+                                className="p-2 bg-gray-50 hover:bg-purple-50 border border-gray-300 hover:border-purple-300 rounded-xl text-gray-600 hover:text-purple-600 transition-colors"
+                                title="Favorite"
+                              >
+                                <Heart size={15} className={isLiked ? "fill-purple-600 text-purple-600" : ""} />
+                              </button>
+
+                              <Link 
+                                to={`/product/${productId}`} 
+                                className="p-2 bg-gray-50 hover:bg-purple-50 border border-gray-300 hover:border-purple-300 rounded-xl text-gray-600 hover:text-purple-600 transition-colors"
+                                title="View Details"
+                              >
+                                <Eye size={15} />
+                              </Link>
+
+                              {isSoldOut ? (
+                                <button 
+                                  disabled
+                                  className="bg-gray-200 text-gray-400 p-2 rounded-xl text-[10px] font-bold uppercase cursor-not-allowed"
+                                >
+                                  Off
+                                </button>
+                              ) : (
+                                <button 
+                                  onClick={() => addToCart(p)}
+                                  className="bg-purple-600 hover:bg-purple-700 text-white p-2 rounded-xl transition-all shadow-md shadow-purple-600/20 flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-purple-500 active:scale-95"
+                                  title="Add to Cart"
+                                >
+                                  <ShoppingCart size={15} />
+                                </button>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+
+            </section>
+
+          </div>
+        </main>
+      </div>
+
+      {/* FOOTER */}
+      <footer className="bg-black text-white pt-8 pb-6 mt-12 rounded-t-3xl">
+        <div className="max-w-[1600px] mx-auto px-6">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-medium text-zinc-400">
+            <div className="flex items-center gap-2">
+              <div className="w-5 h-5 rounded bg-purple-600 flex items-center justify-center font-black text-[10px] text-white">L</div>
+              <span className="text-white font-black tracking-tight">Luu Safety</span>
+            </div>
+            <p>© {new Date().getFullYear()} Luu Safety. All rights reserved.</p>
+          </div>
         </div>
-      </main>
+      </footer>
     </div>
   );
 };

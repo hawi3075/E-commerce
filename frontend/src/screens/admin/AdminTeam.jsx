@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import API from '../utils/api';
 import { Search, Crown, Shield, Users, Save, Loader2 } from 'lucide-react';
 
 const AdminTeam = () => {
@@ -13,12 +13,7 @@ const AdminTeam = () => {
   const fetchTeam = async () => {
     setLoading(true);
     try {
-      const rawUserInfo = localStorage.getItem('userInfo');
-      const userInfo = rawUserInfo ? JSON.parse(rawUserInfo) : {};
-      const token = userInfo.token || localStorage.getItem('token');
-
-      const config = { headers: { Authorization: `Bearer ${token}` } };
-      const { data } = await axios.get('/api/admin/users', config);
+      const { data } = await API.get('/api/admin/users');
       setUsers(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error('Error fetching team:', error);
@@ -43,14 +38,9 @@ const AdminTeam = () => {
     if (!newRole) return;
 
     try {
-      const rawUserInfo = localStorage.getItem('userInfo');
-      const userInfo = rawUserInfo ? JSON.parse(rawUserInfo) : {};
-      const token = userInfo.token || localStorage.getItem('token');
-
-      await axios.put(
+      await API.put(
         `/api/admin/users/${user._id}/role`,
-        { role: newRole, isAdmin: newRole !== 'REGULAR' },
-        { headers: { Authorization: `Bearer ${token}` } }
+        { role: newRole, isAdmin: newRole !== 'REGULAR' }
       );
 
       setUsers((prev) =>

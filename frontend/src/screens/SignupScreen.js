@@ -4,7 +4,7 @@ import {
   User, Mail, Lock, ArrowRight, AlertCircle, 
   Eye, EyeOff, CheckCircle2, Loader2 
 } from 'lucide-react';
-import API from '../utils/api'; // 1. Use your custom configured API instance
+import API from '../utils/api';
 import { AuthContext } from '../context/AuthContext';
 
 import logoImg from '../components/logo.webp';
@@ -28,7 +28,6 @@ const SignupScreen = () => {
     setLoading(true);
 
     try {
-      // 2. Use API.post and '/auth/register' (no duplicate '/api' prefix)
       const { data } = await API.post('/auth/register', { 
         name, 
         email, 

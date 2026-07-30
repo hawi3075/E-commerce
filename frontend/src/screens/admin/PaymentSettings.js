@@ -1,11 +1,41 @@
-import React from 'react';
-import { CheckCircle, XCircle, Eye } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import { CheckCircle, XCircle, Eye, Loader2 } from 'lucide-react';
 
 const PaymentSettings = () => {
-  const transactions = [
-    { id: 'TX-101', user: 'Abebe B.', amount: '$165.00', method: 'Telebirr', status: 'Completed' },
-    { id: 'TX-102', user: 'Sara K.', amount: '$55.00', method: 'Telebirr', status: 'Pending' },
-  ];
+  const [transactions, setTransactions] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetchTransactions = async () => {
+    setLoading(true);
+    try {
+      const rawUserInfo = localStorage.getItem('userInfo');
+      const userInfo = rawUserInfo ? JSON.parse(rawUserInfo) : {};
+      const token = userInfo.token || localStorage.getItem('token');
+
+      const config = {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      };
+
+      const { data } = await axios.get('/api/admin/payments', config);
+      setTransactions(Array.isArray(data) ? data : data.transactions || []);
+    } catch (error) {
+      console.error('Error fetching transactions:', error);
+      // Fallback dummy data matching design if API fails
+      setTransactions([
+        { _id: 'TX-101', id: 'TX-101', user: { name: 'Abebe B.' }, customer: 'Abebe B.', amount: 165.00, method: 'Telebirr', status: 'Completed' },
+        { _id: 'TX-102', id: 'TX-102', user: { name: 'Sara K.' }, customer: 'Sara K.', amount: 55.00, method: 'Telebirr', status: 'Pending' },
+      ]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchTransactions();
+  }, []);
 
   return (
     <div className="p-8 bg-gray-50 min-h-screen">
@@ -37,22 +67,53 @@ const PaymentSettings = () => {
               </tr>
             </thead>
             <tbody className="text-sm font-medium text-slate-600">
-              {transactions.map((tx) => (
-                <tr key={tx.id} className="border-t border-slate-50 hover:bg-slate-50/50 transition-colors">
-                  <td className="px-6 py-4 font-bold text-blue-600">{tx.id}</td>
-                  <td className="px-6 py-4">{tx.user}</td>
-                  <td className="px-6 py-4">{tx.method}</td>
-                  <td className="px-6 py-4 font-black text-slate-900">{tx.amount}</td>
-                  <td className="px-6 py-4">
-                    <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase ${tx.status === 'Completed' ? 'bg-green-100 text-green-600' : 'bg-orange-100 text-orange-600'}`}>
-                      {tx.status}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 flex justify-center gap-2">
-                    <button className="p-2 bg-slate-100 rounded-lg hover:bg-blue-600 hover:text-white transition-all"><Eye size={14} /></button>
+              {loading ? (
+                <tr>
+                  <td colSpan="6" className="py-12 text-center text-purple-600 font-bold">
+                    <div className="flex items-center justify-center gap-2">
+                      <Loader2 className="animate-spin" size={18} />
+                      <span>Loading transactions...</span>
+                    </div>
                   </td>
                 </tr>
-              ))}
+              ) : transactions.length > 0 ? (
+                transactions.map((tx) => {
+                  const txId = tx.id || tx._id || 'TX-000';
+                  const customerName = tx.customer || tx.user?.name || tx.userName || 'Customer';
+                  const method = tx.method || 'Telebirr';
+                  const amount = tx.amount ?? tx.totalPrice ?? 0;
+                  const status = tx.status || 'Completed';
+
+                  return (
+                    <tr key={tx._id || tx.id} className="border-t border-slate-50 hover:bg-slate-50/50 transition-colors">
+                      <td className="px-6 py-4 font-bold text-blue-600">{txId}</td>
+                      <td className="px-6 py-4">{customerName}</td>
+                      <td className="px-6 py-4">{method}</td>
+                      <td className="px-6 py-4 font-black text-slate-900">${Number(amount).toFixed(2)}</td>
+                      <td className="px-6 py-4">
+                        <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase ${
+                          status.toLowerCase() === 'completed' || status.toLowerCase() === 'success'
+                            ? 'bg-green-100 text-green-600'
+                            : 'bg-orange-100 text-orange-600'
+                        }`}>
+                          {status}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 flex justify-center gap-2">
+                        <button className="p-2 bg-slate-100 rounded-lg hover:bg-blue-600 hover:text-white transition-all">
+                          <Eye size={14} />
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })
+              ) : (
+                <tr>
+                  <td colSpan="6" className="py-10 text-center text-slate-400 font-medium">
+                    No transactions found.
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>

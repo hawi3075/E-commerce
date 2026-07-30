@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import API from '../utils/api';
 import { Search, ShieldAlert, Trash2, Loader2, User } from 'lucide-react';
 
 const Customers = () => {
@@ -11,12 +11,7 @@ const Customers = () => {
   const fetchUsers = async () => {
     setLoading(true);
     try {
-      const rawUserInfo = localStorage.getItem('userInfo');
-      const userInfo = rawUserInfo ? JSON.parse(rawUserInfo) : {};
-      const token = userInfo.token || localStorage.getItem('token');
-
-      const config = { headers: { Authorization: `Bearer ${token}` } };
-      const { data } = await axios.get('/api/admin/users', config);
+      const { data } = await API.get('/api/admin/users');
       setUsers(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error('Error fetching users:', error);
@@ -38,15 +33,7 @@ const Customers = () => {
   const handleToggleStatus = async (userId, currentStatus) => {
     const newStatus = currentStatus === 'BANNED' ? 'ACTIVE' : 'BANNED';
     try {
-      const rawUserInfo = localStorage.getItem('userInfo');
-      const userInfo = rawUserInfo ? JSON.parse(rawUserInfo) : {};
-      const token = userInfo.token || localStorage.getItem('token');
-
-      await axios.put(
-        `/api/admin/users/${userId}/status`,
-        { status: newStatus },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      await API.put(`/api/admin/users/${userId}/status`, { status: newStatus });
 
       setUsers((prev) =>
         prev.map((u) => (u._id === userId ? { ...u, status: newStatus } : u))
@@ -61,13 +48,7 @@ const Customers = () => {
   const handleDeleteUser = async (userId) => {
     if (!window.confirm('Are you sure you want to delete this user?')) return;
     try {
-      const rawUserInfo = localStorage.getItem('userInfo');
-      const userInfo = rawUserInfo ? JSON.parse(rawUserInfo) : {};
-      const token = userInfo.token || localStorage.getItem('token');
-
-      await axios.delete(`/api/admin/users/${userId}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await API.delete(`/api/admin/users/${userId}`);
       setUsers((prev) => prev.filter((u) => u._id !== userId));
     } catch (error) {
       setUsers((prev) => prev.filter((u) => u._id !== userId));

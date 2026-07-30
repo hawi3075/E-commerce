@@ -114,7 +114,7 @@ const Messages = () => {
                     </span>
                   </td>
                   <td className="py-4 px-6 font-bold text-slate-600">
-                    🕒 {msg.date || new Date(msg.createdAt).toLocaleDateString()}
+                    🕒 {msg.date || (msg.createdAt ? new Date(msg.createdAt).toLocaleDateString() : 'N/A')}
                   </td>
                   <td className="py-4 px-6 text-center">
                     <div className="flex items-center justify-center gap-2">
