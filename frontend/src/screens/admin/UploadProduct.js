@@ -61,7 +61,10 @@ const Inventory = () => {
           product_name: 'Titan Steel Toe Armor',
           product_type: 'Heavy Duty Boots',
           product_code: 'LUU-SHO-001',
-          category: 'FOOTWEAR',
+          product_category: 'FOOTWEAR',
+          work_field: 'CONSTRUCTION',
+          target_gender: 'MALE',
+          raw_material: 'Steel',
           price: 129.99,
           countInStock: 12,
           image: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff',
@@ -71,7 +74,10 @@ const Inventory = () => {
           product_name: 'Agri-Guard Rubber Boot',
           product_type: 'Waterproof Boots',
           product_code: 'LUU-SHO-002',
-          category: 'FOOTWEAR',
+          product_category: 'FOOTWEAR',
+          work_field: 'FARMER',
+          target_gender: 'ALL GENDERS',
+          raw_material: 'Rubber',
           price: 65.00,
           countInStock: 0,
           image: 'https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a',
@@ -177,7 +183,6 @@ const Inventory = () => {
       fetchProducts();
     } catch (error) {
       console.error('Delete Error:', error);
-      // Fallback state update if API is unreachable
       setProducts(products.filter(p => p._id !== id));
     }
   };
@@ -201,6 +206,11 @@ const Inventory = () => {
     }
 
     setSubmitting(true);
+    const finalCategory = category === 'OTHER' ? customCategory : category;
+    const finalWorkField = workField === 'OTHER' ? customWorkField : workField;
+    const finalTargetGender = targetGender === 'OTHER' ? customTargetGender : targetGender;
+    const finalRawMaterial = rawMaterial === 'OTHER' ? customRawMaterial : rawMaterial;
+
     try {
       const config = getAuthHeader();
       const productData = {
@@ -208,10 +218,10 @@ const Inventory = () => {
         product_type: productType,
         price: Number(price),
         product_code: productCode,
-        product_category: category === 'OTHER' ? customCategory : category,
-        work_field: workField === 'OTHER' ? customWorkField : workField,
-        target_gender: targetGender === 'OTHER' ? customTargetGender : targetGender,
-        raw_material: rawMaterial === 'OTHER' ? customRawMaterial : rawMaterial,
+        product_category: finalCategory,
+        work_field: finalWorkField,
+        target_gender: finalTargetGender,
+        raw_material: finalRawMaterial,
         size,
         countInStock: Number(amount),
         color,
@@ -230,13 +240,21 @@ const Inventory = () => {
       fetchProducts();
     } catch (error) {
       console.error('Submission Error:', error);
-      // Fallback local update for demonstration/offline resilience
       const fallbackProduct = {
         _id: editingId || `prod-${Date.now()}`,
-        ...productData,
-        name: productData.product_name,
-        category: productData.product_category,
-        stock: productData.countInStock,
+        product_name: name,
+        product_type: productType,
+        price: Number(price),
+        product_code: productCode,
+        product_category: finalCategory,
+        work_field: finalWorkField,
+        target_gender: finalTargetGender,
+        raw_material: finalRawMaterial,
+        size,
+        countInStock: Number(amount),
+        color,
+        description,
+        image: activeImage,
       };
       if (editingId) {
         setProducts(products.map(p => p._id === editingId ? fallbackProduct : p));
@@ -273,9 +291,11 @@ const Inventory = () => {
   };
 
   const filteredProducts = products.filter(p => {
+    const productName = p.product_name || p.name || '';
+    const code = p.product_code || p._id || '';
     const matchesSearch = 
-      (p.name || p.product_name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (p.product_code || p._id || '').toLowerCase().includes(searchTerm.toLowerCase());
+      productName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      code.toLowerCase().includes(searchTerm.toLowerCase());
     
     const stock = p.countInStock ?? p.stock ?? 0;
     if (statusFilter === 'In Stock') return matchesSearch && stock > 0;
@@ -356,12 +376,12 @@ const Inventory = () => {
                         <div className="flex items-center gap-3">
                           <img 
                             src={product.image || product.images?.[0] || '/logo.webp'} 
-                            alt={product.name || product.product_name} 
+                            alt={product.product_name || product.name} 
                             className="w-12 h-12 object-cover rounded-xl bg-slate-100 border border-slate-200"
                           />
                           <div>
                             <h4 className="font-extrabold text-slate-900 text-sm">
-                              {product.name || product.product_name}
+                              {product.product_name || product.name}
                             </h4>
                             <p className="text-[10px] font-bold text-slate-400 mt-0.5">
                               #{product._id?.substring(0, 7).toUpperCase()}
@@ -374,7 +394,7 @@ const Inventory = () => {
                       </td>
                       <td className="py-4 px-6">
                         <span className="bg-emerald-50 text-emerald-700 font-black text-[10px] uppercase px-3 py-1 rounded-full tracking-wider">
-                          {product.category || product.product_category || 'FOOTWEAR'}
+                          {product.product_category || product.category || 'FOOTWEAR'}
                         </span>
                       </td>
                       <td className="py-4 px-6 font-extrabold text-slate-900 text-sm">

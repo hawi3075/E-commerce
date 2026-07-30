@@ -222,9 +222,11 @@ const ProductScreen = () => {
         }
       };
 
+      const productData = { rating: Number(rating), comment };
+
       await axios.post(
         `/api/products/${id}/reviews`,
-        { rating: Number(rating), comment },
+        productData,
         config
       );
 
