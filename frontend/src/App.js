@@ -1,5 +1,10 @@
 import React, { useContext } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from 'react-router-dom';
+import axios from 'axios';
+
+// Configure Axios Default Base URL for Production (Vercel to Render connection)
+axios.defaults.baseURL = process.env.REACT_APP_API_URL || process.env.VITE_API_URL || 'https://your-backend-service-name.onrender.com';
+axios.defaults.withCredentials = true;
 
 import Navbar from './components/Navbar';
 import AdminSidebar from './components/AdminSidebar';

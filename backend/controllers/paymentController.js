@@ -6,7 +6,6 @@ exports.initializeTelebirrPayment = async (req, res) => {
 
     console.log("📥 [1] Received checkout request from frontend:", req.body);
 
-    // 1. Sanitize Email (Chapa requires standard format)
     let cleanEmail = 'customer@gmail.com';
     if (email && typeof email === 'string' && email.includes('@')) {
       const trimmed = email.trim().toLowerCase();
@@ -15,7 +14,6 @@ exports.initializeTelebirrPayment = async (req, res) => {
       }
     }
 
-    // 2. Sanitize Phone Number (Must be local Ethiopian format: 09... or 07...)
     let cleanPhone = phone ? phone.toString().replace(/\D/g, '') : '0911234567';
     if (cleanPhone.startsWith('251') && cleanPhone.length === 12) {
       cleanPhone = '0' + cleanPhone.substring(3);
@@ -24,17 +22,19 @@ exports.initializeTelebirrPayment = async (req, res) => {
       cleanPhone = '0911234567';
     }
 
-    // 3. Name Formatting
     const nameParts = (fullName || 'Customer User').trim().split(' ');
     const firstName = nameParts[0] || 'Customer';
     const lastName = nameParts.slice(1).join(' ') || 'User';
 
-    // 4. Ensure valid numerical amount
     const parsedAmount = parseFloat(amount);
     const finalAmount = (!isNaN(parsedAmount) && parsedAmount > 0) ? parsedAmount.toFixed(2) : '100.00';
 
-    // Dynamic Frontend URL for return redirect (falls back to localhost for local testing)
-    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+    // Strictly prioritize environment variable, warn if missing
+    const frontendUrl = process.env.FRONTEND_URL;
+    if (!frontendUrl) {
+      console.warn("⚠️ WARNING: FRONTEND_URL environment variable is not defined on Render!");
+    }
+    const resolvedFrontendUrl = frontendUrl || 'https://e-commerce-msuo.vercel.app';
 
     const chapaPayload = {
       amount: finalAmount,
@@ -45,8 +45,7 @@ exports.initializeTelebirrPayment = async (req, res) => {
       phone_number: cleanPhone,
       tx_ref: `luu-${orderId || 'order'}-${Date.now()}`,
       callback_url: 'https://webhook.site/test',
-      // Dynamically points to production frontend or localhost
-      return_url: `${frontendUrl}/orders?payment=success`,
+      return_url: `${resolvedFrontendUrl}/orders?payment=success`,
       customizations: {
         title: 'Luu Safety Purchase',
         description: 'Payment for safety equipment',

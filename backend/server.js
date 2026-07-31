@@ -7,10 +7,8 @@ const connectDB = require('./config/db');
 dotenv.config();
 connectDB();
 
-// Initialize app first so it is available for middleware
 const app = express();
 
-// Allowed origins for CORS (supports local development and Vercel deployments)
 const allowedOrigins = [
   'http://localhost:3000',
   'http://localhost:5173',
@@ -18,7 +16,6 @@ const allowedOrigins = [
   process.env.FRONTEND_URL
 ].filter(Boolean);
 
-// Middleware
 app.use(cors({
   origin: function (origin, callback) {
     if (!origin) return callback(null, true);
@@ -34,10 +31,8 @@ app.use(cors({
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
-// Serve static uploaded files
 app.use('/uploads', express.static(path.join(__dirname, '/uploads')));
 
-// Helper to safely inspect and mount routes
 const safeMount = (routePath, routeModule, fileName) => {
   if (typeof routeModule === 'function' || (routeModule && typeof routeModule.use === 'function')) {
     app.use(routePath, routeModule);
@@ -47,7 +42,6 @@ const safeMount = (routePath, routeModule, fileName) => {
   }
 };
 
-// Route Imports
 const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
 const productRoutes = require('./routes/productRoutes');
@@ -56,7 +50,6 @@ const paymentRoutes = require('./routes/paymentRoutes');
 const contactRoutes = require('./routes/contactRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 
-// Safely mount each route
 safeMount('/api/auth', authRoutes, './routes/authRoutes.js');
 safeMount('/api/users', userRoutes, './routes/userRoutes.js');
 safeMount('/api/products', productRoutes, './routes/productRoutes.js');
@@ -65,19 +58,16 @@ safeMount('/api/payments', paymentRoutes, './routes/paymentRoutes.js');
 safeMount('/api/contact', contactRoutes, './routes/contactRoutes.js');
 safeMount('/api/admin', adminRoutes, './routes/adminRoutes.js');
 
-// Health Check
 app.get('/', (req, res) => {
     res.send('Luu Safety API is running with MongoDB...');
 });
 
-// 404 Handler
 app.use((req, res, next) => {
     const error = new Error(`NOT FOUND - ${req.originalUrl}`);
     res.status(404);
     next(error);
 });
 
-// Global Error Handler
 app.use((err, req, res, next) => {
     const statusCode = res.statusCode === 200 ? 500 : res.statusCode;
     res.status(statusCode).json({
