@@ -169,7 +169,6 @@ const rawProductsList = ['All', 'Cotton/Polyester', 'Steel/Polymer', 'Leather', 
 const ShopScreen = () => {
   const [products, setProducts] = useState([]);
 
-  // Helper to safely fetch target language key
   const getCurrentLang = useCallback(() => {
     const raw = localStorage.getItem('lang') || localStorage.getItem('language') || localStorage.getItem('appLang') || 'en';
     const lower = raw.toLowerCase();
@@ -180,7 +179,6 @@ const ShopScreen = () => {
 
   const [lang, setLang] = useState(getCurrentLang());
 
-  // Sync language selection across component tree / local storage
   useEffect(() => {
     const syncLang = () => {
       const current = getCurrentLang();
@@ -205,7 +203,6 @@ const ShopScreen = () => {
     return t[group]?.[key] || TRANSLATIONS.en[group]?.[key] || key;
   }, [t]);
 
-  // Filter States
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [selectedGender, setSelectedGender] = useState('All');
   const [selectedWorkCategory, setSelectedWorkCategory] = useState('All');
@@ -218,7 +215,6 @@ const ShopScreen = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
-  // Search Query Param
   const searchQuery = searchParams.get('search') || '';
 
   const normalizeCategory = useCallback((catParam) => {
@@ -239,7 +235,6 @@ const ShopScreen = () => {
     }
   }, [searchParams, normalizeCategory]);
 
-  // Robust API Fetching
   useEffect(() => {
     let isMounted = true;
     const fetchProducts = async () => {
@@ -260,13 +255,11 @@ const ShopScreen = () => {
   }, []);
 
   const addToCart = (product) => {
-    // 1. Get current user ID to match the Navbar's key structure
     const rawUser = localStorage.getItem('userInfo');
     const currentUser = rawUser ? JSON.parse(rawUser) : {};
     const userId = currentUser._id || currentUser.id || currentUser.email || 'guest';
     const cartKey = `cartItems_${userId}`;
 
-    // 2. Fetch existing items using the user-specific key
     const productId = product._id || product.id;
     const existingCart = JSON.parse(localStorage.getItem(cartKey) || '[]');
     const itemIndex = existingCart.findIndex((item) => (item._id || item.id) === productId);
@@ -284,12 +277,10 @@ const ShopScreen = () => {
       });
     }
 
-    // 3. Save back to the correct user key and notify the Navbar drawer
     localStorage.setItem(cartKey, JSON.stringify(existingCart));
     window.dispatchEvent(new Event('cartUpdated'));
   };
 
-  // Safe Filtering Logic mapped directly to MongoDB Document fields
   const filteredProducts = useMemo(() => {
     const query = searchQuery.toLowerCase().trim();
     const selCat = selectedCategory.toLowerCase();
@@ -298,27 +289,23 @@ const ShopScreen = () => {
     const selRaw = selectedRawProduct.toLowerCase();
 
     return products.filter((p) => {
-      // Direct extraction with database key fallbacks
       const pName = String(p.product_name || p.name || '').toLowerCase();
       const pCat = String(p.product_category || p.category || p.productCategory || '').toLowerCase();
       const pGender = String(p.target_gender || p.gender || p.targetGender || '').toLowerCase();
       const pWork = String(p.work_field || p.workCategory || p.workSector || p.sector || '').toLowerCase();
       const pRaw = String(p.raw_material || p.rawProduct || p.rawMaterial || p.material || '').toLowerCase();
 
-      // 1. Search Query Match
       const matchSearch = !query || 
         pName.includes(query) || 
         pCat.includes(query) ||
         pWork.includes(query);
 
-      // 2. Category Match
       const matchCat = selectedCategory === 'All' || 
                        selCat === 'all' || 
                        pCat === selCat || 
                        pCat.includes(selCat) ||
                        normalizeCategory(pCat) === selectedCategory;
 
-      // 3. Target Gender Match
       const matchGender = selectedGender === 'All' || 
                           selGender === 'all' || 
                           !pGender || 
@@ -327,14 +314,12 @@ const ShopScreen = () => {
                           pGender === selGender ||
                           pGender.includes(selGender);
 
-      // 4. Work Sector Match
       const matchWork = selectedWorkCategory === 'All' || 
                         selWork === 'all' || 
                         !pWork || 
                         pWork === selWork || 
                         pWork.includes(selWork);
 
-      // 5. Raw Material Match
       const matchRaw = selectedRawProduct === 'All' || 
                        selRaw === 'all' || 
                        !pRaw || 
@@ -345,7 +330,6 @@ const ShopScreen = () => {
     });
   }, [searchQuery, selectedCategory, selectedGender, selectedWorkCategory, selectedRawProduct, products, normalizeCategory]);
 
-  // Sorting Logic
   const sortedProducts = useMemo(() => {
     const list = [...filteredProducts];
     if (sortBy === 'low-to-high') {
@@ -380,11 +364,10 @@ const ShopScreen = () => {
         <main className="max-w-[1600px] mx-auto px-6 pt-24 pb-12">
           <div className="flex flex-col lg:flex-row gap-8 items-start relative">
             
-            {/* ================= STICKY SIDEBAR FILTERS ================= */}
+            {/* SIDEBAR FILTERS */}
             <aside className="w-full lg:w-72 shrink-0 pt-2 lg:sticky lg:top-20 lg:self-start">
               <div className="bg-white p-6 rounded-3xl border border-gray-300 shadow-sm lg:max-h-[calc(100vh-7rem)] lg:overflow-y-auto space-y-6 relative">
                 
-                {/* STICKY HEADER INSIDE SIDEBAR */}
                 <div className="flex items-center justify-between pb-4 border-b border-gray-200 sticky top-0 bg-white z-20 -mx-6 px-6 pt-2 -mt-2">
                   <div className="flex items-center gap-2">
                     <SlidersHorizontal size={18} className="text-purple-600" />
@@ -398,7 +381,7 @@ const ShopScreen = () => {
                   </button>
                 </div>
                 
-                {/* 1. CATEGORY FILTER */}
+                {/* 1. CATEGORY */}
                 <div className="space-y-2">
                   <label className="text-xs font-extrabold uppercase text-gray-900 flex items-center gap-1.5">
                     <Grid size={13} className="text-purple-600" /> {t.productCategory}
@@ -420,7 +403,7 @@ const ShopScreen = () => {
                   </div>
                 </div>
 
-                {/* 2. WORK CATEGORY / FIELD FILTER */}
+                {/* 2. WORK SECTOR */}
                 <div className="space-y-2 pt-3 border-t border-gray-200">
                   <label className="text-xs font-extrabold uppercase text-gray-900 flex items-center gap-1.5">
                     <Briefcase size={13} className="text-purple-600" /> {t.workSector}
@@ -441,7 +424,7 @@ const ShopScreen = () => {
                   </div>
                 </div>
 
-                {/* 3. GENDER TARGET */}
+                {/* 3. GENDER */}
                 <div className="space-y-2 pt-3 border-t border-gray-200">
                   <label className="text-xs font-extrabold uppercase text-gray-900 flex items-center gap-1.5">
                     <User size={13} className="text-purple-600" /> {t.targetGender}
@@ -463,7 +446,7 @@ const ShopScreen = () => {
                   </div>
                 </div>
 
-                {/* 4. RAW PRODUCT / MATERIAL */}
+                {/* 4. RAW MATERIAL */}
                 <div className="space-y-2 pt-3 border-t border-gray-200">
                   <label className="text-xs font-extrabold uppercase text-gray-900 flex items-center gap-1.5">
                     <Layers size={13} className="text-purple-600" /> {t.rawMaterial}
@@ -487,10 +470,9 @@ const ShopScreen = () => {
               </div>
             </aside>
 
-            {/* ================= PRODUCTS GRID ================= */}
+            {/* PRODUCTS GRID */}
             <section className="flex-1 w-full space-y-6 pt-2">
               
-              {/* Toolbar Summary & Sorting */}
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white border border-gray-300 p-4 rounded-3xl shadow-sm">
                 <div className="flex items-center gap-2">
                   <p className="text-xs text-gray-600 font-extrabold uppercase tracking-wider">
@@ -517,7 +499,6 @@ const ShopScreen = () => {
                 </div>
               </div>
 
-              {/* Content States */}
               {isLoading ? (
                 <div className="text-center py-24 bg-white rounded-3xl border border-dashed border-gray-300 flex flex-col items-center justify-center gap-3">
                   <Loader2 className="animate-spin text-purple-600" size={32} />
@@ -554,7 +535,6 @@ const ShopScreen = () => {
                         key={productId}
                         className="bg-white rounded-3xl p-4 border border-gray-300 hover:border-purple-400 shadow-sm hover:shadow-md transition-all duration-300 group relative flex flex-col justify-between"
                       >
-                        {/* Product Image Container */}
                         <div className="relative h-48 bg-gray-100 rounded-2xl mb-4 overflow-hidden flex items-center justify-center border border-gray-200">
                           <img 
                             src={imageUrl} 
@@ -580,10 +560,8 @@ const ShopScreen = () => {
                           </span>
                         </div>
 
-                        {/* Details & Actions Under Image */}
                         <div className="space-y-3 flex-1 flex flex-col justify-between">
                           <div>
-                            {/* Rating */}
                             <div className="flex items-center gap-1.5 mb-1">
                               <div className="flex items-center gap-0.5">
                                 {[...Array(5)].map((_, i) => (
@@ -604,7 +582,6 @@ const ShopScreen = () => {
                             </h3>
                           </div>
 
-                          {/* Bottom Bar */}
                           <div className="pt-3 border-t border-gray-200 flex items-center justify-between gap-2">
                             <div>
                               <span className="text-[9px] font-bold text-gray-500 uppercase tracking-wider block">{t.assetValue}</span>
@@ -660,7 +637,6 @@ const ShopScreen = () => {
         </main>
       </div>
 
-      {/* FOOTER */}
       <footer className="bg-black text-white pt-8 pb-6 mt-12 rounded-t-3xl">
         <div className="max-w-[1600px] mx-auto px-6">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-medium text-zinc-400">
