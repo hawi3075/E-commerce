@@ -2,6 +2,8 @@
 
 A full-stack safety equipment and gear hub application designed for operator tools, catalog management, and seamless e-commerce transactions.
 
+* **Live Frontend Application:** [https://e-commerce-msuo.vercel.app](https://e-commerce-msuo.vercel.app)
+
 ## 🚀 Tech Stack
 
 * **Frontend:** React, React Router, Tailwind CSS, Axios
