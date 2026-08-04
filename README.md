@@ -8,7 +8,7 @@ A full-stack safety equipment and gear hub application designed for operator too
 
 * **Frontend:** React, React Router, Tailwind CSS, Axios
 * **Backend:** Node.js, Express.js, MongoDB, Mongoose
-* **Hosting & Deployment:** Vercel (Frontend) & Render/Heroku (Backend)
+* **Hosting & Deployment:** Vercel (Frontend) & Render (Backend)
 
 ---
 
